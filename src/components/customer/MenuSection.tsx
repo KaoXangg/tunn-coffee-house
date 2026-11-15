@@ -92,8 +92,8 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
           </p>
         </div>
 
-        {/* Dynamic Category Tabs with Fluid Active Indicator */}
-        <div className="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-3 mb-4 no-scrollbar border-b border-coffee-beige/60">
+        {/* Sticky Category Jump Bar (Mobile & Desktop) */}
+        <div className="sticky top-[68px] lg:top-[72px] z-30 bg-ivory-light/95 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0 pt-2.5 pb-3 mb-4 border-b border-coffee-beige/60 flex items-center justify-start sm:justify-center gap-2 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveCategoryId('all')}
@@ -287,17 +287,13 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                       )}
                     </div>
 
-                    {/* Text & Classic Printed-Menu Dotted Leader Price */}
+                    {/* Text & Price */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-baseline gap-2">
-                        <h3 className="font-serif text-xl sm:text-2xl font-semibold text-coffee-dark group-hover:text-coffee transition-colors">
+                      <div className="flex items-start justify-between gap-3">
+                        <h3 className="font-serif text-xl sm:text-2xl font-semibold text-coffee-dark group-hover:text-coffee transition-colors leading-snug">
                           {item.name}
                         </h3>
-                        <span
-                          aria-hidden="true"
-                          className="flex-1 border-b border-dotted border-coffee-beige/90 min-w-[16px] hidden sm:inline-block"
-                        />
-                        <div className="text-right shrink-0 ml-auto">
+                        <div className="text-right shrink-0 pt-0.5">
                           <span className="font-serif text-lg sm:text-xl font-bold text-coffee">
                             {formatVND(hasSale ? item.sale_price : item.price)}
                           </span>

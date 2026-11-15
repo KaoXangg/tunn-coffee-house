@@ -72,6 +72,68 @@ export function getImageDimensions(
   });
 }
 
+/**
+ * Resize large raster images (max 1600px) and compress to WebP for fast storefront loading.
+ * Preserves SVG/transparent PNG fallback if WebP conversion is unsupported or larger.
+ */
+async function optimizeImageToWebP(file: File): Promise<File> {
+  if (file.type === 'image/svg+xml' || typeof document === 'undefined') {
+    return file;
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const maxDim = 1600;
+      let targetW = img.naturalWidth;
+      let targetH = img.naturalHeight;
+
+      if (targetW > maxDim || targetH > maxDim) {
+        const ratio = Math.min(maxDim / targetW, maxDim / targetH);
+        targetW = Math.round(targetW * ratio);
+        targetH = Math.round(targetH * ratio);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(file);
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, targetW, targetH);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob || (blob.size >= file.size && file.type === 'image/webp')) {
+            resolve(file);
+            return;
+          }
+          const baseName = file.name.replace(/\.[^/.]+$/, '');
+          const webpFile = new File([blob], `${baseName}.webp`, {
+            type: 'image/webp',
+            lastModified: Date.now(),
+          });
+          resolve(webpFile);
+        },
+        'image/webp',
+        0.85
+      );
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(file);
+    };
+
+    img.src = objectUrl;
+  });
+}
+
 export async function sanitizeSvgFile(file: File): Promise<{ safe: boolean; error?: string }> {
   if (file.type !== 'image/svg+xml') return { safe: true };
   try {
@@ -120,9 +182,10 @@ export async function uploadMediaFile(
     };
   }
 
-  const dimensions = await getImageDimensions(file);
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-  const cleanBaseName = file.name
+  const processedFile = await optimizeImageToWebP(file);
+  const dimensions = await getImageDimensions(processedFile);
+  const ext = processedFile.name.split('.').pop()?.toLowerCase() || 'webp';
+  const cleanBaseName = processedFile.name
     .replace(/\.[^/.]+$/, '')
     .toLowerCase()
     .replace(/[^a-z0-9-_]/g, '-')
@@ -134,10 +197,10 @@ export async function uploadMediaFile(
 
   const { error: uploadError } = await supabase.storage
     .from(STORAGE_BUCKET)
-    .upload(uniquePath, file, {
-      cacheControl: '3600',
+    .upload(uniquePath, processedFile, {
+      cacheControl: '31536000',
       upsert: false,
-      contentType: file.type,
+      contentType: processedFile.type,
     });
 
   if (uploadError) {
@@ -158,14 +221,14 @@ export async function uploadMediaFile(
   const { data: inserted, error: dbError } = await supabase
     .from('media_assets')
     .insert({
-      file_name: file.name,
+      file_name: processedFile.name,
       file_path: uniquePath,
       public_url: publicUrl,
-      mime_type: file.type,
-      file_size: file.size,
+      mime_type: processedFile.type,
+      file_size: processedFile.size,
       width: dimensions.width,
       height: dimensions.height,
-      alt_text: altText || file.name,
+      alt_text: altText || processedFile.name,
       folder,
       uploaded_by: user?.id || null,
     })

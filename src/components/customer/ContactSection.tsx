@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
+import { sanitizeUrl, sanitizeMapEmbedUrl } from '../../lib/utils';
 
 export const ContactSection: React.FC = () => {
   const { settings, getSection } = useSiteData();
@@ -186,7 +187,7 @@ export const ContactSection: React.FC = () => {
 
                 {settings.google_maps_url && (
                   <a
-                    href={settings.google_maps_url}
+                    href={sanitizeUrl(settings.google_maps_url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`inline-flex items-center gap-2 px-5 py-3 text-xs uppercase tracking-wider font-semibold border border-coffee text-coffee-dark hover:bg-ivory transition-colors ${buttonRadiusClass}`}
@@ -197,7 +198,7 @@ export const ContactSection: React.FC = () => {
                 )}
 
                 <a
-                  href={settings.order_url || '#menu'}
+                  href={sanitizeUrl(settings.order_url, '#menu')}
                   className={`inline-flex items-center gap-2 px-5 py-3 text-xs uppercase tracking-wider font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-colors ${buttonRadiusClass}`}
                 >
                   <ShoppingBag className="w-3.5 h-3.5" />
@@ -209,7 +210,7 @@ export const ContactSection: React.FC = () => {
               <div className="pt-3 flex flex-wrap items-center gap-4 text-xs uppercase tracking-widest font-semibold text-coffee">
                 {settings.facebook_url && (
                   <a
-                    href={settings.facebook_url}
+                    href={sanitizeUrl(settings.facebook_url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 hover:text-coffee-dark"
@@ -220,7 +221,7 @@ export const ContactSection: React.FC = () => {
                 )}
                 {settings.instagram_url && (
                   <a
-                    href={settings.instagram_url}
+                    href={sanitizeUrl(settings.instagram_url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 hover:text-coffee-dark"
@@ -231,7 +232,7 @@ export const ContactSection: React.FC = () => {
                 )}
                 {settings.tiktok_url && (
                   <a
-                    href={settings.tiktok_url}
+                    href={sanitizeUrl(settings.tiktok_url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 hover:text-coffee-dark"
@@ -253,9 +254,9 @@ export const ContactSection: React.FC = () => {
             className="lg:col-span-6"
           >
             <div className="aspect-[4/3] w-full rounded-brand overflow-hidden border border-coffee-beige bg-ivory-light shadow-sm relative">
-              {settings.google_maps_embed ? (
+              {sanitizeMapEmbedUrl(settings.google_maps_embed) ? (
                 <iframe
-                  src={settings.google_maps_embed}
+                  src={sanitizeMapEmbedUrl(settings.google_maps_embed) || ''}
                   title="Bản đồ TUNN Coffee House"
                   className="w-full h-full border-0"
                   loading="lazy"

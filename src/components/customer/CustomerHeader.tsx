@@ -6,7 +6,7 @@ import { useSiteData } from '../../contexts/SiteDataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { BrandLogo } from '../common/BrandLogo';
 import { ScrollProgressBar, TUNN_EASE } from '../common/MotionPrimitives';
-import { getStoreOpenStatus } from '../../lib/utils';
+import { getStoreOpenStatus, sanitizeUrl } from '../../lib/utils';
 
 export const CustomerHeader: React.FC = () => {
   const { settings, themeMode, toggleTheme } = useSiteData();
@@ -219,7 +219,7 @@ export const CustomerHeader: React.FC = () => {
             </Link>
           )}
           <a
-            href={settings.header_cta_href || '#menu'}
+            href={sanitizeUrl(settings.header_cta_href, '#menu')}
             className={`group inline-flex items-center gap-2 px-5 py-2.5 text-xs uppercase tracking-[0.16em] font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-all duration-300 active:scale-[0.98] ${buttonRadiusClass}`}
           >
             <span>{settings.header_cta_label || 'Khám phá Thực đơn'}</span>
@@ -291,7 +291,7 @@ export const CustomerHeader: React.FC = () => {
 
               <div className="pt-3 flex flex-col sm:flex-row gap-2.5">
                 <a
-                  href={settings.header_cta_href || '#menu'}
+                  href={sanitizeUrl(settings.header_cta_href, '#menu')}
                   onClick={() => setMobileOpen(false)}
                   className={`inline-flex items-center justify-center gap-2 px-5 py-3 text-xs uppercase tracking-[0.16em] font-semibold bg-coffee text-ivory-light ${buttonRadiusClass}`}
                 >

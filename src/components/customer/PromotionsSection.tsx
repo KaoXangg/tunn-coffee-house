@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
-import { formatDateVi, getPromotionScheduleStatus } from '../../lib/utils';
+import { formatDateVi, getPromotionScheduleStatus, sanitizeUrl } from '../../lib/utils';
 
 export const PromotionsSection: React.FC = () => {
   const { promotions, settings, getSection } = useSiteData();
@@ -109,7 +109,7 @@ export const PromotionsSection: React.FC = () => {
 
                   <div className="mt-8">
                     <a
-                      href={promo.cta_url || '#menu'}
+                      href={sanitizeUrl(promo.cta_url, '#menu')}
                       className={`inline-flex items-center gap-2.5 px-6 py-3.5 text-xs uppercase tracking-[0.18em] font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-colors ${buttonRadiusClass}`}
                     >
                       <span>{promo.cta_label || 'Khám phá ngay'}</span>

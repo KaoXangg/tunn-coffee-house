@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Lock } from 'lucide-react';
 import { useSiteData } from '../../contexts/SiteDataContext';
+import { sanitizeUrl } from '../../lib/utils';
 import { BrandLogo } from '../common/BrandLogo';
 
 export const CustomerFooter: React.FC = () => {
@@ -74,7 +75,7 @@ export const CustomerFooter: React.FC = () => {
             <div className="pt-3 flex flex-wrap gap-4 text-xs uppercase tracking-widest">
               {settings.facebook_url && (
                 <a
-                  href={settings.facebook_url}
+                  href={sanitizeUrl(settings.facebook_url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-[#D5C6AD] hover:text-white"
@@ -85,7 +86,7 @@ export const CustomerFooter: React.FC = () => {
               )}
               {settings.instagram_url && (
                 <a
-                  href={settings.instagram_url}
+                  href={sanitizeUrl(settings.instagram_url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-[#D5C6AD] hover:text-white"
@@ -96,7 +97,7 @@ export const CustomerFooter: React.FC = () => {
               )}
               {settings.tiktok_url && (
                 <a
-                  href={settings.tiktok_url}
+                  href={sanitizeUrl(settings.tiktok_url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-[#D5C6AD] hover:text-white"

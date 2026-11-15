@@ -49,13 +49,58 @@ interface SiteDataContextType {
 
 const SiteDataContext = createContext<SiteDataContextType | undefined>(undefined);
 
+const OFFLINE_CACHE_KEY = 'tunn_offline_storefront_v1';
+
+interface CachedStorefront {
+  settings?: SiteSettings;
+  categories?: Category[];
+  products?: Product[];
+  promotions?: Promotion[];
+  gallery?: GalleryItem[];
+  sections?: PageSection[];
+}
+
+function readOfflineCache(): CachedStorefront {
+  try {
+    const raw = localStorage.getItem(OFFLINE_CACHE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
 export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
-  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
-  const [products, setProducts] = useState<Product[]>(DEFAULT_PRODUCTS);
-  const [promotions, setPromotions] = useState<Promotion[]>(DEFAULT_PROMOTIONS);
-  const [gallery, setGallery] = useState<GalleryItem[]>(DEFAULT_GALLERY_ITEMS);
-  const [sections, setSections] = useState<PageSection[]>(DEFAULT_PAGE_SECTIONS);
+  const initialCache = readOfflineCache();
+  const [settings, setSettings] = useState<SiteSettings>(
+    initialCache.settings ? { ...DEFAULT_SITE_SETTINGS, ...initialCache.settings } : DEFAULT_SITE_SETTINGS
+  );
+  const [categories, setCategories] = useState<Category[]>(
+    initialCache.categories && initialCache.categories.length > 0
+      ? initialCache.categories
+      : DEFAULT_CATEGORIES
+  );
+  const [products, setProducts] = useState<Product[]>(
+    initialCache.products && initialCache.products.length > 0
+      ? initialCache.products
+      : DEFAULT_PRODUCTS
+  );
+  const [promotions, setPromotions] = useState<Promotion[]>(
+    initialCache.promotions && initialCache.promotions.length > 0
+      ? initialCache.promotions
+      : DEFAULT_PROMOTIONS
+  );
+  const [gallery, setGallery] = useState<GalleryItem[]>(
+    initialCache.gallery && initialCache.gallery.length > 0
+      ? initialCache.gallery
+      : DEFAULT_GALLERY_ITEMS
+  );
+  const [sections, setSections] = useState<PageSection[]>(
+    initialCache.sections && initialCache.sections.length > 0
+      ? initialCache.sections
+      : DEFAULT_PAGE_SECTIONS
+  );
   const [mediaAssets, setMediaAssets] = useState<MediaAsset[]>([]);
   const [activityLogs, setActivityLogs] = useState<AdminActivityLog[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -216,6 +261,43 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       if (!logsRes.error && logsRes.data) {
         setActivityLogs(logsRes.data as AdminActivityLog[]);
+      }
+
+      // Persist latest storefront snapshot for offline / weak-signal PWA access
+      try {
+        const snapshot: CachedStorefront = {
+          settings: !settingsRes.error && settingsRes.data
+            ? {
+                ...DEFAULT_SITE_SETTINGS,
+                ...settingsRes.data,
+                nav_items: Array.isArray(settingsRes.data.nav_items)
+                  ? settingsRes.data.nav_items
+                  : DEFAULT_SITE_SETTINGS.nav_items,
+              }
+            : undefined,
+          categories: !catsRes.error && catsRes.data ? (catsRes.data as Category[]) : undefined,
+          products: !prodsRes.error && prodsRes.data ? (prodsRes.data as Product[]) : undefined,
+          promotions: !promosRes.error && promosRes.data ? (promosRes.data as Promotion[]) : undefined,
+          gallery: !galleryRes.error && galleryRes.data ? (galleryRes.data as GalleryItem[]) : undefined,
+          sections:
+            !sectionsRes.error && sectionsRes.data && sectionsRes.data.length > 0
+              ? (sectionsRes.data as PageSection[])
+              : undefined,
+        };
+        const existing = readOfflineCache();
+        localStorage.setItem(
+          OFFLINE_CACHE_KEY,
+          JSON.stringify({
+            settings: snapshot.settings ?? existing.settings,
+            categories: snapshot.categories ?? existing.categories,
+            products: snapshot.products ?? existing.products,
+            promotions: snapshot.promotions ?? existing.promotions,
+            gallery: snapshot.gallery ?? existing.gallery,
+            sections: snapshot.sections ?? existing.sections,
+          })
+        );
+      } catch {
+        // ignore storage quota errors
       }
     } catch (err) {
       console.warn('Error fetching live data from Supabase:', err);

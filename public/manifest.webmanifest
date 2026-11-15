@@ -1,0 +1,24 @@
+{
+  "name": "TUNN Coffee House",
+  "short_name": "TUNN Coffee",
+  "description": "Thương hiệu trà sữa, trà trái cây, cà phê đặc sản và matcha thủ công.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F5EF",
+  "theme_color": "#4B2E24",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

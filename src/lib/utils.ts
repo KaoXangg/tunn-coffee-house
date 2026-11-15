@@ -219,3 +219,56 @@ export function getPromotionScheduleStatus(
 
   return { isCurrentlyVisible: true, reason: 'active', dailyWindow };
 }
+
+/**
+ * Sanitize user/CMS-supplied URLs to prevent javascript:/data: XSS and open redirects.
+ * Allows https:, http:, tel:, mailto:, relative paths (/), and in-page anchors (#).
+ */
+export function sanitizeUrl(rawUrl?: string | null, fallback = '#'): string {
+  if (!rawUrl || typeof rawUrl !== 'string') return fallback;
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return fallback;
+
+  if (trimmed.startsWith('#') || (trimmed.startsWith('/') && !trimmed.startsWith('//'))) {
+    return trimmed;
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    const allowedProtocols = ['https:', 'http:', 'tel:', 'mailto:'];
+    if (allowedProtocols.includes(parsed.protocol.toLowerCase())) {
+      return trimmed;
+    }
+  } catch {
+    // Reject malformed URLs
+  }
+
+  return fallback;
+}
+
+/**
+ * Validate Google Maps embed iframe URLs strictly (https only, Google Maps hostnames).
+ */
+export function sanitizeMapEmbedUrl(rawUrl?: string | null): string | null {
+  if (!rawUrl || typeof rawUrl !== 'string') return null;
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return null;
+
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== 'https:') return null;
+    const host = parsed.hostname.toLowerCase();
+    if (
+      host === 'www.google.com' ||
+      host === 'google.com' ||
+      host === 'maps.google.com' ||
+      host.endsWith('.google.com')
+    ) {
+      return trimmed;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}

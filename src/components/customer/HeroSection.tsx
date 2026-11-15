@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { DEFAULT_HERO_CONTENT } from '../../lib/defaultData';
 import { TUNN_EASE } from '../common/MotionPrimitives';
+import { sanitizeUrl } from '../../lib/utils';
 import type { HeroSectionContent } from '../../types/database';
 
 export const HeroSection: React.FC = () => {
@@ -87,7 +88,7 @@ export const HeroSection: React.FC = () => {
             {/* Primary & Secondary Actions */}
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <a
-                href={content.primary_cta_href || '#menu'}
+                href={sanitizeUrl(content.primary_cta_href, '#menu')}
                 className={`group inline-flex items-center gap-3 px-7 py-4 text-xs uppercase tracking-[0.18em] font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-all duration-300 shadow-editorial active:scale-[0.98] ${buttonRadiusClass}`}
               >
                 <span>{content.primary_cta_label || 'Khám phá Thực đơn'}</span>
@@ -96,7 +97,7 @@ export const HeroSection: React.FC = () => {
 
               {content.secondary_cta_label && (
                 <a
-                  href={content.secondary_cta_href || '#about'}
+                  href={sanitizeUrl(content.secondary_cta_href, '#about')}
                   className={`inline-flex items-center gap-2 px-6 py-4 text-xs uppercase tracking-[0.18em] font-semibold border border-coffee/45 text-coffee-dark hover:border-coffee hover:bg-ivory-light/70 transition-all duration-300 active:scale-[0.98] ${buttonRadiusClass}`}
                 >
                   <span>{content.secondary_cta_label}</span>
