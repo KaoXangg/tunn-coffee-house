@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   Download,
   Upload,
@@ -7,14 +7,13 @@ import {
   Check,
   Loader2,
   Database,
-  ShieldAlert,
-  ExternalLink,
   Printer,
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { renderQrToDataUrl } from '../../lib/qrGenerator';
 
 export const AdminBackupQrPage: React.FC = () => {
   const {
@@ -170,16 +169,40 @@ export const AdminBackupQrPage: React.FC = () => {
     }
   };
 
-  // Build high-res QR Code URL (coffee brown #4B2E24 on cream #F7F5EF)
-  const finalQrDestination = tableNumber.trim()
-    ? `${qrTargetUrl}${qrTargetUrl.includes('?') ? '&' : '?'}table=${encodeURIComponent(
-        tableNumber.trim()
-      )}`
-    : qrTargetUrl;
+  // Build high-res QR Code Data URL locally (coffee brown #4B2E24 on cream #F7F5EF)
+  const finalQrDestination = useMemo(() => {
+    const cleanTarget = qrTargetUrl.trim() || 'https://tunn-coffee-house.vercel.app/#menu';
+    if (!tableNumber.trim()) return cleanTarget;
 
-  const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=16&color=4B2E24&bgcolor=F7F5EF&format=png&data=${encodeURIComponent(
-    finalQrDestination
-  )}`;
+    const encodedTable = encodeURIComponent(tableNumber.trim());
+    if (cleanTarget.includes('#')) {
+      const [basePart, hashPart] = cleanTarget.split('#');
+      const sep = basePart.includes('?') ? '&' : '?';
+      return `${basePart}${sep}table=${encodedTable}#${hashPart}`;
+    }
+    const sep = cleanTarget.includes('?') ? '&' : '?';
+    return `${cleanTarget}${sep}table=${encodedTable}`;
+  }, [qrTargetUrl, tableNumber]);
+
+  const qrDataUrl = useMemo(() => {
+    return renderQrToDataUrl(finalQrDestination, {
+      pixelSize: 600,
+      marginModules: 3,
+      darkColor: '#4B2E24',
+      lightColor: '#F7F5EF',
+    });
+  }, [finalQrDestination]);
+
+  const handleDownloadRawQrOnly = () => {
+    if (!qrDataUrl) return;
+    const a = document.createElement('a');
+    a.href = qrDataUrl;
+    a.download = `TUNN-QR-Code${tableNumber.trim() ? `-Ban-${tableNumber.trim()}` : ''}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast.success('Đã tải hình mã QR thành công!');
+  };
 
   // Download printable Table Standee Card as high-res PNG using HTML5 Canvas
   const handleDownloadPrintableCard = async () => {
@@ -220,13 +243,12 @@ export const AdminBackupQrPage: React.FC = () => {
         ctx.fillText(`BÀN SỐ: ${tableNumber.trim().toUpperCase()}`, 450, 275);
       }
 
-      // Draw QR Image
+      // Draw Locally Generated QR Image
       const qrImg = new Image();
-      qrImg.crossOrigin = 'anonymous';
       await new Promise((resolve, reject) => {
         qrImg.onload = resolve;
         qrImg.onerror = reject;
-        qrImg.src = qrApiUrl;
+        qrImg.src = qrDataUrl;
       });
 
       ctx.drawImage(qrImg, 200, 310, 500, 500);
@@ -261,8 +283,8 @@ export const AdminBackupQrPage: React.FC = () => {
         'Đã tải thẻ QR Menu nét cao!',
         'Bạn có thể mang file ảnh PNG này đi in dán tại bàn hoặc quầy thu ngân.'
       );
-    } catch {
-      window.open(qrApiUrl, '_blank');
+    } catch (err: any) {
+      toast.error('Không thể xuất ảnh thẻ QR', err?.message);
     } finally {
       setDownloadingQr(false);
     }
@@ -488,15 +510,14 @@ export const AdminBackupQrPage: React.FC = () => {
                 <span>Tải Thẻ Standee QR Nét Cao (PNG)</span>
               </button>
 
-              <a
-                href={qrApiUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={handleDownloadRawQrOnly}
                 className="inline-flex items-center gap-2 px-4 py-3 text-xs font-semibold uppercase tracking-wider border border-[#D5C6AD] text-[#241914] hover:bg-[#E9E6D8] rounded-brand"
               >
+                <Download className="w-3.5 h-3.5" />
                 <span>Chỉ tải riêng hình QR</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
+              </button>
             </div>
           </div>
 
@@ -522,11 +543,13 @@ export const AdminBackupQrPage: React.FC = () => {
                 </div>
 
                 <div className="p-2 bg-[#F7F5EF] border border-[#D5C6AD] inline-block mx-auto">
-                  <img
-                    src={qrApiUrl}
-                    alt="QR Code Menu"
-                    className="w-44 h-44 object-contain mx-auto"
-                  />
+                  {qrDataUrl && (
+                    <img
+                      src={qrDataUrl}
+                      alt="QR Code Menu"
+                      className="w-44 h-44 object-contain mx-auto"
+                    />
+                  )}
                 </div>
 
                 <div>
