@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { broadcastLiveSync, subscribeLiveSync } from '../lib/liveSync';
 import {
   PRESET_SEASONAL_THEMES,
   SEASONAL_PREVIEW_SESSION_KEY,
@@ -90,18 +91,56 @@ export const SeasonalThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     refreshThemes();
   }, [refreshThemes]);
 
-  // Realtime sync across customer & admin tabs
+  // Realtime + Cross-Tab + Visibility + Fallback Polling sync across customer & admin tabs
   useEffect(() => {
-    if (!isSupabaseConfigured) return;
-    const channel = supabase
-      .channel('tunn-seasonal-themes-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'seasonal_themes' }, () => {
+    let debounceTimer: number | null = null;
+    const scheduleRefresh = () => {
+      if (debounceTimer) window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(() => {
         refreshThemes();
-      })
-      .subscribe();
+      }, 220);
+    };
+
+    const unsubLocal = subscribeLiveSync((scope) => {
+      if (scope === 'themes' || scope === 'all') {
+        scheduleRefresh();
+      }
+    });
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        scheduleRefresh();
+      }
+    };
+    const onFocus = () => scheduleRefresh();
+
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('focus', onFocus);
+
+    const pollInterval = isSupabaseConfigured
+      ? window.setInterval(() => {
+          if (document.visibilityState === 'visible') {
+            refreshThemes();
+          }
+        }, 12_000)
+      : null;
+
+    const channel = isSupabaseConfigured
+      ? supabase
+          .channel('tunn-seasonal-themes-realtime')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'seasonal_themes' }, () => {
+            scheduleRefresh();
+          })
+          .subscribe()
+      : null;
 
     return () => {
-      supabase.removeChannel(channel);
+      if (debounceTimer) window.clearTimeout(debounceTimer);
+      unsubLocal();
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('focus', onFocus);
+      if (pollInterval) window.clearInterval(pollInterval);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [refreshThemes]);
 
@@ -140,6 +179,7 @@ export const SeasonalThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setThemes(updated);
     saveLocalSeasonalThemes(updated);
+    broadcastLiveSync('themes');
 
     if (!isSupabaseConfigured) return { error: null };
 
@@ -172,6 +212,7 @@ export const SeasonalThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setThemes(updated);
     saveLocalSeasonalThemes(updated);
+    broadcastLiveSync('themes');
 
     if (!isSupabaseConfigured) return { error: null };
 
@@ -196,6 +237,7 @@ export const SeasonalThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setThemes(updated);
     saveLocalSeasonalThemes(updated);
+    broadcastLiveSync('themes');
 
     if (!isSupabaseConfigured) return { error: null };
 

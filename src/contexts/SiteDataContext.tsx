@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { broadcastLiveSync, subscribeLiveSync } from '../lib/liveSync';
 import {
   DEFAULT_SITE_SETTINGS,
   DEFAULT_CATEGORIES,
@@ -310,19 +311,56 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     refreshAll();
   }, [refreshAll]);
 
-  // Realtime subscription so customer website updates automatically when Admin saves
+  // Realtime + Cross-Tab + Visibility + Fallback Polling sync so website updates without F5
   useEffect(() => {
-    if (!isSupabaseConfigured) return;
-
-    const channel = supabase
-      .channel('tunn-cms-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public' }, () => {
+    let debounceTimer: number | null = null;
+    const scheduleRefresh = () => {
+      if (debounceTimer) window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(() => {
         refreshAll();
-      })
-      .subscribe();
+      }, 220);
+    };
+
+    const unsubLocal = subscribeLiveSync((scope) => {
+      if (scope === 'cms' || scope === 'all') {
+        scheduleRefresh();
+      }
+    });
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        scheduleRefresh();
+      }
+    };
+    const onFocus = () => scheduleRefresh();
+
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('focus', onFocus);
+
+    const pollInterval = isSupabaseConfigured
+      ? window.setInterval(() => {
+          if (document.visibilityState === 'visible') {
+            refreshAll();
+          }
+        }, 12_000)
+      : null;
+
+    const channel = isSupabaseConfigured
+      ? supabase
+          .channel('tunn-cms-realtime')
+          .on('postgres_changes', { event: '*', schema: 'public' }, () => {
+            scheduleRefresh();
+          })
+          .subscribe()
+      : null;
 
     return () => {
-      supabase.removeChannel(channel);
+      if (debounceTimer) window.clearTimeout(debounceTimer);
+      unsubLocal();
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('focus', onFocus);
+      if (pollInterval) window.clearInterval(pollInterval);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [refreshAll]);
 
@@ -385,6 +423,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             ...details,
           },
         });
+        broadcastLiveSync('cms');
       } catch {
         // non-blocking
       }
@@ -414,6 +453,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     await logAdminActivity('Cập nhật cài đặt', 'site_settings', 'Cấu hình thương hiệu & Website');
     await refreshAll();
+    broadcastLiveSync('cms');
     return { error: null };
   };
 
