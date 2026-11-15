@@ -22,6 +22,7 @@ Cloudflare Pages Free Hosting (Global CDN + Automatic HTTPS + Custom Domain)
 ```
 
 > **Lưu ý về giới hạn gói Free hiện hành:**
+>
 > - **Supabase Free Plan:** Bao gồm 500MB PostgreSQL Database, 1GB Supabase Storage, 50,000 Monthly Active Users. Dự án Free có thể tạm dừng (pause) nếu không có truy cập trong 7 ngày liên tục — bạn có thể khôi phục trong 1 cú nhấp chuột trên Supabase Dashboard.
 > - **Cloudflare Pages Free Plan:** Băng thông không giới hạn (Unlimited bandwidth), 500 lượt build/tháng, hỗ trợ SSL và tên miền riêng miễn phí.
 
@@ -84,7 +85,7 @@ npm run dev
 
 1. Trong Supabase Dashboard, vào **Authentication** → **Providers** → **Email**.
 2. Đảm bảo **Enable Email provider** đang bật.
-3. *(Khuyến nghị khi thiết lập nhanh)*: Bạn có thể tạm tắt **Confirm email** nếu muốn đăng ký tài khoản Admin đầu tiên và đăng nhập ngay lập tức mà không cần bấm link xác nhận trong hộp thư.
+3. _(Khuyến nghị khi thiết lập nhanh)_: Bạn có thể tạm tắt **Confirm email** nếu muốn đăng ký tài khoản Admin đầu tiên và đăng nhập ngay lập tức mà không cần bấm link xác nhận trong hộp thư.
 4. Vào **Authentication** → **URL Configuration**:
    - **Site URL**: Điền URL website của bạn (ví dụ `http://localhost:5173` khi chạy local, hoặc `https://tunncoffee.pages.dev` sau khi deploy).
    - **Redirect URLs**: Thêm `https://tunncoffee.pages.dev/**` và `http://localhost:5173/**`.
@@ -107,7 +108,7 @@ npm run dev
 2. Sao chép 2 giá trị:
    - **Project URL** (ví dụ: `https://xyzcompany.supabase.co`)
    - **Project API Keys → `anon` `public`**
-   - *(Tuyệt đối KHÔNG sử dụng `service_role` key ở frontend)*.
+   - _(Tuyệt đối KHÔNG sử dụng `service_role` key ở frontend)_.
 3. Tại thư mục gốc dự án, tạo file `.env` (copy từ `.env.example`):
 
 ```env
@@ -148,7 +149,7 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    git remote add origin https://github.com/<username>/tunn-coffee-house.git
    git push -u origin main
    ```
-   *(Lưu ý: File `.gitignore` đã tự động loại trừ `.env` và `node_modules` để bảo mật khóa của bạn).*
+   _(Lưu ý: File `.gitignore` đã tự động loại trừ `.env` và `node_modules` để bảo mật khóa của bạn)._
 
 ---
 
@@ -162,8 +163,8 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    - **Build command**: `npm run build`
    - **Build output directory**: `dist`
 5. Mở mục **Environment variables (advanced)** và thêm 2 biến môi trường:
-   - `VITE_SUPABASE_URL` = *(URL Supabase của bạn)*
-   - `VITE_SUPABASE_ANON_KEY` = *(Anon public key của bạn)*
+   - `VITE_SUPABASE_URL` = _(URL Supabase của bạn)_
+   - `VITE_SUPABASE_ANON_KEY` = _(Anon public key của bạn)_
 6. Nhấn **Save and Deploy**.
 7. Sau khoảng 1 phút, Cloudflare Pages sẽ cung cấp cho bạn đường dẫn online dạng `https://tunn-coffee-house.pages.dev` (File `public/_redirects` đã được cấu hình sẵn để hỗ trợ React Router SPA trên mọi đường dẫn `/admin/*`).
 
