@@ -31,8 +31,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
 import { BrandLogo } from '../common/BrandLogo';
-import { formatDurationVi } from '../../lib/utils';
-import { IDLE_TIMEOUT_STORAGE_KEY } from '../../pages/admin/AdminSecurityPage';
+import {
+  formatDurationVi,
+  IDLE_TIMEOUT_STORAGE_KEY,
+  SESSION_ID_STORAGE_KEY,
+  SESSION_START_STORAGE_KEY,
+} from '../../lib/utils';
 
 interface NavGroupItem {
   label: string;

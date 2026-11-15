@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import {
-  ShieldCheck,
   KeyRound,
   Clock,
   Users,
@@ -26,11 +25,14 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
-import { formatDateVi, formatDateTimeVi, formatDurationVi } from '../../lib/utils';
+import {
+  formatDateVi,
+  formatDateTimeVi,
+  formatDurationVi,
+  IDLE_TIMEOUT_STORAGE_KEY,
+} from '../../lib/utils';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import type { Profile, AdminActivityLog } from '../../types/database';
-
-export const IDLE_TIMEOUT_STORAGE_KEY = 'tunn_admin_idle_timeout_minutes';
 
 export const AdminSecurityPage: React.FC = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -657,7 +659,7 @@ export const AdminSecurityPage: React.FC = () => {
                 Vai trò của bạn hiện tại:{' '}
                 <strong className="text-[#4B2E24]">
                   {isOwnerAdmin
-                    ? '👑 ADMIN GỐC (Toàn quyền thêm, xóa & cấp mật khẩu cho Quản lý con)'
+                    ? 'ADMIN GỐC (Toàn quyền thêm, xóa & cấp mật khẩu cho Quản lý con)'
                     : 'QUẢN LÝ VIÊN (Không thể xóa hoặc đổi mật khẩu của người khác)'}
                 </strong>
               </p>

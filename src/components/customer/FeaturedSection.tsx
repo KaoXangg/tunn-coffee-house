@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, Sparkles } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { formatVND } from '../../lib/utils';
@@ -33,11 +33,12 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Editorial Heading */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14 pb-6 border-b border-coffee-beige/70">
           <div>
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.24em] text-coffee font-semibold mb-2.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{section?.content?.eyebrow || 'CURATED SIGNATURES'}</span>
+            <div className="inline-flex items-center gap-2.5 text-[11px] uppercase tracking-[0.22em] text-coffee font-semibold mb-2.5">
+              <span className="font-serif italic normal-case text-xs">Chương II</span>
+              <span className="w-3.5 h-[1px] bg-coffee/40" />
+              <span>{section?.content?.eyebrow || 'TUYỂN CHỌN ĐẶC SẮC'}</span>
             </div>
             <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
               {section?.title || 'Tác Phẩm Nổi Bật'}
@@ -48,7 +49,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
           </p>
         </div>
 
-        {/* Asymmetric Editorial Grid */}
+        {/* Editorial Curated Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {featuredProducts.map((product, idx) => {
             const hasDiscount =
@@ -57,14 +58,24 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
               Number(product.sale_price) > 0 &&
               Number(product.sale_price) < Number(product.price);
 
+            const indexLabel = `Nº ${String(idx + 1).padStart(2, '0')}`;
+
             return (
               <motion.article
                 key={product.id}
-                initial={{ opacity: 0, y: 24 }}
+                role="button"
+                tabIndex={0}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-60px' }}
-                transition={{ duration: 0.55, delay: (idx % 3) * 0.1 }}
+                transition={{ duration: 0.5, delay: (idx % 3) * 0.08 }}
                 onClick={() => onSelectProduct?.(product)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectProduct?.(product);
+                  }
+                }}
                 className="group cursor-pointer flex flex-col bg-ivory-light border border-coffee-beige/80 rounded-brand overflow-hidden hover:border-coffee transition-all duration-300"
               >
                 {/* Product Photography */}
@@ -79,14 +90,17 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                   {/* Top Badges */}
                   <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2 pointer-events-none">
                     <div className="flex flex-wrap gap-1.5">
+                      <span className="px-2.5 py-1 text-[10px] font-serif italic bg-ivory-light/95 text-coffee-dark border border-coffee-beige rounded-brand">
+                        {indexLabel}
+                      </span>
                       {product.badge && (
-                        <span className="px-3 py-1 text-[10px] uppercase tracking-[0.18em] font-semibold bg-coffee text-ivory-light rounded-brand">
+                        <span className="px-3 py-1 text-[10px] uppercase tracking-[0.16em] font-semibold bg-coffee text-ivory-light rounded-brand">
                           {product.badge}
                         </span>
                       )}
                       {product.is_best_seller && product.badge !== 'Best Seller' && (
-                        <span className="px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] font-semibold bg-ivory-light/95 text-coffee-dark border border-coffee-beige rounded-brand">
-                          Best Seller
+                        <span className="px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] font-semibold bg-ivory-light/95 text-coffee-dark border border-coffee-beige rounded-brand">
+                          Bán chạy
                         </span>
                       )}
                     </div>
@@ -126,7 +140,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                     </div>
 
                     <span className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.16em] font-semibold text-coffee group-hover:translate-x-0.5 transition-transform">
-                      <span>Chi tiết</span>
+                      <span>Thưởng vị</span>
                       <ArrowUpRight className="w-3.5 h-3.5" />
                     </span>
                   </div>

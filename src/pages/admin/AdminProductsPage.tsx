@@ -507,8 +507,12 @@ export const AdminProductsPage: React.FC = () => {
       {viewMode === 'counter' ? (
         <div className="space-y-4">
           <div className="p-3.5 bg-[#E9E6D8] border border-[#D5C6AD] rounded-brand flex items-center justify-between text-xs text-[#241914]">
-            <span>
-              ⚡ <strong>Chế độ Tại Quầy (1-Chạm):</strong> Chạm trực tiếp vào nút <strong>CÒN MÓN / TẠM HẾT</strong> để cập nhật ngay lên website khách hàng.
+            <span className="inline-flex items-center gap-2">
+              <Zap className="w-4 h-4 text-[#4B2E24] shrink-0" />
+              <span>
+                <strong>Chế độ Tại Quầy (1-Chạm):</strong> Chạm trực tiếp vào nút{' '}
+                <strong>CÒN MÓN / TẠM HẾT</strong> để cập nhật ngay lên website khách hàng.
+              </span>
             </span>
             <span className="font-semibold">
               {filteredProducts.filter((p) => p.is_available).length}/

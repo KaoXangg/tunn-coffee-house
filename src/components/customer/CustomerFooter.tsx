@@ -109,9 +109,24 @@ export const CustomerFooter: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom Copyright */}
+        {/* Bottom Copyright & Utilities */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#D5C6AD]/70">
           <p>{settings.copyright_text}</p>
+          <div className="flex items-center gap-5">
+            <a
+              href="#hero"
+              className="text-[#D5C6AD]/80 hover:text-white transition-colors"
+            >
+              Lên đầu trang ↑
+            </a>
+            <Link
+              to="/admin/login"
+              className="inline-flex items-center gap-1.5 text-[#D5C6AD]/60 hover:text-[#D5C6AD] transition-colors"
+            >
+              <Lock className="w-3 h-3" />
+              <span>Quản trị nội bộ</span>
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

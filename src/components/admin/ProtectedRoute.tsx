@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation, Link } from 'react-router-dom';
-import { Loader2, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { Loader2, ShieldAlert } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {

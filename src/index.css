@@ -17,6 +17,8 @@
 html {
   scroll-behavior: smooth;
   overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -24,6 +26,16 @@ body {
   color: var(--color-text-primary);
   font-family: var(--font-body), system-ui, -apple-system, sans-serif;
   overflow-x: clip;
+}
+
+::selection {
+  background-color: #4B2E24;
+  color: #F7F5EF;
+}
+
+:focus-visible {
+  outline: 2px solid #4B2E24;
+  outline-offset: 2px;
 }
 
 .no-scrollbar::-webkit-scrollbar {

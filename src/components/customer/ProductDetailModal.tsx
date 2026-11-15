@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Sparkles, CheckCircle2 } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { X, CheckCircle2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { formatVND } from '../../lib/utils';
 import { useSiteData } from '../../contexts/SiteDataContext';
@@ -16,6 +16,15 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 }) => {
   const { categories, settings } = useSiteData();
 
+  useEffect(() => {
+    if (!product) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [product, onClose]);
+
   if (!product) return null;
 
   const categoryName =
@@ -30,7 +39,12 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   return (
     <AnimatePresence>
       {product && (
-        <div className="fixed inset-0 z-[85] flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-[85] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="product-modal-title"
+        >
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -63,12 +77,14 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
             <div className="md:col-span-6 p-6 sm:p-8 flex flex-col justify-between">
               <div>
-                <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-coffee font-semibold">
-                  <Sparkles className="w-3.5 h-3.5" />
+                <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-coffee font-semibold border-b border-coffee-beige pb-1">
                   <span>{categoryName}</span>
                 </div>
 
-                <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-coffee-dark mt-2">
+                <h3
+                  id="product-modal-title"
+                  className="font-serif text-2xl sm:text-3xl font-semibold text-coffee-dark mt-2.5"
+                >
                   {product.name}
                 </h3>
 
@@ -99,7 +115,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-coffee" />
-                    <span>Tùy chỉnh mức đường & đá theo sở thích</span>
+                    <span>Tùy chỉnh mức đường &amp; đá theo sở thích riêng</span>
                   </div>
                 </div>
               </div>

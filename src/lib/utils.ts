@@ -1,6 +1,10 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+export const IDLE_TIMEOUT_STORAGE_KEY = 'tunn_admin_idle_timeout_minutes';
+export const SESSION_ID_STORAGE_KEY = 'tunn_admin_session_id';
+export const SESSION_START_STORAGE_KEY = 'tunn_admin_session_start';
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

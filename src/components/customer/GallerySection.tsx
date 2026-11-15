@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Maximize2, X } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import type { GalleryItem } from '../../types/database';
@@ -11,13 +11,9 @@ export const GallerySection: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('Tất cả');
   const [lightboxItem, setLightboxItem] = useState<GalleryItem | null>(null);
 
-  if (section && !section.is_enabled) return null;
-
   const visibleItems = gallery
     .filter((g) => g.is_visible)
     .sort((a, b) => a.sort_order - b.sort_order);
-
-  if (visibleItems.length === 0) return null;
 
   const categories = ['Tất cả', 'Không gian', 'Đồ uống', 'Thương hiệu', 'Sự kiện'];
 
@@ -26,6 +22,31 @@ export const GallerySection: React.FC = () => {
       ? visibleItems
       : visibleItems.filter((item) => item.category === selectedCategory);
 
+  const navigateLightbox = useCallback(
+    (direction: -1 | 1) => {
+      if (!lightboxItem || filteredItems.length <= 1) return;
+      const currentIdx = filteredItems.findIndex((i) => i.id === lightboxItem.id);
+      if (currentIdx === -1) return;
+      const nextIdx = (currentIdx + direction + filteredItems.length) % filteredItems.length;
+      setLightboxItem(filteredItems[nextIdx]);
+    },
+    [lightboxItem, filteredItems]
+  );
+
+  useEffect(() => {
+    if (!lightboxItem) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxItem(null);
+      if (e.key === 'ArrowLeft') navigateLightbox(-1);
+      if (e.key === 'ArrowRight') navigateLightbox(1);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [lightboxItem, navigateLightbox]);
+
+  if (section && !section.is_enabled) return null;
+  if (visibleItems.length === 0) return null;
+
   return (
     <section
       id="gallery"
@@ -33,11 +54,13 @@ export const GallerySection: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Header & Filter */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pb-6 border-b border-coffee-beige/70">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.26em] text-coffee font-semibold mb-2.5">
-              {section?.content?.eyebrow || 'VISUAL JOURNAL'}
-            </p>
+            <div className="inline-flex items-center gap-2.5 text-[11px] uppercase tracking-[0.22em] text-coffee font-semibold mb-2.5">
+              <span className="font-serif italic normal-case text-xs">Chương V</span>
+              <span className="w-3.5 h-[1px] bg-coffee/40" />
+              <span>{section?.content?.eyebrow || 'NHẬT KÝ HÌNH ẢNH'}</span>
+            </div>
             <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
               {section?.title || 'Không Gian & Khoảnh Khắc'}
             </h2>
@@ -77,12 +100,20 @@ export const GallerySection: React.FC = () => {
             return (
               <motion.figure
                 key={item.id}
+                role="button"
+                tabIndex={0}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: (idx % 3) * 0.08 }}
                 onClick={() => setLightboxItem(item)}
-                className="group relative break-inside-avoid cursor-pointer rounded-brand overflow-hidden border border-coffee-beige bg-ivory"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setLightboxItem(item);
+                  }
+                }}
+                className="group relative break-inside-avoid cursor-pointer rounded-brand overflow-hidden border border-coffee-beige bg-ivory hover:border-coffee transition-colors"
               >
                 <div className={`w-full overflow-hidden ${aspectClass}`}>
                   <img
@@ -117,7 +148,7 @@ export const GallerySection: React.FC = () => {
         </div>
       </div>
 
-      {/* Lightbox Modal */}
+      {/* Lightbox Modal with Keyboard & Prev/Next Navigation */}
       <AnimatePresence>
         {lightboxItem && (
           <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
@@ -126,12 +157,12 @@ export const GallerySection: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setLightboxItem(null)}
-              className="fixed inset-0 bg-[#241914]/85 backdrop-blur-sm"
+              className="fixed inset-0 bg-[#241914]/85 backdrop-blur-xs"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              exit={{ opacity: 0, scale: 0.96 }}
               className="relative z-10 max-w-4xl w-full bg-ivory-light border border-coffee-beige rounded-brand overflow-hidden shadow-2xl"
             >
               <button
@@ -142,6 +173,28 @@ export const GallerySection: React.FC = () => {
               >
                 <X className="w-5 h-5" />
               </button>
+
+              {filteredItems.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => navigateLightbox(-1)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2 bg-ivory-light/85 text-coffee-dark rounded-full hover:bg-ivory transition-colors"
+                    aria-label="Ảnh trước"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigateLightbox(1)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 bg-ivory-light/85 text-coffee-dark rounded-full hover:bg-ivory transition-colors"
+                    aria-label="Ảnh tiếp theo"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+
               <div className="max-h-[72vh] bg-[#241914] flex items-center justify-center overflow-hidden">
                 <img
                   src={lightboxItem.image_url}
@@ -149,18 +202,24 @@ export const GallerySection: React.FC = () => {
                   className="max-h-[72vh] w-auto object-contain"
                 />
               </div>
-              <div className="p-6 bg-ivory-light">
-                <span className="text-[10px] uppercase tracking-[0.2em] text-coffee font-semibold">
-                  {lightboxItem.category}
+              <div className="p-6 bg-ivory-light flex items-start justify-between gap-4">
+                <div>
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-coffee font-semibold">
+                    {lightboxItem.category}
+                  </span>
+                  <h3 className="font-serif text-2xl font-semibold text-coffee-dark mt-1">
+                    {lightboxItem.title}
+                  </h3>
+                  {lightboxItem.caption && (
+                    <p className="text-sm text-coffee-muted mt-1.5">
+                      {lightboxItem.caption}
+                    </p>
+                  )}
+                </div>
+                <span className="text-xs font-serif italic text-coffee-muted shrink-0">
+                  {filteredItems.findIndex((i) => i.id === lightboxItem.id) + 1} /{' '}
+                  {filteredItems.length}
                 </span>
-                <h3 className="font-serif text-2xl font-semibold text-coffee-dark mt-1">
-                  {lightboxItem.title}
-                </h3>
-                {lightboxItem.caption && (
-                  <p className="text-sm text-coffee-muted mt-1.5">
-                    {lightboxItem.caption}
-                  </p>
-                )}
               </div>
             </motion.div>
           </div>
