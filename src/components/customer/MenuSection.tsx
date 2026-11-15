@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { Search, SlidersHorizontal, X, Coffee, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { formatVND } from '../../lib/utils';
@@ -12,14 +12,18 @@ interface MenuSectionProps {
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc';
 type QuickTagFilter = 'all' | 'bestseller' | 'promo';
 
+const ITEMS_PER_PAGE = 8;
+
 export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => {
   const { categories, products, getSection } = useSiteData();
   const section = getSection('menu');
+  const menuGridRef = useRef<HTMLDivElement>(null);
 
   const [activeCategoryId, setActiveCategoryId] = useState<string>('all');
   const [quickFilter, setQuickFilter] = useState<QuickTagFilter>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortOption>('default');
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const activeCategories = useMemo(
     () =>
@@ -71,6 +75,43 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
     });
   }, [products, activeCategoryId, quickFilter, searchQuery, sortBy]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategoryId, quickFilter, searchQuery, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(visibleProducts.length / ITEMS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
+
+  const paginatedProducts = useMemo(() => {
+    const start = (safePage - 1) * ITEMS_PER_PAGE;
+    return visibleProducts.slice(start, start + ITEMS_PER_PAGE);
+  }, [visibleProducts, safePage]);
+
+  const pageNumbers = useMemo(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages: Array<number | 'ellipsis'> = [1];
+    if (safePage > 3) pages.push('ellipsis');
+    const start = Math.max(2, safePage - 1);
+    const end = Math.min(totalPages - 1, safePage + 1);
+    for (let p = start; p <= end; p++) pages.push(p);
+    if (safePage < totalPages - 2) pages.push('ellipsis');
+    pages.push(totalPages);
+    return pages;
+  }, [totalPages, safePage]);
+
+  const handlePageChange = (nextPage: number) => {
+    const target = Math.max(1, Math.min(totalPages, nextPage));
+    if (target === safePage) return;
+    setCurrentPage(target);
+    if (menuGridRef.current) {
+      const y =
+        menuGridRef.current.getBoundingClientRect().top + window.scrollY - 135;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }
+  };
+
   if (section && !section.is_enabled) return null;
 
   return (
@@ -92,58 +133,152 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
           </p>
         </div>
 
-        {/* Sticky Category Jump Bar (Mobile & Desktop) */}
-        <div className="sticky top-[68px] lg:top-[72px] z-30 bg-ivory-light/95 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0 pt-2.5 pb-3 mb-4 border-b border-coffee-beige/60 flex items-center justify-start sm:justify-center gap-2 overflow-x-auto no-scrollbar">
-          <button
-            type="button"
-            onClick={() => setActiveCategoryId('all')}
-            className={`relative px-5 py-2.5 text-xs uppercase tracking-[0.16em] font-semibold whitespace-nowrap rounded-brand transition-colors ${
-              activeCategoryId === 'all'
-                ? 'text-ivory-light'
-                : 'text-coffee-dark/80 hover:text-coffee hover:bg-ivory/60'
-            }`}
-          >
-            {activeCategoryId === 'all' && (
-              <motion.span
-                layoutId="menuCategoryPill"
-                transition={{ type: 'spring', stiffness: 360, damping: 30 }}
-                className="absolute inset-0 bg-coffee rounded-brand shadow-xs -z-0"
-              />
-            )}
-            <span className="relative z-10">
-              Tất cả ({products.filter((p) => p.is_visible).length})
-            </span>
-          </button>
+        {/* Editorial Category Visual Marquee (Slow leftward glide, pauses on hover) */}
+        {activeCategories.length > 0 && (
+          <div className="group/marquee relative overflow-hidden mb-10 py-2 [mask-image:linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]">
+            <div
+              className="animate-category-marquee"
+              style={{
+                animationDuration: `${Math.max(24, activeCategories.length * 6)}s`,
+              }}
+            >
+              {[0, 1].map((dupIndex) => (
+                <div
+                  key={dupIndex}
+                  aria-hidden={dupIndex === 1}
+                  className="flex items-center gap-3.5 sm:gap-4 pr-3.5 sm:pr-4 shrink-0"
+                >
+                  {activeCategories.map((cat) => {
+                    const count = products.filter(
+                      (p) => p.is_visible && p.category_id === cat.id
+                    ).length;
+                    const isActive = activeCategoryId === cat.id;
 
-          {activeCategories.map((cat) => {
-            const count = products.filter(
-              (p) => p.is_visible && p.category_id === cat.id
-            ).length;
-            const isActive = activeCategoryId === cat.id;
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setActiveCategoryId(cat.id)}
-                className={`relative px-5 py-2.5 text-xs uppercase tracking-[0.16em] font-semibold whitespace-nowrap rounded-brand transition-colors ${
-                  isActive
-                    ? 'text-ivory-light'
-                    : 'text-coffee-dark/80 hover:text-coffee hover:bg-ivory/60'
-                }`}
-              >
-                {isActive && (
-                  <motion.span
-                    layoutId="menuCategoryPill"
-                    transition={{ type: 'spring', stiffness: 360, damping: 30 }}
-                    className="absolute inset-0 bg-coffee rounded-brand shadow-xs -z-0"
-                  />
-                )}
-                <span className="relative z-10">
-                  {cat.name} ({count})
-                </span>
-              </button>
-            );
-          })}
+                    return (
+                      <button
+                        key={`${dupIndex}-${cat.id}`}
+                        type="button"
+                        tabIndex={dupIndex === 1 ? -1 : 0}
+                        onClick={() =>
+                          setActiveCategoryId((prev) =>
+                            prev === cat.id ? 'all' : cat.id
+                          )
+                        }
+                        className={`group relative w-[180px] sm:w-[205px] lg:w-[220px] h-32 sm:h-36 shrink-0 rounded-xl overflow-hidden text-left transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] ${
+                          isActive
+                            ? 'ring-2 ring-coffee ring-offset-2 ring-offset-ivory-light shadow-editorial-lg'
+                            : 'border border-coffee-beige/60 shadow-sm hover:shadow-editorial opacity-95 hover:opacity-100'
+                        }`}
+                      >
+                        {/* Background Image or Artisanal Fallback */}
+                        {cat.image_url ? (
+                          <img
+                            src={cat.image_url}
+                            alt={cat.name}
+                            loading="lazy"
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-gradient-to-br from-[#4B2E24] via-[#342019] to-[#1D120E] flex items-center justify-center">
+                            <Coffee className="w-8 h-8 text-[#D5C6AD]/25 transition-transform duration-500 group-hover:scale-110" />
+                          </div>
+                        )}
+
+                        {/* Multi-layer Depth Overlay */}
+                        <div
+                          className={`absolute inset-0 transition-opacity duration-300 ${
+                            isActive
+                              ? 'bg-gradient-to-t from-[#1A100C]/90 via-[#1A100C]/35 to-[#4B2E24]/20'
+                              : 'bg-gradient-to-t from-[#160E0A]/90 via-[#160E0A]/40 to-black/10 group-hover:from-[#160E0A]/95'
+                          }`}
+                        />
+
+                        {/* Top Row: Count Pill & Active Indicator */}
+                        <div className="relative z-10 flex items-center justify-between p-2.5 sm:p-3">
+                          <span className="px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded-full backdrop-blur-md bg-white/15 border border-white/20 text-[#F7F5EF]">
+                            {count} món
+                          </span>
+                          {isActive && (
+                            <span className="w-2.5 h-2.5 rounded-full bg-amber-300 shadow-[0_0_10px_rgba(252,211,77,0.9)]" />
+                          )}
+                        </div>
+
+                        {/* Bottom Title */}
+                        <div className="absolute inset-x-0 bottom-0 z-10 p-3">
+                          <p className="font-serif text-sm sm:text-base font-medium text-[#F7F5EF] leading-snug line-clamp-2 drop-shadow-sm">
+                            {cat.name}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Sticky Category Jump Bar (Wraps cleanly on desktop, horizontal swipe on mobile) */}
+        <div className="sticky top-[62px] lg:top-[70px] z-30 bg-ivory-light/95 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0 pt-2.5 pb-3 mb-4 border-b border-coffee-beige/60 overflow-x-auto sm:overflow-visible no-scrollbar">
+          <div className="flex flex-nowrap sm:flex-wrap items-center sm:justify-center gap-2 w-max sm:w-full mx-auto px-1">
+            <button
+              type="button"
+              onClick={() => setActiveCategoryId('all')}
+              className={`relative px-4 py-2 text-xs uppercase tracking-[0.14em] font-semibold whitespace-nowrap rounded-full transition-colors shrink-0 ${
+                activeCategoryId === 'all'
+                  ? 'text-ivory-light'
+                  : 'text-coffee-dark/80 hover:text-coffee hover:bg-ivory/70'
+              }`}
+            >
+              {activeCategoryId === 'all' && (
+                <motion.span
+                  layoutId="menuCategoryPill"
+                  transition={{ type: 'spring', stiffness: 360, damping: 30 }}
+                  className="absolute inset-0 bg-coffee rounded-full shadow-xs -z-0"
+                />
+              )}
+              <span className="relative z-10">
+                Tất cả ({products.filter((p) => p.is_visible).length})
+              </span>
+            </button>
+
+            {activeCategories.map((cat) => {
+              const count = products.filter(
+                (p) => p.is_visible && p.category_id === cat.id
+              ).length;
+              const isActive = activeCategoryId === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setActiveCategoryId(cat.id)}
+                  className={`relative inline-flex items-center gap-2 px-3.5 py-2 text-xs uppercase tracking-[0.14em] font-semibold whitespace-nowrap rounded-full transition-colors shrink-0 ${
+                    isActive
+                      ? 'text-ivory-light'
+                      : 'text-coffee-dark/80 hover:text-coffee hover:bg-ivory/70'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="menuCategoryPill"
+                      transition={{ type: 'spring', stiffness: 360, damping: 30 }}
+                      className="absolute inset-0 bg-coffee rounded-full shadow-xs -z-0"
+                    />
+                  )}
+                  {cat.image_url && (
+                    <img
+                      src={cat.image_url}
+                      alt=""
+                      className="relative z-10 w-5 h-5 rounded-full object-cover border border-white/30 shrink-0"
+                    />
+                  )}
+                  <span className="relative z-10">
+                    {cat.name} ({count})
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Active Category Tasting Note */}
@@ -219,6 +354,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
         </div>
 
         {/* Editorial Menu List / 2-Column Tasting Index */}
+        <div ref={menuGridRef} />
         {visibleProducts.length === 0 ? (
           <div className="py-16 text-center border border-dashed border-coffee-beige rounded-brand bg-ivory/30">
             <p className="font-serif text-2xl text-coffee-dark">
@@ -240,9 +376,10 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8">
-            <AnimatePresence mode="popLayout">
-              {visibleProducts.map((item) => {
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8">
+              <AnimatePresence mode="popLayout">
+                {paginatedProducts.map((item) => {
                 const hasSale =
                   item.sale_price !== null &&
                   item.sale_price !== undefined &&
@@ -328,8 +465,77 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                   </motion.div>
                 );
               })}
-            </AnimatePresence>
-          </div>
+              </AnimatePresence>
+            </div>
+
+            {/* Pagination Bar */}
+            {totalPages > 1 && (
+              <div className="mt-12 pt-8 border-t border-coffee-beige/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-xs text-coffee-muted">
+                  Hiển thị{' '}
+                  <strong className="text-coffee-dark font-semibold">
+                    {(safePage - 1) * ITEMS_PER_PAGE + 1}–
+                    {Math.min(safePage * ITEMS_PER_PAGE, visibleProducts.length)}
+                  </strong>{' '}
+                  trên tổng{' '}
+                  <strong className="text-coffee-dark font-semibold">
+                    {visibleProducts.length}
+                  </strong>{' '}
+                  món
+                </p>
+
+                <nav
+                  aria-label="Phân trang thực đơn"
+                  className="inline-flex items-center gap-1.5"
+                >
+                  <button
+                    type="button"
+                    disabled={safePage === 1}
+                    onClick={() => handlePageChange(safePage - 1)}
+                    aria-label="Trang trước"
+                    className="w-9 h-9 inline-flex items-center justify-center rounded-full border border-coffee-beige bg-ivory/60 text-coffee-dark hover:border-coffee hover:bg-ivory transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+
+                  {pageNumbers.map((page, idx) =>
+                    page === 'ellipsis' ? (
+                      <span
+                        key={`ellipsis-${idx}`}
+                        className="px-1.5 text-xs text-coffee-muted select-none"
+                      >
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() => handlePageChange(page)}
+                        aria-current={page === safePage ? 'page' : undefined}
+                        className={`min-w-[36px] h-9 px-3 inline-flex items-center justify-center rounded-full text-xs font-semibold transition-all ${
+                          page === safePage
+                            ? 'bg-coffee text-ivory-light shadow-editorial'
+                            : 'border border-coffee-beige/80 bg-ivory/50 text-coffee-dark hover:border-coffee hover:bg-ivory'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    type="button"
+                    disabled={safePage === totalPages}
+                    onClick={() => handlePageChange(safePage + 1)}
+                    aria-label="Trang sau"
+                    className="w-9 h-9 inline-flex items-center justify-center rounded-full border border-coffee-beige bg-ivory/60 text-coffee-dark hover:border-coffee hover:bg-ivory transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </nav>
+              </div>
+            )}
+          </>
         )}
 
         {/* Footnote */}
