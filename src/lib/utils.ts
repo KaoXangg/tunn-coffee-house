@@ -84,3 +84,138 @@ export function formatDurationVi(seconds: number | null | undefined): string {
   }
   return secs > 0 ? `${minutes} phút ${secs} giây` : `${minutes} phút`;
 }
+
+export interface StoreOpenStatus {
+  isOpen: boolean;
+  label: string;
+  detail: string;
+  openTime: string;
+  closeTime: string;
+}
+
+export function getStoreOpenStatus(
+  openingHours: string | null | undefined,
+  now: Date = new Date()
+): StoreOpenStatus {
+  const timeMatches = (openingHours || '').match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/g);
+  const openStr = timeMatches && timeMatches.length >= 2 ? timeMatches[0] : '07:30';
+  const closeStr = timeMatches && timeMatches.length >= 2 ? timeMatches[1] : '22:30';
+
+  const toMinutes = (hhmm: string) => {
+    const [h, m] = hhmm.split(':').map(Number);
+    return h * 60 + m;
+  };
+
+  const openMin = toMinutes(openStr);
+  const closeMin = toMinutes(closeStr);
+  const currentMin = now.getHours() * 60 + now.getMinutes();
+
+  const isOpen =
+    closeMin > openMin
+      ? currentMin >= openMin && currentMin < closeMin
+      : currentMin >= openMin || currentMin < closeMin;
+
+  if (isOpen) {
+    return {
+      isOpen: true,
+      label: 'Đang mở cửa',
+      detail: `Phục vụ đến ${closeStr}`,
+      openTime: openStr,
+      closeTime: closeStr,
+    };
+  }
+
+  const detail =
+    currentMin < openMin
+      ? `Mở cửa lúc ${openStr} hôm nay`
+      : `Hẹn gặp lại vào ${openStr} sáng mai`;
+
+  return {
+    isOpen: false,
+    label: 'Đã đóng cửa',
+    detail,
+    openTime: openStr,
+    closeTime: closeStr,
+  };
+}
+
+export interface PromotionScheduleStatus {
+  isCurrentlyVisible: boolean;
+  reason: 'active' | 'disabled' | 'not_started' | 'expired' | 'outside_daily_window';
+  dailyWindow: { start: string; end: string } | null;
+}
+
+export function extractDailyTimeWindow(
+  text: string | null | undefined
+): { start: string; end: string } | null {
+  if (!text) return null;
+  const match = text.match(/\b([01]?\d|2[0-3]):([0-5]\d)\s*[—–\-]\s*([01]?\d|2[0-3]):([0-5]\d)\b/);
+  if (!match) return null;
+  const pad = (n: string) => n.padStart(2, '0');
+  return {
+    start: `${pad(match[1])}:${match[2]}`,
+    end: `${pad(match[3])}:${match[4]}`,
+  };
+}
+
+export function getPromotionScheduleStatus(
+  promo: {
+    is_active: boolean;
+    start_date: string | null;
+    end_date: string | null;
+    subtitle?: string;
+  },
+  now: Date = new Date()
+): PromotionScheduleStatus {
+  const dailyWindow = extractDailyTimeWindow(promo.subtitle);
+
+  if (!promo.is_active) {
+    return { isCurrentlyVisible: false, reason: 'disabled', dailyWindow };
+  }
+
+  const nowMs = now.getTime();
+  if (promo.start_date) {
+    const startMs = new Date(promo.start_date).getTime();
+    if (!isNaN(startMs) && nowMs < startMs) {
+      return { isCurrentlyVisible: false, reason: 'not_started', dailyWindow };
+    }
+  }
+
+  if (promo.end_date) {
+    const endDate = new Date(promo.end_date);
+    if (!isNaN(endDate.getTime())) {
+      // If stored at midnight UTC/local without explicit time, keep active until end of that day
+      if (promo.end_date.length <= 10 || promo.end_date.includes('T00:00:00')) {
+        endDate.setHours(23, 59, 59, 999);
+      }
+      if (nowMs > endDate.getTime()) {
+        return { isCurrentlyVisible: false, reason: 'expired', dailyWindow };
+      }
+    }
+  }
+
+  if (dailyWindow) {
+    const toMin = (t: string) => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
+    const startMin = toMin(dailyWindow.start);
+    const endMin = toMin(dailyWindow.end);
+    const currentMin = now.getHours() * 60 + now.getMinutes();
+
+    const inWindow =
+      endMin > startMin
+        ? currentMin >= startMin && currentMin <= endMin
+        : currentMin >= startMin || currentMin <= endMin;
+
+    if (!inWindow) {
+      return {
+        isCurrentlyVisible: false,
+        reason: 'outside_daily_window',
+        dailyWindow,
+      };
+    }
+  }
+
+  return { isCurrentlyVisible: true, reason: 'active', dailyWindow };
+}

@@ -20,6 +20,7 @@ import {
   Zap,
   LayoutList,
   DollarSign,
+  Printer,
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useSiteData } from '../../contexts/SiteDataContext';
@@ -52,7 +53,7 @@ type ProductFormValues = z.infer<typeof productSchema>;
 const ITEMS_PER_PAGE = 8;
 
 export const AdminProductsPage: React.FC = () => {
-  const { products, categories, refreshAll, logAdminActivity } = useSiteData();
+  const { products, categories, settings, refreshAll, logAdminActivity } = useSiteData();
   const toast = useToast();
 
   // View Mode: 'full' (Standard Table) | 'counter' (1-Tap Quick Counter Mode for Mobile/Tablet)
@@ -67,6 +68,12 @@ export const AdminProductsPage: React.FC = () => {
     'order'
   );
   const [page, setPage] = useState(1);
+
+  // Bulk Selection & Batch Price Adjustment State
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [bulkPriceInput, setBulkPriceInput] = useState('');
+  const [bulkPriceUnit, setBulkPriceUnit] = useState<'percent' | 'vnd'>('percent');
 
   // Inline Price Editing State
   const [inlinePriceId, setInlinePriceId] = useState<string | null>(null);
@@ -382,6 +389,270 @@ export const AdminProductsPage: React.FC = () => {
     return categories.find((c) => c.id === catId)?.name || 'Chưa phân loại';
   };
 
+  const toggleSelectProduct = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectPage = (pageItems: Product[]) => {
+    const pageIds = pageItems.map((p) => p.id);
+    const allSelected =
+      pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
+    if (allSelected) {
+      setSelectedIds((prev) => prev.filter((id) => !pageIds.includes(id)));
+    } else {
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...pageIds])));
+    }
+  };
+
+  const handleBulkUpdateField = async (
+    field: 'is_available' | 'is_visible',
+    value: boolean,
+    label: string
+  ) => {
+    if (selectedIds.length === 0) return;
+    if (!isSupabaseConfigured) {
+      toast.error('Chưa kết nối Supabase Database');
+      return;
+    }
+
+    setBulkProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ [field]: value })
+        .in('id', selectedIds);
+
+      if (error) throw error;
+      await logAdminActivity(
+        `${label} (${selectedIds.length} món)`,
+        'products',
+        `${selectedIds.length} sản phẩm`
+      );
+      await refreshAll();
+      toast.success(`Đã ${label.toLowerCase()} cho ${selectedIds.length} món`);
+      setSelectedIds([]);
+    } catch (err: any) {
+      toast.error('Lỗi thao tác hàng loạt', err?.message);
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
+  const handleBulkAdjustPrice = async () => {
+    const delta = Number(bulkPriceInput);
+    if (!bulkPriceInput.trim() || isNaN(delta) || delta === 0) {
+      toast.error('Vui lòng nhập mức điều chỉnh giá hợp lệ (VD: 10 hoặc -5000)');
+      return;
+    }
+    if (selectedIds.length === 0 || !isSupabaseConfigured) return;
+
+    setBulkProcessing(true);
+    try {
+      const targets = products.filter((p) => selectedIds.includes(p.id));
+      for (const prod of targets) {
+        const nextPrice =
+          bulkPriceUnit === 'percent'
+            ? Math.max(0, Math.round((Number(prod.price) * (1 + delta / 100)) / 1000) * 1000)
+            : Math.max(0, Number(prod.price) + delta);
+
+        const nextSalePrice =
+          prod.sale_price && Number(prod.sale_price) > 0
+            ? bulkPriceUnit === 'percent'
+              ? Math.max(
+                  0,
+                  Math.round((Number(prod.sale_price) * (1 + delta / 100)) / 1000) * 1000
+                )
+              : Math.max(0, Number(prod.sale_price) + delta)
+            : null;
+
+        const { error } = await supabase
+          .from('products')
+          .update({ price: nextPrice, sale_price: nextSalePrice })
+          .eq('id', prod.id);
+        if (error) throw error;
+      }
+
+      await logAdminActivity(
+        `Điều chỉnh giá hàng loạt (${delta > 0 ? '+' : ''}${delta}${
+          bulkPriceUnit === 'percent' ? '%' : 'đ'
+        })`,
+        'products',
+        `${targets.length} sản phẩm`
+      );
+      await refreshAll();
+      toast.success(`Đã cập nhật giá cho ${targets.length} món`);
+      setBulkPriceInput('');
+      setSelectedIds([]);
+    } catch (err: any) {
+      toast.error('Lỗi cập nhật giá hàng loạt', err?.message);
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
+  const handlePrintMenuA4 = () => {
+    const visibleItems = products
+      .filter((p) => p.is_visible)
+      .sort((a, b) => a.sort_order - b.sort_order);
+
+    const activeCats = [...categories]
+      .filter((c) => c.is_active)
+      .sort((a, b) => a.sort_order - b.sort_order);
+
+    const groupedHtml = activeCats
+      .map((cat) => {
+        const items = visibleItems.filter((p) => p.category_id === cat.id);
+        if (items.length === 0) return '';
+        const rows = items
+          .map((item) => {
+            const hasSale =
+              item.sale_price !== null &&
+              item.sale_price !== undefined &&
+              Number(item.sale_price) > 0 &&
+              Number(item.sale_price) < Number(item.price);
+            const displayPrice = formatVND(hasSale ? item.sale_price : item.price);
+            return `
+              <div class="menu-item">
+                <div class="menu-row">
+                  <span class="item-name">${item.name}${
+                    !item.is_available ? ' <em>(Tạm hết)</em>' : ''
+                  }</span>
+                  <span class="dots"></span>
+                  <span class="item-price">${displayPrice}</span>
+                </div>
+                ${item.description ? `<p class="item-desc">${item.description}</p>` : ''}
+              </div>
+            `;
+          })
+          .join('');
+
+        return `
+          <section class="cat-block">
+            <h2 class="cat-title">${cat.name}</h2>
+            <div class="cat-grid">${rows}</div>
+          </section>
+        `;
+      })
+      .join('');
+
+    const win = window.open('', '_blank', 'width=900,height=1100');
+    if (!win) {
+      toast.error('Trình duyệt đang chặn cửa sổ mở mới', 'Vui lòng cho phép pop-up để in thực đơn.');
+      return;
+    }
+
+    win.document.write(`
+      <!doctype html>
+      <html lang="vi">
+        <head>
+          <meta charset="utf-8" />
+          <title>Thực Đơn — ${settings.brand_name}</title>
+          <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet" />
+          <style>
+            @page { size: A4; margin: 16mm 18mm; }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body {
+              font-family: 'Be Vietnam Pro', sans-serif;
+              color: #241914;
+              background: #fff;
+              line-height: 1.45;
+              padding: 12px;
+            }
+            .header {
+              text-align: center;
+              border-bottom: 2px solid #4B2E24;
+              padding-bottom: 14px;
+              margin-bottom: 20px;
+            }
+            .brand {
+              font-family: 'Lora', serif;
+              font-size: 28px;
+              font-weight: 600;
+              letter-spacing: 0.04em;
+            }
+            .sub {
+              font-size: 11px;
+              text-transform: uppercase;
+              letter-spacing: 0.2em;
+              color: #8C7565;
+              margin-top: 4px;
+            }
+            .cat-block { margin-bottom: 20px; break-inside: avoid; }
+            .cat-title {
+              font-family: 'Lora', serif;
+              font-size: 17px;
+              font-weight: 600;
+              color: #4B2E24;
+              border-bottom: 1px solid #D5C6AD;
+              padding-bottom: 4px;
+              margin-bottom: 10px;
+              text-transform: uppercase;
+              letter-spacing: 0.08em;
+            }
+            .cat-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 10px 26px;
+            }
+            .menu-item { break-inside: avoid; }
+            .menu-row {
+              display: flex;
+              align-items: baseline;
+              gap: 6px;
+            }
+            .item-name {
+              font-family: 'Lora', serif;
+              font-size: 13.5px;
+              font-weight: 600;
+            }
+            .dots {
+              flex: 1;
+              border-bottom: 1px dotted #C5B399;
+            }
+            .item-price {
+              font-family: 'Lora', serif;
+              font-size: 13.5px;
+              font-weight: 600;
+              color: #4B2E24;
+              white-space: nowrap;
+            }
+            .item-desc {
+              font-size: 10.5px;
+              color: #6E594B;
+              margin-top: 2px;
+            }
+            .footer {
+              margin-top: 22px;
+              padding-top: 10px;
+              border-top: 1px solid #D5C6AD;
+              text-align: center;
+              font-size: 10.5px;
+              color: #8C7565;
+            }
+          </style>
+        </head>
+        <body>
+          <header class="header">
+            <h1 class="brand">${settings.brand_name || 'TUNN Coffee House'}</h1>
+            <p class="sub">Thực Đơn Thức Uống Thủ Công · ${settings.opening_hours || '07:30 — 22:30'}</p>
+          </header>
+          ${groupedHtml}
+          <footer class="footer">
+            ${settings.address ? `${settings.address} · ` : ''}${
+              settings.hotline ? `Hotline: ${settings.hotline}` : settings.slogan
+            }
+          </footer>
+          <script>
+            window.onload = function() { setTimeout(function() { window.print(); }, 350); };
+          </script>
+        </body>
+      </html>
+    `);
+    win.document.close();
+  };
+
   return (
     <div className="space-y-6">
       {/* Header & Mode Switcher */}
@@ -423,6 +694,15 @@ export const AdminProductsPage: React.FC = () => {
               <span>Chế Độ Tại Quầy (1-Chạm)</span>
             </button>
           </div>
+
+          <button
+            type="button"
+            onClick={handlePrintMenuA4}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider bg-white border border-[#D5C6AD] text-[#241914] hover:bg-[#E9E6D8] rounded-brand transition-colors"
+          >
+            <Printer className="w-4 h-4" />
+            <span>In Thực Đơn A4</span>
+          </button>
 
           <button
             type="button"
@@ -568,6 +848,93 @@ export const AdminProductsPage: React.FC = () => {
         </div>
       ) : (
         /* VIEW MODE 2: FULL TABLE WITH INLINE PRICE EDIT & DUPLICATE */
+        <div className="space-y-4">
+          {selectedIds.length > 0 && (
+            <div className="p-3.5 bg-[#241914] text-[#F7F5EF] rounded-brand flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-sm">
+              <div className="flex items-center gap-3 text-xs">
+                <span className="font-semibold">
+                  Đã chọn {selectedIds.length} món
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedIds([])}
+                  className="text-[#D5C6AD] hover:text-white underline"
+                >
+                  Bỏ chọn
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  disabled={bulkProcessing}
+                  onClick={() =>
+                    handleBulkUpdateField('is_available', false, 'Báo hết hàng loạt')
+                  }
+                  className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider bg-red-700 hover:bg-red-800 text-white rounded-brand disabled:opacity-50"
+                >
+                  Báo hết
+                </button>
+                <button
+                  type="button"
+                  disabled={bulkProcessing}
+                  onClick={() =>
+                    handleBulkUpdateField('is_available', true, 'Mở bán hàng loạt')
+                  }
+                  className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider bg-emerald-700 hover:bg-emerald-800 text-white rounded-brand disabled:opacity-50"
+                >
+                  Mở bán lại
+                </button>
+                <button
+                  type="button"
+                  disabled={bulkProcessing}
+                  onClick={() =>
+                    handleBulkUpdateField('is_visible', false, 'Ẩn hàng loạt')
+                  }
+                  className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider bg-[#4B2E24] hover:bg-[#5c392d] text-white rounded-brand disabled:opacity-50"
+                >
+                  Ẩn trên Web
+                </button>
+                <button
+                  type="button"
+                  disabled={bulkProcessing}
+                  onClick={() =>
+                    handleBulkUpdateField('is_visible', true, 'Hiện hàng loạt')
+                  }
+                  className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider bg-[#4B2E24] hover:bg-[#5c392d] text-white rounded-brand disabled:opacity-50"
+                >
+                  Hiện trên Web
+                </button>
+
+                <div className="flex items-center gap-1.5 pl-2 border-l border-[#4B2E24]">
+                  <input
+                    type="number"
+                    value={bulkPriceInput}
+                    onChange={(e) => setBulkPriceInput(e.target.value)}
+                    placeholder="+10 hoặc -5000"
+                    className="w-28 px-2.5 py-1 text-xs bg-white text-[#241914] rounded-brand"
+                  />
+                  <select
+                    value={bulkPriceUnit}
+                    onChange={(e) => setBulkPriceUnit(e.target.value as 'percent' | 'vnd')}
+                    className="px-2 py-1 text-xs bg-white text-[#241914] rounded-brand"
+                  >
+                    <option value="percent">%</option>
+                    <option value="vnd">VNĐ</option>
+                  </select>
+                  <button
+                    type="button"
+                    disabled={bulkProcessing}
+                    onClick={handleBulkAdjustPrice}
+                    className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider bg-[#D5C6AD] text-[#241914] hover:bg-white rounded-brand disabled:opacity-50"
+                  >
+                    Đổi giá
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
         <div className="bg-white border border-[#D5C6AD] rounded-brand overflow-hidden">
           {paginatedProducts.length === 0 ? (
             <div className="py-14 text-center">
@@ -583,6 +950,18 @@ export const AdminProductsPage: React.FC = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-[#E9E6D8] border-b border-[#D5C6AD] text-[11px] uppercase tracking-wider text-[#241914] font-semibold">
+                    <th className="py-3.5 pl-4 pr-2 w-10">
+                      <input
+                        type="checkbox"
+                        checked={
+                          paginatedProducts.length > 0 &&
+                          paginatedProducts.every((p) => selectedIds.includes(p.id))
+                        }
+                        onChange={() => toggleSelectPage(paginatedProducts)}
+                        aria-label="Chọn tất cả món trong trang"
+                        className="rounded border-[#D5C6AD] text-[#4B2E24]"
+                      />
+                    </th>
                     <th className="py-3.5 px-4">Món đồ uống</th>
                     <th className="py-3.5 px-4">Danh mục</th>
                     <th className="py-3.5 px-4">Giá bán (Chạm để sửa nhanh)</th>
@@ -595,11 +974,23 @@ export const AdminProductsPage: React.FC = () => {
                 <tbody className="divide-y divide-[#E9E6D8] text-sm">
                   {paginatedProducts.map((prod) => {
                     const isEditingPrice = inlinePriceId === prod.id;
+                    const isChecked = selectedIds.includes(prod.id);
                     return (
                       <tr
                         key={prod.id}
-                        className="hover:bg-[#F7F5EF]/60 transition-colors"
+                        className={`hover:bg-[#F7F5EF]/60 transition-colors ${
+                          isChecked ? 'bg-amber-50/50' : ''
+                        }`}
                       >
+                        <td className="py-3.5 pl-4 pr-2">
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => toggleSelectProduct(prod.id)}
+                            aria-label={`Chọn ${prod.name}`}
+                            className="rounded border-[#D5C6AD] text-[#4B2E24]"
+                          />
+                        </td>
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-3 min-w-[220px]">
                             <img
@@ -805,6 +1196,7 @@ export const AdminProductsPage: React.FC = () => {
               </div>
             </div>
           )}
+        </div>
         </div>
       )}
 

@@ -15,7 +15,7 @@ import {
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
-import { formatDateVi } from '../../lib/utils';
+import { formatDateVi, getPromotionScheduleStatus } from '../../lib/utils';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { MediaPickerModal } from '../../components/common/MediaPickerModal';
 import type { Promotion } from '../../types/database';
@@ -193,7 +193,23 @@ export const AdminPromotionsPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {promotions.map((promo) => (
+        {promotions.map((promo) => {
+          const schedule = getPromotionScheduleStatus(promo);
+          const statusMeta =
+            schedule.reason === 'active'
+              ? { label: 'Đang hiển thị trên Web', cls: 'bg-emerald-700 text-white' }
+              : schedule.reason === 'outside_daily_window'
+              ? {
+                  label: `Chờ khung giờ ${schedule.dailyWindow?.start}–${schedule.dailyWindow?.end}`,
+                  cls: 'bg-amber-600 text-white',
+                }
+              : schedule.reason === 'not_started'
+              ? { label: 'Chưa tới ngày mở', cls: 'bg-sky-700 text-white' }
+              : schedule.reason === 'expired'
+              ? { label: 'Đã hết hạn', cls: 'bg-red-700 text-white' }
+              : { label: 'Tạm dừng', cls: 'bg-stone-600 text-white' };
+
+          return (
           <div
             key={promo.id}
             className="bg-white border border-[#D5C6AD] rounded-brand overflow-hidden flex flex-col justify-between shadow-xs"
@@ -210,13 +226,9 @@ export const AdminPromotionsPage: React.FC = () => {
                     #{promo.sort_order} · {promo.tag}
                   </span>
                   <span
-                    className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-semibold rounded-brand ${
-                      promo.is_active
-                        ? 'bg-emerald-700 text-white'
-                        : 'bg-stone-600 text-white'
-                    }`}
+                    className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-semibold rounded-brand ${statusMeta.cls}`}
                   >
-                    {promo.is_active ? 'Đang chạy' : 'Tạm dừng'}
+                    {statusMeta.label}
                   </span>
                 </div>
               </div>
@@ -268,7 +280,8 @@ export const AdminPromotionsPage: React.FC = () => {
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Modal */}
@@ -310,13 +323,17 @@ export const AdminPromotionsPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
-                    Tiêu đề phụ (Subtitle)
+                    Tiêu đề phụ (hoặc Khung giờ vàng)
                   </label>
                   <input
                     type="text"
                     {...form.register('subtitle')}
+                    placeholder="VD: EVERYDAY 07:30 — 10:30"
                     className="w-full px-3.5 py-2 text-sm bg-white border border-[#D5C6AD] rounded-brand"
                   />
+                  <p className="text-[11px] text-[#8C7565] mt-1">
+                    Ghi khung giờ (VD: <code className="font-mono">07:30 — 10:30</code>) để tự động bật/tắt theo giờ mỗi ngày.
+                  </p>
                 </div>
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Coffee,
@@ -13,10 +13,13 @@ import {
   Clock,
   ArrowUpRight,
   RefreshCw,
+  QrCode,
+  TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { formatVND, formatDateVi } from '../../lib/utils';
+import { fetchCustomerEvents, type CustomerEventRecord } from '../../lib/analytics';
 
 export const AdminDashboardPage: React.FC = () => {
   const { user, isOwnerAdmin } = useAuth();
@@ -30,6 +33,55 @@ export const AdminDashboardPage: React.FC = () => {
     loading,
     refreshAll,
   } = useSiteData();
+
+  const [customerEvents, setCustomerEvents] = useState<CustomerEventRecord[]>([]);
+  const [analyticsSource, setAnalyticsSource] = useState<'supabase' | 'local'>('local');
+
+  useEffect(() => {
+    fetchCustomerEvents().then(({ events, source }) => {
+      setCustomerEvents(events);
+      setAnalyticsSource(source);
+    });
+  }, [loading]);
+
+  const analyticsSummary = useMemo(() => {
+    const todayPrefix = new Date().toISOString().slice(0, 10);
+    const todayQrScans = customerEvents.filter(
+      (e) => e.event_type === 'qr_scan' && e.created_at.startsWith(todayPrefix)
+    );
+    const totalQrScans = customerEvents.filter((e) => e.event_type === 'qr_scan');
+
+    const tableCounts = new Map<string, number>();
+    todayQrScans.forEach((e) => {
+      if (e.table_number) {
+        tableCounts.set(e.table_number, (tableCounts.get(e.table_number) || 0) + 1);
+      }
+    });
+
+    const productViewCounts = new Map<string, { name: string; count: number }>();
+    customerEvents
+      .filter((e) => e.event_type === 'product_view' && e.product_name)
+      .forEach((e) => {
+        const key = e.product_id || e.product_name || 'unknown';
+        const prev = productViewCounts.get(key);
+        productViewCounts.set(key, {
+          name: e.product_name || 'Sản phẩm',
+          count: (prev?.count || 0) + 1,
+        });
+      });
+
+    const topProducts = Array.from(productViewCounts.values())
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    return {
+      todayQrCount: todayQrScans.length,
+      totalQrCount: totalQrScans.length,
+      activeTablesToday: Array.from(tableCounts.entries()).sort((a, b) => b[1] - a[1]),
+      totalProductViews: customerEvents.filter((e) => e.event_type === 'product_view').length,
+      topProducts,
+    };
+  }, [customerEvents]);
 
   const displayedLogs = isOwnerAdmin
     ? activityLogs.filter((l) => l.entity_type !== 'session_heartbeat')
@@ -247,6 +299,122 @@ export const AdminDashboardPage: React.FC = () => {
               </Link>
             </>
           )}
+        </div>
+      </div>
+
+      {/* Customer Interest & QR Analytics */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-7 bg-white border border-[#D5C6AD] rounded-brand p-6">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-[#4B2E24]" />
+              <h2 className="font-serif text-xl font-semibold text-[#241914]">
+                Món Được Khách Xem Nhiều Nhất
+              </h2>
+            </div>
+            <span className="text-[11px] font-medium text-[#8C7565]">
+              {analyticsSummary.totalProductViews} lượt xem ·{' '}
+              {analyticsSource === 'supabase' ? 'Đồng bộ máy chủ' : 'Trình duyệt hiện tại'}
+            </span>
+          </div>
+
+          {analyticsSummary.topProducts.length === 0 ? (
+            <div className="py-8 text-center border border-dashed border-[#D5C6AD] rounded-brand bg-[#F7F5EF]/50 p-4">
+              <p className="text-sm font-medium text-[#241914]">
+                Chưa ghi nhận lượt xem chi tiết món nào
+              </p>
+              <p className="text-xs text-[#8C7565] mt-1">
+                Khi khách hàng nhấn xem chi tiết thức uống trên trang chủ, bảng xếp hạng sẽ tự động cập nhật tại đây.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {analyticsSummary.topProducts.map((item, idx) => {
+                const maxCount = analyticsSummary.topProducts[0]?.count || 1;
+                const widthPct = Math.max(12, Math.round((item.count / maxCount) * 100));
+                return (
+                  <div key={item.name} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-[#241914] truncate pr-3">
+                        #{idx + 1} · {item.name}
+                      </span>
+                      <span className="font-semibold text-[#4B2E24] shrink-0">
+                        {item.count} lượt xem
+                      </span>
+                    </div>
+                    <div className="h-2 bg-[#E9E6D8] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#4B2E24] rounded-full transition-all duration-500"
+                        style={{ width: `${widthPct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="lg:col-span-5 bg-white border border-[#D5C6AD] rounded-brand p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <QrCode className="w-4 h-4 text-[#4B2E24]" />
+                <h2 className="font-serif text-xl font-semibold text-[#241914]">
+                  Lượt Quét Mã QR Đặt Bàn
+                </h2>
+              </div>
+              {isOwnerAdmin && (
+                <Link
+                  to="/admin/settings/backup"
+                  className="text-xs font-semibold uppercase tracking-wider text-[#4B2E24] hover:underline"
+                >
+                  Tạo mã QR →
+                </Link>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="p-4 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand">
+                <p className="text-[11px] uppercase tracking-wider text-[#8C7565] font-semibold">
+                  Hôm nay
+                </p>
+                <p className="font-serif text-3xl font-bold text-[#241914] mt-1">
+                  {analyticsSummary.todayQrCount}
+                </p>
+              </div>
+              <div className="p-4 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand">
+                <p className="text-[11px] uppercase tracking-wider text-[#8C7565] font-semibold">
+                  Tổng lượt quét
+                </p>
+                <p className="font-serif text-3xl font-bold text-[#4B2E24] mt-1">
+                  {analyticsSummary.totalQrCount}
+                </p>
+              </div>
+            </div>
+
+            {analyticsSummary.activeTablesToday.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-[11px] uppercase tracking-wider font-semibold text-[#8C7565]">
+                  Bàn quét QR hôm nay:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {analyticsSummary.activeTablesToday.map(([table, cnt]) => (
+                    <span
+                      key={table}
+                      className="px-2.5 py-1 text-xs font-semibold bg-[#E9E6D8] text-[#241914] rounded-brand"
+                    >
+                      Bàn {table}: {cnt} lượt
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-[#8C7565]">
+                Chưa có lượt quét QR theo số bàn nào trong hôm nay (ví dụ: link có <code className="font-mono">?table=01</code>).
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

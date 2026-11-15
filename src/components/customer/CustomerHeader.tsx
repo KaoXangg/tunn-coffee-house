@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { BrandLogo } from '../common/BrandLogo';
+import { getStoreOpenStatus } from '../../lib/utils';
 
 export const CustomerHeader: React.FC = () => {
   const { settings } = useSiteData();
@@ -12,6 +13,14 @@ export const CustomerHeader: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeHash, setActiveHash] = useState('#hero');
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const storeStatus = getStoreOpenStatus(settings.opening_hours, now);
 
   useEffect(() => {
     const onScroll = () => {
@@ -91,9 +100,20 @@ export const CustomerHeader: React.FC = () => {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 h-8 flex items-center justify-between text-[11px] tracking-wider">
-          <span className="uppercase tracking-[0.18em] text-[#D5C6AD]">
-            {settings.brand_name} — Trà Nguyên Lá &amp; Cà Phê Rang Mộc Thủ Công
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 font-medium text-[#F7F5EF]">
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  storeStatus.isOpen
+                    ? 'bg-emerald-400 animate-pulse'
+                    : 'bg-amber-400/80'
+                }`}
+              />
+              <span>{storeStatus.label}</span>
+            </span>
+            <span className="text-[#D5C6AD]/40">|</span>
+            <span className="text-[#D5C6AD]">{storeStatus.detail}</span>
+          </div>
           <div className="flex items-center gap-6 text-[#D5C6AD]">
             <span className="inline-flex items-center gap-1.5">
               <Clock className="w-3 h-3 text-[#D5C6AD]/80" />
@@ -203,6 +223,17 @@ export const CustomerHeader: React.FC = () => {
             className="lg:hidden bg-ivory-light border-b border-coffee-beige overflow-hidden shadow-lg"
           >
             <div className="px-5 py-5 flex flex-col gap-2">
+              <div className="flex items-center justify-between px-3 py-2 mb-1 bg-ivory border border-coffee-beige/70 rounded-brand text-xs">
+                <span className="inline-flex items-center gap-2 font-semibold text-coffee-dark">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      storeStatus.isOpen ? 'bg-emerald-600 animate-pulse' : 'bg-amber-600'
+                    }`}
+                  />
+                  <span>{storeStatus.label}</span>
+                </span>
+                <span className="text-[11px] text-coffee-muted">{storeStatus.detail}</span>
+              </div>
               {navItems.map((item, idx) => (
                 <a
                   key={`mob-${item.href}-${idx}`}

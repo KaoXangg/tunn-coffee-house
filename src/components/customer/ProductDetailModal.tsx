@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { X, CheckCircle2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { formatVND } from '../../lib/utils';
+import { trackProductView } from '../../lib/analytics';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import type { Product } from '../../types/database';
 
@@ -18,6 +19,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
   useEffect(() => {
     if (!product) return;
+    trackProductView(product.id, product.name);
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };

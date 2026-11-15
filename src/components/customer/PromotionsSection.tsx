@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar, ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
-import { formatDateVi } from '../../lib/utils';
+import { formatDateVi, getPromotionScheduleStatus } from '../../lib/utils';
 
 export const PromotionsSection: React.FC = () => {
   const { promotions, settings, getSection } = useSiteData();
@@ -10,8 +10,9 @@ export const PromotionsSection: React.FC = () => {
 
   if (section && !section.is_enabled) return null;
 
+  const now = new Date();
   const activePromos = promotions
-    .filter((p) => p.is_active)
+    .filter((p) => getPromotionScheduleStatus(p, now).isCurrentlyVisible)
     .sort((a, b) => a.sort_order - b.sort_order);
 
   if (activePromos.length === 0) return null;

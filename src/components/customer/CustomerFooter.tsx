@@ -119,13 +119,6 @@ export const CustomerFooter: React.FC = () => {
             >
               Lên đầu trang ↑
             </a>
-            <Link
-              to="/admin/login"
-              className="inline-flex items-center gap-1.5 text-[#D5C6AD]/60 hover:text-[#D5C6AD] transition-colors"
-            >
-              <Lock className="w-3 h-3" />
-              <span>Quản trị nội bộ</span>
-            </Link>
           </div>
         </div>
       </div>
