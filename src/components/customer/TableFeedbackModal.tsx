@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, X, Send, CheckCircle2, MessageSquareHeart, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Star, X, Send, CheckCircle2, MessageSquareHeart, AlertCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { submitTableFeedback, validateGmailFormat } from '../../lib/feedback';
 import { useToast } from '../../contexts/ToastContext';
@@ -220,35 +220,32 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
                     >
                       Gmail *
                     </label>
-                    <input
-                      id="feedback-gmail"
-                      type="email"
-                      required
-                      maxLength={120}
-                      value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)}
-                      placeholder="tenban@gmail.com"
-                      className="w-full px-3 py-2 text-sm bg-ivory/50 border border-coffee-beige rounded-brand text-coffee-dark placeholder:text-coffee-muted focus:outline-none focus:border-coffee"
-                    />
+                    <div className="relative">
+                      <input
+                        id="feedback-gmail"
+                        type="email"
+                        required
+                        maxLength={120}
+                        value={customerEmail}
+                        onChange={(e) => setCustomerEmail(e.target.value)}
+                        placeholder="tenban@gmail.com"
+                        className={`w-full pl-3 py-2 text-sm bg-ivory/50 border border-coffee-beige rounded-brand text-coffee-dark placeholder:text-coffee-muted focus:outline-none focus:border-coffee ${
+                          emailCheck?.valid ? 'pr-8' : 'pr-3'
+                        }`}
+                      />
+                      {emailCheck?.valid && (
+                        <CheckCircle2
+                          className="w-4 h-4 text-emerald-600 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                          aria-hidden="true"
+                        />
+                      )}
+                    </div>
                   </div>
                 </div>
-                {emailCheck && (
-                  <p
-                    className={`-mt-2.5 flex items-center gap-1.5 text-[11px] ${
-                      emailCheck.valid ? 'text-emerald-700' : 'text-red-600'
-                    }`}
-                  >
-                    {emailCheck.valid ? (
-                      <>
-                        <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                        <span>Định dạng Gmail hợp lệ (sẽ kiểm tra máy chủ thư khi gửi)</span>
-                      </>
-                    ) : (
-                      <>
-                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        <span>{emailCheck.reason}</span>
-                      </>
-                    )}
+                {emailCheck && !emailCheck.valid && customerEmail.includes('@') && (
+                  <p className="-mt-2.5 flex items-center gap-1.5 text-[11px] text-red-600">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{emailCheck.reason}</span>
                   </p>
                 )}
 

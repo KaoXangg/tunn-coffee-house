@@ -91,7 +91,7 @@ export function validateGmailFormat(rawEmail: string): {
       valid: false,
       normalizedEmail: email,
       canonicalEmail: '',
-      reason: 'Hệ thống chỉ chấp nhận Gmail thật (@gmail.com) để chống spam.',
+      reason: 'Vui lòng nhập địa chỉ @gmail.com hợp lệ.',
     };
   }
 
@@ -129,7 +129,7 @@ export function validateGmailFormat(rawEmail: string): {
       valid: false,
       normalizedEmail: email,
       canonicalEmail: '',
-      reason: 'Vui lòng sử dụng Gmail thật đang hoạt động (không dùng Gmail ảo/mẫu).',
+      reason: 'Vui lòng nhập địa chỉ Gmail đang hoạt động.',
     };
   }
 

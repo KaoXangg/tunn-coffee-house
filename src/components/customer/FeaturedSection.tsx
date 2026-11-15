@@ -33,22 +33,29 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Editorial Heading */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14 pb-6 border-b border-coffee-beige/70">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-8 sm:mb-14 pb-5 sm:pb-6 border-b border-coffee-beige/70">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2.5">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2">
               {section?.content?.eyebrow || 'TUYỂN CHỌN ĐẶC SẮC'}
             </p>
             <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
               {section?.title || 'Tác Phẩm Nổi Bật'}
             </h2>
           </div>
-          <p className="text-sm text-coffee-muted max-w-md leading-relaxed">
-            {section?.subtitle || section?.content?.description}
-          </p>
+          <div className="flex flex-col items-start md:items-end gap-2">
+            <p className="text-sm text-coffee-muted max-w-md leading-relaxed">
+              {section?.subtitle || section?.content?.description}
+            </p>
+            {featuredProducts.length > 1 && (
+              <span className="md:hidden text-[11px] uppercase tracking-[0.16em] font-semibold text-coffee/80">
+                Vuốt ngang để xem thêm →
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Editorial Curated Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Mobile Horizontal Snap Carousel / Desktop Editorial Grid */}
+        <div className="flex overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-3 gap-4 no-scrollbar md:mx-0 md:px-0 md:pb-0 md:overflow-visible md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-8">
           {featuredProducts.map((product, idx) => {
             const hasDiscount =
               product.sale_price !== null &&
@@ -72,10 +79,10 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                     onSelectProduct?.(product);
                   }
                 }}
-                className="group cursor-pointer flex flex-col bg-ivory-light border border-coffee-beige/80 rounded-brand overflow-hidden hover:border-coffee hover:-translate-y-1 hover:shadow-editorial transition-all duration-300"
+                className="group cursor-pointer w-[76vw] max-w-[296px] shrink-0 snap-start md:w-auto md:max-w-none flex flex-col bg-ivory-light border border-coffee-beige/80 rounded-xl md:rounded-brand overflow-hidden hover:border-coffee hover:-translate-y-1 hover:shadow-editorial transition-all duration-300"
               >
                 {/* Product Photography */}
-                <div className="relative aspect-[4/5] overflow-hidden bg-ivory">
+                <div className="relative aspect-[4/3] sm:aspect-[4/5] overflow-hidden bg-ivory">
                   <img
                     src={product.image_url}
                     alt={product.name}
@@ -111,32 +118,32 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                 </div>
 
                 {/* Product Editorial Info */}
-                <div className="p-6 flex-1 flex flex-col justify-between">
+                <div className="p-4 sm:p-6 flex-1 flex flex-col justify-between">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.2em] text-coffee-muted font-medium">
                       {getCategoryName(product.category_id)}
                     </p>
-                    <h3 className="font-serif text-2xl font-semibold text-coffee-dark mt-1 group-hover:text-coffee transition-colors">
+                    <h3 className="font-serif text-lg sm:text-2xl font-semibold text-coffee-dark mt-1 line-clamp-1 sm:line-clamp-none group-hover:text-coffee transition-colors">
                       {product.name}
                     </h3>
-                    <p className="text-xs sm:text-sm text-coffee-muted mt-2 line-clamp-2 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-coffee-muted mt-1.5 sm:mt-2 line-clamp-1 sm:line-clamp-2 leading-relaxed">
                       {product.description}
                     </p>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-coffee-beige/60 flex items-center justify-between">
+                  <div className="mt-4 pt-3 sm:mt-6 sm:pt-4 border-t border-coffee-beige/60 flex items-center justify-between gap-2">
                     <div className="flex items-baseline gap-2">
-                      <span className="font-serif text-xl font-bold text-coffee">
+                      <span className="font-serif text-lg sm:text-xl font-bold text-coffee">
                         {formatVND(hasDiscount ? product.sale_price : product.price)}
                       </span>
                       {hasDiscount && (
-                        <span className="text-xs text-coffee-muted line-through">
+                        <span className="text-[11px] sm:text-xs text-coffee-muted line-through">
                           {formatVND(product.price)}
                         </span>
                       )}
                     </div>
 
-                    <span className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.16em] font-semibold text-coffee group-hover:translate-x-0.5 transition-transform">
+                    <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs uppercase tracking-[0.14em] sm:tracking-[0.16em] font-semibold text-coffee group-hover:translate-x-0.5 transition-transform shrink-0">
                       <span>Thưởng vị</span>
                       <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </span>
