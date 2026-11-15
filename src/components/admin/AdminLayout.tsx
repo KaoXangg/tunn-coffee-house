@@ -225,23 +225,32 @@ export const AdminLayout: React.FC = () => {
     <div className="min-h-screen bg-[#F7F5EF] text-[#241914] flex">
       {/* Desktop Collapsible Sidebar */}
       <aside
-        className={`hidden lg:flex flex-col bg-[#241914] text-[#F7F5EF] border-r border-[#4B2E24] transition-all duration-300 shrink-0 ${
-          collapsed ? 'w-20' : 'w-68'
+        className={`hidden lg:flex flex-col fixed inset-y-0 left-0 h-screen bg-[#241914] text-[#F7F5EF] border-r border-[#4B2E24] transition-all duration-300 shrink-0 z-40 ${
+          collapsed ? 'w-20' : 'w-64'
         }`}
       >
-        <div className="h-16 px-4 border-b border-[#4B2E24] flex items-center justify-between gap-2">
-          <Link to="/admin/dashboard" className="overflow-hidden">
-            <BrandLogo
-              size="sm"
-              showText={!collapsed}
-              subtitle="CMS STUDIO"
-              textClassName="text-[#F7F5EF] text-base"
-            />
-          </Link>
+        <div
+          className={`h-16 border-b border-[#4B2E24] flex items-center shrink-0 ${
+            collapsed ? 'justify-center px-2' : 'justify-between px-4 gap-2'
+          }`}
+        >
+          {!collapsed && (
+            <Link to="/admin/dashboard" className="overflow-hidden">
+              <BrandLogo
+                size="sm"
+                showText
+                subtitle="CMS STUDIO"
+                textClassName="text-[#F7F5EF] text-base"
+              />
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setCollapsed((c) => !c)}
-            className="p-1.5 text-[#D5C6AD] hover:text-white rounded-brand hover:bg-[#4B2E24]/50 transition-colors"
+            title={collapsed ? 'Mở rộng thanh công cụ' : 'Thu gọn thanh công cụ'}
+            className={`text-[#D5C6AD] hover:text-white rounded-brand hover:bg-[#4B2E24]/60 transition-colors flex items-center justify-center shrink-0 ${
+              collapsed ? 'w-10 h-10 bg-[#4B2E24]/30' : 'p-1.5'
+            }`}
             aria-label={collapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
           >
             {collapsed ? (
@@ -267,7 +276,11 @@ export const AdminLayout: React.FC = () => {
                   to={item.to}
                   title={collapsed ? item.label : undefined}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2.5 rounded-brand text-xs font-medium tracking-wide transition-colors ${
+                    `flex items-center rounded-brand text-xs font-medium tracking-wide transition-colors ${
+                      collapsed
+                        ? 'justify-center py-2.5 px-0'
+                        : 'gap-3 px-3 py-2.5'
+                    } ${
                       isActive
                         ? 'bg-[#4B2E24] text-[#F7F5EF] font-semibold shadow-sm'
                         : 'text-[#D5C6AD]/80 hover:bg-[#4B2E24]/40 hover:text-white'
@@ -297,7 +310,11 @@ export const AdminLayout: React.FC = () => {
                     to={item.to}
                     title={collapsed ? item.label : undefined}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-2.5 rounded-brand text-xs font-medium tracking-wide transition-colors ${
+                      `flex items-center rounded-brand text-xs font-medium tracking-wide transition-colors ${
+                        collapsed
+                          ? 'justify-center py-2.5 px-0'
+                          : 'gap-3 px-3 py-2.5'
+                      } ${
                         isActive
                           ? 'bg-[#4B2E24] text-[#F7F5EF] font-semibold shadow-sm'
                           : 'text-[#D5C6AD]/80 hover:bg-[#4B2E24]/40 hover:text-white'
@@ -313,7 +330,7 @@ export const AdminLayout: React.FC = () => {
           )}
         </nav>
 
-        <div className="p-3 border-t border-[#4B2E24] space-y-2">
+        <div className="p-3 border-t border-[#4B2E24] space-y-2 shrink-0">
           {!collapsed && (
             <div className="px-2 py-1.5 space-y-1">
               <div className="flex items-center gap-1.5">
@@ -345,7 +362,12 @@ export const AdminLayout: React.FC = () => {
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center justify-center lg:justify-start gap-2.5 px-3 py-2 text-xs font-medium text-red-300 hover:text-red-200 hover:bg-red-950/40 rounded-brand transition-colors"
+            title={collapsed ? 'Đăng xuất' : undefined}
+            className={`w-full flex items-center text-xs font-medium text-red-300 hover:text-red-200 hover:bg-red-950/40 rounded-brand transition-colors ${
+              collapsed
+                ? 'justify-center py-2.5 px-0'
+                : 'justify-center lg:justify-start gap-2.5 px-3 py-2'
+            }`}
           >
             <LogOut className="w-4 h-4 shrink-0" />
             {!collapsed && <span>Đăng xuất</span>}
@@ -449,7 +471,11 @@ export const AdminLayout: React.FC = () => {
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+          collapsed ? 'lg:pl-20' : 'lg:pl-64'
+        }`}
+      >
         <header className="h-16 bg-white border-b border-[#D5C6AD] px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-30">
           <div className="flex items-center gap-3 min-w-0">
             <button
