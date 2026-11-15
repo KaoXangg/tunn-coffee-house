@@ -40,11 +40,9 @@ export const ContactSection: React.FC = () => {
             className="lg:col-span-6 space-y-8"
           >
             <div>
-              <div className="inline-flex items-center gap-2.5 text-[11px] uppercase tracking-[0.22em] text-coffee font-semibold mb-2.5">
-                <span className="font-serif italic normal-case text-xs">Chương VI</span>
-                <span className="w-3.5 h-[1px] bg-coffee/40" />
-                <span>{section?.content?.eyebrow || 'ĐỊA CHỈ & LIÊN HỆ'}</span>
-              </div>
+              <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2.5">
+                {section?.content?.eyebrow || 'ĐỊA CHỈ & LIÊN HỆ'}
+              </p>
               <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
                 {section?.title || 'Ghé Thăm TUNN Coffee House'}
               </h2>

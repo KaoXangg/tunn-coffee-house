@@ -33,11 +33,9 @@ export const AboutSection: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="lg:col-span-7"
           >
-            <div className="inline-flex items-center gap-2.5 text-[11px] uppercase tracking-[0.22em] text-coffee font-semibold mb-3">
-              <span className="font-serif italic normal-case text-xs">Chương I</span>
-              <span className="w-3.5 h-[1px] bg-coffee/40" />
-              <span>{content.eyebrow || 'NGHỆ THUẬT THƯỞNG THỨC'}</span>
-            </div>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-3">
+              {content.eyebrow || 'NGHỆ THUẬT THƯỞNG THỨC'}
+            </p>
             <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark leading-[1.15]">
               {content.headline}
             </h2>

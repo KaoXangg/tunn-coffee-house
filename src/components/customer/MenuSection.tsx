@@ -81,11 +81,9 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Editorial Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2.5 text-[11px] uppercase tracking-[0.22em] text-coffee font-semibold mb-3">
-            <span className="font-serif italic normal-case text-xs">Chương III</span>
-            <span className="w-3.5 h-[1px] bg-coffee/40" />
-            <span>{section?.content?.eyebrow || 'THỰC ĐƠN THỦ CÔNG'}</span>
-          </div>
+          <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-3">
+            {section?.content?.eyebrow || 'THỰC ĐƠN THỦ CÔNG'}
+          </p>
           <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
             {section?.title || 'Thực Đơn Tinh Tuyển'}
           </h2>

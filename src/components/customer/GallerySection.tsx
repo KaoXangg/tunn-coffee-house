@@ -56,11 +56,9 @@ export const GallerySection: React.FC = () => {
         {/* Header & Filter */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pb-6 border-b border-coffee-beige/70">
           <div>
-            <div className="inline-flex items-center gap-2.5 text-[11px] uppercase tracking-[0.22em] text-coffee font-semibold mb-2.5">
-              <span className="font-serif italic normal-case text-xs">Chương V</span>
-              <span className="w-3.5 h-[1px] bg-coffee/40" />
-              <span>{section?.content?.eyebrow || 'NHẬT KÝ HÌNH ẢNH'}</span>
-            </div>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2.5">
+              {section?.content?.eyebrow || 'NHẬT KÝ HÌNH ẢNH'}
+            </p>
             <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
               {section?.title || 'Không Gian & Khoảnh Khắc'}
             </h2>

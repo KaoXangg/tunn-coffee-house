@@ -35,11 +35,9 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
         {/* Editorial Heading */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14 pb-6 border-b border-coffee-beige/70">
           <div>
-            <div className="inline-flex items-center gap-2.5 text-[11px] uppercase tracking-[0.22em] text-coffee font-semibold mb-2.5">
-              <span className="font-serif italic normal-case text-xs">Chương II</span>
-              <span className="w-3.5 h-[1px] bg-coffee/40" />
-              <span>{section?.content?.eyebrow || 'TUYỂN CHỌN ĐẶC SẮC'}</span>
-            </div>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2.5">
+              {section?.content?.eyebrow || 'TUYỂN CHỌN ĐẶC SẮC'}
+            </p>
             <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
               {section?.title || 'Tác Phẩm Nổi Bật'}
             </h2>
@@ -57,8 +55,6 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
               product.sale_price !== undefined &&
               Number(product.sale_price) > 0 &&
               Number(product.sale_price) < Number(product.price);
-
-            const indexLabel = `Nº ${String(idx + 1).padStart(2, '0')}`;
 
             return (
               <motion.article
@@ -90,9 +86,6 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                   {/* Top Badges */}
                   <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2 pointer-events-none">
                     <div className="flex flex-wrap gap-1.5">
-                      <span className="px-2.5 py-1 text-[10px] font-serif italic bg-ivory-light/95 text-coffee-dark border border-coffee-beige rounded-brand">
-                        {indexLabel}
-                      </span>
                       {product.badge && (
                         <span className="px-3 py-1 text-[10px] uppercase tracking-[0.16em] font-semibold bg-coffee text-ivory-light rounded-brand">
                           {product.badge}

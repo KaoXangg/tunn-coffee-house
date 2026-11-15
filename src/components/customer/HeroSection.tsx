@@ -54,10 +54,8 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
             className={`lg:col-span-7 flex flex-col ${alignmentClass}`}
           >
-            {/* Editorial Issue / Masthead Stamp */}
-            <div className="inline-flex items-center gap-3 mb-7 pb-2 border-b border-coffee/30">
-              <span className="font-serif italic text-xs text-coffee">Nº 01</span>
-              <span className="w-4 h-[1px] bg-coffee/40" />
+            {/* Editorial Masthead Stamp */}
+            <div className="inline-flex items-center mb-7 pb-2 border-b border-coffee/30">
               <span className="text-[11px] uppercase tracking-[0.22em] font-semibold text-coffee">
                 {content.badge || 'TRÀ NGUYÊN LÁ & CÀ PHÊ THỦ CÔNG'}
               </span>

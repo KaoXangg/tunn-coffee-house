@@ -31,11 +31,9 @@ export const PromotionsSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Heading */}
         <div className="mb-14 pb-6 border-b border-coffee-beige/70">
-          <div className="inline-flex items-center gap-2.5 text-[11px] uppercase tracking-[0.22em] text-coffee font-semibold mb-2.5">
-            <span className="font-serif italic normal-case text-xs">Chương IV</span>
-            <span className="w-3.5 h-[1px] bg-coffee/40" />
-            <span>{section?.content?.eyebrow || 'ƯU ĐÃI ĐẶC BIỆT'}</span>
-          </div>
+          <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2.5">
+            {section?.content?.eyebrow || 'ƯU ĐÃI ĐẶC BIỆT'}
+          </p>
           <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
             {section?.title || 'Ưu Đãi & Mùa Vị Mới'}
           </h2>
