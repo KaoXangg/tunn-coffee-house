@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Lock,
   Mail,
-  KeyRound,
   ArrowLeft,
   Loader2,
   Database,
@@ -22,12 +21,7 @@ const loginSchema = z.object({
   password: z.string().min(6, 'Mật khẩu cần ít nhất 6 ký tự'),
 });
 
-const resetSchema = z.object({
-  email: z.string().email('Vui lòng nhập địa chỉ email hợp lệ'),
-});
-
 type LoginFormValues = z.infer<typeof loginSchema>;
-type ResetFormValues = z.infer<typeof resetSchema>;
 
 const LOCKOUT_KEY = 'tunn_login_lockout_until';
 const ATTEMPTS_KEY = 'tunn_login_failed_attempts';
@@ -35,11 +29,10 @@ const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
 export const AdminLoginPage: React.FC = () => {
-  const { signInWithEmail, sendPasswordReset, isConfigured } = useAuth();
+  const { signInWithEmail, isConfigured } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
-  const [mode, setMode] = useState<'login' | 'reset'>('login');
   const [submitting, setSubmitting] = useState(false);
 
   // Brute-force Rate-limit Lockout State
@@ -64,11 +57,6 @@ export const AdminLoginPage: React.FC = () => {
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
-  });
-
-  const resetForm = useForm<ResetFormValues>({
-    resolver: zodResolver(resetSchema),
-    defaultValues: { email: '' },
   });
 
   const onLoginSubmit = async (values: LoginFormValues) => {
@@ -108,24 +96,6 @@ export const AdminLoginPage: React.FC = () => {
         localStorage.removeItem(LOCKOUT_KEY);
         toast.success('Chào mừng trở lại!', 'Đã đăng nhập vào TUNN Admin CMS');
         navigate('/admin/dashboard');
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const onResetSubmit = async (values: ResetFormValues) => {
-    setSubmitting(true);
-    try {
-      const { error } = await sendPasswordReset(values.email);
-      if (error) {
-        toast.error('Gửi yêu cầu thất bại', error);
-      } else {
-        toast.success(
-          'Đã gửi email khôi phục',
-          'Vui lòng kiểm tra hộp thư đến của bạn để đặt lại mật khẩu.'
-        );
-        setMode('login');
       }
     } finally {
       setSubmitting(false);
@@ -173,123 +143,65 @@ export const AdminLoginPage: React.FC = () => {
             </div>
           )}
 
-          {/* Login Form */}
-          {mode === 'login' && (
-            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
-                  Email Quản trị viên
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-[#8C7565] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="email"
-                    autoComplete="email"
-                    disabled={lockoutRemainingSec > 0}
-                    {...loginForm.register('email')}
-                    placeholder="admin@tunncoffee.com"
-                    className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24] disabled:opacity-50"
-                  />
-                </div>
-                {loginForm.formState.errors.email && (
-                  <p className="text-xs text-red-700 mt-1">
-                    {loginForm.formState.errors.email.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914]">
-                    Mật khẩu
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setMode('reset')}
-                    className="text-xs text-[#4B2E24] hover:underline"
-                  >
-                    Quên mật khẩu?
-                  </button>
-                </div>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-[#8C7565] absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="password"
-                    autoComplete="current-password"
-                    disabled={lockoutRemainingSec > 0}
-                    {...loginForm.register('password')}
-                    placeholder="••••••••"
-                    className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24] disabled:opacity-50"
-                  />
-                </div>
-                {loginForm.formState.errors.password && (
-                  <p className="text-xs text-red-700 mt-1">
-                    {loginForm.formState.errors.password.message}
-                  </p>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={submitting || lockoutRemainingSec > 0}
-                className="w-full mt-2 py-3 px-4 bg-[#4B2E24] hover:bg-[#241914] text-[#F7F5EF] text-xs font-semibold uppercase tracking-[0.18em] rounded-brand transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                <span>
-                  {lockoutRemainingSec > 0
-                    ? `Tạm khóa (${lockoutRemainingSec}s)`
-                    : 'Đăng Nhập Hệ Thống'}
-                </span>
-              </button>
-            </form>
-          )}
-
-          {/* Password Reset Form */}
-          {mode === 'reset' && (
-            <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-4">
-              <p className="text-xs text-[#8C7565] leading-relaxed">
-                Nhập địa chỉ email quản trị viên của bạn. Hệ thống Supabase Auth sẽ gửi đường dẫn đặt lại mật khẩu mới.
-              </p>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
-                  Email của bạn
-                </label>
+          {/* Login Form (No Forgot Password link) */}
+          <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+                Email Quản trị viên
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-[#8C7565] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
-                  {...resetForm.register('email')}
+                  autoComplete="email"
+                  disabled={lockoutRemainingSec > 0}
+                  {...loginForm.register('email')}
                   placeholder="admin@tunncoffee.com"
-                  className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24]"
+                  className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24] disabled:opacity-50"
                 />
-                {resetForm.formState.errors.email && (
-                  <p className="text-xs text-red-700 mt-1">
-                    {resetForm.formState.errors.email.message}
-                  </p>
-                )}
               </div>
+              {loginForm.formState.errors.email && (
+                <p className="text-xs text-red-700 mt-1">
+                  {loginForm.formState.errors.email.message}
+                </p>
+              )}
+            </div>
 
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full py-3 px-4 bg-[#4B2E24] hover:bg-[#241914] text-[#F7F5EF] text-xs font-semibold uppercase tracking-[0.18em] rounded-brand transition-colors flex items-center justify-center gap-2"
-              >
-                {submitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <KeyRound className="w-4 h-4" />
-                )}
-                <span>Gửi Email Khôi Phục</span>
-              </button>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+                Mật khẩu
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-[#8C7565] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  disabled={lockoutRemainingSec > 0}
+                  {...loginForm.register('password')}
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24] disabled:opacity-50"
+                />
+              </div>
+              {loginForm.formState.errors.password && (
+                <p className="text-xs text-red-700 mt-1">
+                  {loginForm.formState.errors.password.message}
+                </p>
+              )}
+            </div>
 
-              <button
-                type="button"
-                onClick={() => setMode('login')}
-                className="w-full text-center text-xs text-[#8C7565] hover:text-[#241914] pt-2"
-              >
-                Quay lại Đăng nhập
-              </button>
-            </form>
-          )}
+            <button
+              type="submit"
+              disabled={submitting || lockoutRemainingSec > 0}
+              className="w-full mt-2 py-3 px-4 bg-[#4B2E24] hover:bg-[#241914] text-[#F7F5EF] text-xs font-semibold uppercase tracking-[0.18em] rounded-brand transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+              <span>
+                {lockoutRemainingSec > 0
+                  ? `Tạm khóa (${lockoutRemainingSec}s)`
+                  : 'Đăng Nhập Hệ Thống'}
+              </span>
+            </button>
+          </form>
 
           {!isConfigured && (
             <div className="mt-6 pt-6 border-t border-[#D5C6AD]">

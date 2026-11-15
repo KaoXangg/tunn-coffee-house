@@ -8,6 +8,7 @@ export interface Profile {
   email: string;
   full_name: string | null;
   role: 'admin' | 'editor' | 'staff';
+  is_owner?: boolean;
   avatar_url: string | null;
   created_at: string;
   updated_at: string;
