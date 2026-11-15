@@ -32,6 +32,7 @@ import {
   IDLE_TIMEOUT_STORAGE_KEY,
 } from '../../lib/utils';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { AdminMfaCard } from '../../components/admin/AdminMfaCard';
 import type { Profile, AdminActivityLog } from '../../types/database';
 
 export const AdminSecurityPage: React.FC = () => {
@@ -1208,6 +1209,9 @@ export const AdminSecurityPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* SECTION 4: TWO-FACTOR AUTHENTICATION (2FA / MFA FOR OWNER) */}
+      <AdminMfaCard />
 
       {/* MODAL 1: ADD NEW SUB-MANAGER */}
       {createModalOpen && (

@@ -11,7 +11,9 @@ import {
   Database,
   CheckCircle2,
   ShieldAlert,
+  Smartphone,
 } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { BrandLogo } from '../../components/common/BrandLogo';
@@ -29,12 +31,15 @@ const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
 export const AdminLoginPage: React.FC = () => {
-  const { signInWithEmail, isConfigured } = useAuth();
+  const { signInWithEmail, signOut, isConfigured } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
   const [submitting, setSubmitting] = useState(false);
   const [accountLockedMessage, setAccountLockedMessage] = useState<string | null>(null);
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState('');
+  const [verifyingMfa, setVerifyingMfa] = useState(false);
 
   // Brute-force Rate-limit Lockout State
   const [lockoutRemainingSec, setLockoutRemainingSec] = useState<number>(0);
@@ -107,12 +112,57 @@ export const AdminLoginPage: React.FC = () => {
       } else {
         localStorage.removeItem(ATTEMPTS_KEY);
         localStorage.removeItem(LOCKOUT_KEY);
+
+        // Check if 2FA (TOTP MFA) is required for this account
+        if (isSupabaseConfigured) {
+          const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+          if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+            const { data: factors } = await supabase.auth.mfa.listFactors();
+            const verifiedTotp = factors?.totp.find((f) => f.status === 'verified');
+            if (verifiedTotp) {
+              setMfaFactorId(verifiedTotp.id);
+              setMfaCode('');
+              toast.info('Yêu cầu Xác thực 2 lớp (2FA)', 'Vui lòng nhập mã 6 chữ số từ ứng dụng Authenticator.');
+              return;
+            }
+          }
+        }
+
         toast.success('Chào mừng trở lại!', 'Đã đăng nhập vào TUNN Admin CMS');
         navigate('/admin/dashboard');
       }
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleVerifyMfa = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mfaFactorId || mfaCode.trim().length < 6) {
+      toast.error('Vui lòng nhập đủ 6 chữ số OTP.');
+      return;
+    }
+    setVerifyingMfa(true);
+    try {
+      const { error } = await supabase.auth.mfa.challengeAndVerify({
+        factorId: mfaFactorId,
+        code: mfaCode.trim(),
+      });
+      if (error) {
+        toast.error('Mã OTP không đúng hoặc đã hết hạn.');
+        return;
+      }
+      toast.success('Xác thực 2 lớp thành công!', 'Đã đăng nhập vào TUNN Admin CMS');
+      navigate('/admin/dashboard');
+    } finally {
+      setVerifyingMfa(false);
+    }
+  };
+
+  const handleCancelMfa = async () => {
+    setMfaFactorId(null);
+    setMfaCode('');
+    await signOut();
   };
 
   const handleEnterPreviewMode = () => {
@@ -166,8 +216,52 @@ export const AdminLoginPage: React.FC = () => {
             </div>
           )}
 
-          {/* Login Form (No Forgot Password link) */}
-          <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+          {/* Login Form or 2FA Step */}
+          {mfaFactorId ? (
+            <form onSubmit={handleVerifyMfa} className="space-y-4">
+              <div className="p-4 bg-[#E9E6D8]/70 border border-[#D5C6AD] rounded-brand text-xs text-[#241914] flex items-start gap-2.5">
+                <Smartphone className="w-4 h-4 text-[#4B2E24] shrink-0 mt-0.5" />
+                <div>
+                  <strong className="block mb-0.5">Xác Thực 2 Lớp (2FA)</strong>
+                  <span>Mở ứng dụng Authenticator trên điện thoại và nhập mã 6 chữ số để hoàn tất đăng nhập.</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+                  Mã OTP 6 chữ số *
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  autoFocus
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
+                  placeholder="000000"
+                  className="w-full py-3 px-4 text-lg font-mono tracking-[0.4em] text-center bg-white border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24]"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={verifyingMfa || mfaCode.length < 6}
+                className="w-full py-3 px-4 bg-[#4B2E24] hover:bg-[#241914] text-[#F7F5EF] text-xs font-semibold uppercase tracking-[0.18em] rounded-brand transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {verifyingMfa && <Loader2 className="w-4 h-4 animate-spin" />}
+                <span>Xác Nhận &amp; Vào Quản Trị</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCancelMfa}
+                className="w-full py-2 text-xs text-[#8C7565] hover:text-[#241914]"
+              >
+                Hủy &amp; Đăng nhập tài khoản khác
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
                 Email Quản trị viên
@@ -225,6 +319,7 @@ export const AdminLoginPage: React.FC = () => {
               </span>
             </button>
           </form>
+          )}
 
           {!isConfigured && (
             <div className="mt-6 pt-6 border-t border-[#D5C6AD]">

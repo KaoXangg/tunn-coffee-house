@@ -13,9 +13,11 @@ import { GallerySection } from '../components/customer/GallerySection';
 import { ContactSection } from '../components/customer/ContactSection';
 import { CustomerFooter } from '../components/customer/CustomerFooter';
 import { ProductDetailModal } from '../components/customer/ProductDetailModal';
+import { TableFeedbackModal } from '../components/customer/TableFeedbackModal';
 import { SeasonalEffectsLayer } from '../components/customer/SeasonalEffectsLayer';
 import { SeasonalBanner, SeasonalPreviewBar } from '../components/customer/SeasonalBanner';
 import { BackToTopButton } from '../components/common/MotionPrimitives';
+import { Star } from 'lucide-react';
 import type { Product } from '../types/database';
 
 const StorefrontSkeleton: React.FC = () => (
@@ -52,6 +54,7 @@ export const CustomerHomePage: React.FC = () => {
   const { sections, loading } = useSiteData();
   const { effectiveTheme } = useSeasonalTheme();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const tableNumber = searchParams.get('table');
 
@@ -146,11 +149,21 @@ export const CustomerHomePage: React.FC = () => {
       <CustomerHeader />
       <SeasonalBanner />
       <main className="flex-1">
-        {tableNumber && (
-          <div className="fixed bottom-4 left-4 z-40 px-4 py-2 bg-[#241914] text-[#F7F5EF] border border-[#4B2E24] rounded-brand shadow-lg text-xs font-medium">
-            Đang xem thực đơn tại <strong className="text-[#D5C6AD]">Bàn {tableNumber}</strong>
-          </div>
-        )}
+        <div className="fixed bottom-5 left-5 z-40 flex items-center gap-2">
+          {tableNumber && (
+            <div className="px-3.5 py-2 bg-[#241914] text-[#F7F5EF] border border-[#4B2E24] rounded-brand shadow-lg text-xs font-medium">
+              Đang xem tại <strong className="text-[#D5C6AD]">Bàn {tableNumber}</strong>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setFeedbackOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-ivory-light/95 backdrop-blur-sm text-coffee-dark border border-coffee-beige hover:border-coffee rounded-brand shadow-lg text-xs font-semibold transition-colors"
+          >
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+            <span>Đánh giá</span>
+          </button>
+        </div>
         {loading ? (
           <StorefrontSkeleton />
         ) : (
@@ -166,6 +179,12 @@ export const CustomerHomePage: React.FC = () => {
       <ProductDetailModal
         product={selectedProduct}
         onClose={() => setSelectedProduct(null)}
+      />
+
+      <TableFeedbackModal
+        open={feedbackOpen}
+        tableNumber={tableNumber}
+        onClose={() => setFeedbackOpen(false)}
       />
     </div>
   );
