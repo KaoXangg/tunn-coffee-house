@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { NavLink, Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -13,6 +13,8 @@ import {
   Palette,
   PhoneCall,
   Globe,
+  ShieldCheck,
+  QrCode,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -24,7 +26,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSiteData } from '../../contexts/SiteDataContext';
+import { useToast } from '../../contexts/ToastContext';
 import { BrandLogo } from '../common/BrandLogo';
+import { IDLE_TIMEOUT_STORAGE_KEY } from '../../pages/admin/AdminSecurityPage';
 
 interface NavGroupItem {
   label: string;
@@ -45,11 +49,14 @@ const CMS_NAV_ITEMS: NavGroupItem[] = [
   { label: 'Giao diện (Appearance)', to: '/admin/settings/appearance', icon: Palette },
   { label: 'Liên hệ (Contact)', to: '/admin/settings/contact', icon: PhoneCall },
   { label: 'Cấu hình SEO', to: '/admin/settings/seo', icon: Globe },
+  { label: 'Sao lưu & Mã QR Menu', to: '/admin/settings/backup', icon: QrCode },
+  { label: 'Bảo mật & Tài khoản', to: '/admin/settings/security', icon: ShieldCheck },
 ];
 
 export const AdminLayout: React.FC = () => {
   const { user, profile, signOut, isConfigured } = useAuth();
   const { isLiveDatabase } = useSiteData();
+  const toast = useToast();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -60,11 +67,41 @@ export const AdminLayout: React.FC = () => {
     location.pathname.startsWith(item.to)
   );
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     sessionStorage.removeItem('tunn_cms_preview_unlocked');
     await signOut();
     navigate('/admin/login');
-  };
+  }, [signOut, navigate]);
+
+  // Auto Session Timeout (Idle Lock)
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const resetIdleTimer = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      const savedMinutes = Number(
+        localStorage.getItem(IDLE_TIMEOUT_STORAGE_KEY) ?? 30
+      );
+      if (savedMinutes <= 0) return;
+
+      timeoutId = setTimeout(() => {
+        toast.info(
+          'Phiên quản trị đã tự động khóa',
+          `Đã tự động đăng xuất sau ${savedMinutes} phút không thao tác để bảo vệ dữ liệu.`
+        );
+        handleLogout();
+      }, savedMinutes * 60 * 1000);
+    };
+
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'tunn-idle-timeout-updated'];
+    events.forEach((ev) => window.addEventListener(ev, resetIdleTimer, { passive: true }));
+    resetIdleTimer();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      events.forEach((ev) => window.removeEventListener(ev, resetIdleTimer));
+    };
+  }, [handleLogout, toast]);
 
   return (
     <div className="min-h-screen bg-[#F7F5EF] text-[#241914] flex">
@@ -74,7 +111,6 @@ export const AdminLayout: React.FC = () => {
           collapsed ? 'w-20' : 'w-68'
         }`}
       >
-        {/* Brand Header */}
         <div className="h-16 px-4 border-b border-[#4B2E24] flex items-center justify-between gap-2">
           <Link to="/admin/dashboard" className="overflow-hidden">
             <BrandLogo
@@ -98,7 +134,6 @@ export const AdminLayout: React.FC = () => {
           </button>
         </div>
 
-        {/* Navigation Links */}
         <nav className="flex-1 py-4 px-2.5 space-y-1 overflow-y-auto">
           {CMS_NAV_ITEMS.map((item) => {
             const Icon = item.icon;
@@ -122,7 +157,6 @@ export const AdminLayout: React.FC = () => {
           })}
         </nav>
 
-        {/* User Footer */}
         <div className="p-3 border-t border-[#4B2E24] space-y-2">
           {!collapsed && (
             <div className="px-2 py-1.5">
@@ -208,7 +242,6 @@ export const AdminLayout: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Bar with Breadcrumb & Status */}
         <header className="h-16 bg-white border-b border-[#D5C6AD] px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-30">
           <div className="flex items-center gap-3 min-w-0">
             <button
@@ -230,7 +263,6 @@ export const AdminLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            {/* Database Connection Badge */}
             <div
               className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium border ${
                 isConfigured && isLiveDatabase
@@ -263,7 +295,6 @@ export const AdminLayout: React.FC = () => {
           </div>
         </header>
 
-        {/* Page Container */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
           <Outlet />
         </main>

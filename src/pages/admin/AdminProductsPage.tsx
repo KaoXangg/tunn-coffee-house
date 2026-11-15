@@ -16,6 +16,10 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  Copy,
+  Zap,
+  LayoutList,
+  DollarSign,
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useSiteData } from '../../contexts/SiteDataContext';
@@ -51,11 +55,24 @@ export const AdminProductsPage: React.FC = () => {
   const { products, categories, refreshAll, logAdminActivity } = useSiteData();
   const toast = useToast();
 
+  // View Mode: 'full' (Standard Table) | 'counter' (1-Tap Quick Counter Mode for Mobile/Tablet)
+  const [viewMode, setViewMode] = useState<'full' | 'counter'>('full');
+
   const [search, setSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'visible' | 'hidden' | 'featured'>('all');
-  const [sortBy, setSortBy] = useState<'order' | 'price-asc' | 'price-desc' | 'name'>('order');
+  const [filterStatus, setFilterStatus] = useState<
+    'all' | 'visible' | 'hidden' | 'featured' | 'soldout'
+  >('all');
+  const [sortBy, setSortBy] = useState<'order' | 'price-asc' | 'price-desc' | 'name'>(
+    'order'
+  );
   const [page, setPage] = useState(1);
+
+  // Inline Price Editing State
+  const [inlinePriceId, setInlinePriceId] = useState<string | null>(null);
+  const [inlinePriceVal, setInlinePriceVal] = useState<string>('');
+  const [inlineSalePriceVal, setInlineSalePriceVal] = useState<string>('');
+  const [savingInline, setSavingInline] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -127,6 +144,80 @@ export const AdminProductsPage: React.FC = () => {
     setModalOpen(true);
   };
 
+  // Duplicate Product (1-Click Clone)
+  const handleDuplicateProduct = async (prod: Product) => {
+    if (!isSupabaseConfigured) {
+      toast.error('Chưa kết nối Supabase');
+      return;
+    }
+
+    const newName = `${prod.name} (Bản sao)`;
+    const newSlug = `${prod.slug}-copy-${Math.random().toString(36).slice(2, 6)}`;
+
+    const { error } = await supabase.from('products').insert({
+      name: newName,
+      slug: newSlug,
+      description: prod.description,
+      image_url: prod.image_url,
+      price: prod.price,
+      sale_price: prod.sale_price,
+      category_id: prod.category_id,
+      badge: prod.badge,
+      is_featured: false,
+      is_best_seller: false,
+      is_available: prod.is_available,
+      is_visible: prod.is_visible,
+      sort_order: products.length + 1,
+    });
+
+    if (error) {
+      toast.error('Không thể nhân bản món', error.message);
+    } else {
+      await logAdminActivity('Nhân bản sản phẩm', 'products', newName);
+      await refreshAll();
+      toast.success('Đã nhân bản món thành công!', newName);
+    }
+  };
+
+  // Start Inline Price Edit
+  const startInlinePriceEdit = (prod: Product) => {
+    setInlinePriceId(prod.id);
+    setInlinePriceVal(String(prod.price));
+    setInlineSalePriceVal(prod.sale_price ? String(prod.sale_price) : '');
+  };
+
+  // Save Inline Price Edit
+  const handleSaveInlinePrice = async (prod: Product) => {
+    if (!isSupabaseConfigured) return;
+    setSavingInline(true);
+    try {
+      const nextPrice = Math.max(0, Number(inlinePriceVal) || 0);
+      const nextSale =
+        inlineSalePriceVal.trim() === '' || Number(inlineSalePriceVal) <= 0
+          ? null
+          : Number(inlineSalePriceVal);
+
+      const { error } = await supabase
+        .from('products')
+        .update({ price: nextPrice, sale_price: nextSale })
+        .eq('id', prod.id);
+
+      if (error) throw error;
+      await logAdminActivity(
+        `Sửa nhanh giá: ${formatVND(nextSale || nextPrice)}`,
+        'products',
+        prod.name
+      );
+      await refreshAll();
+      toast.success('Đã cập nhật giá bán!', prod.name);
+      setInlinePriceId(null);
+    } catch (err: any) {
+      toast.error('Lỗi cập nhật giá', err?.message);
+    } finally {
+      setSavingInline(false);
+    }
+  };
+
   const filteredProducts = useMemo(() => {
     const q = search.toLowerCase().trim();
     const list = products.filter((p) => {
@@ -134,6 +225,7 @@ export const AdminProductsPage: React.FC = () => {
       if (filterStatus === 'visible' && !p.is_visible) return false;
       if (filterStatus === 'hidden' && p.is_visible) return false;
       if (filterStatus === 'featured' && !p.is_featured) return false;
+      if (filterStatus === 'soldout' && p.is_available) return false;
       if (q) {
         return (
           p.name.toLowerCase().includes(q) ||
@@ -162,7 +254,7 @@ export const AdminProductsPage: React.FC = () => {
     if (!isSupabaseConfigured) {
       toast.error(
         'Chưa kết nối Supabase Database',
-        'Vui lòng cấu hình VITE_SUPABASE_URL và VITE_SUPABASE_ANON_KEY trong file .env để lưu sản phẩm.'
+        'Vui lòng cấu hình VITE_SUPABASE_URL và VITE_SUPABASE_ANON_KEY.'
       );
       return;
     }
@@ -221,7 +313,7 @@ export const AdminProductsPage: React.FC = () => {
     field: 'is_visible' | 'is_featured' | 'is_available'
   ) => {
     if (!isSupabaseConfigured) {
-      toast.info('Chưa kết nối Supabase', 'Vui lòng cấu hình .env để lưu thay đổi');
+      toast.info('Chưa kết nối Supabase');
       return;
     }
 
@@ -235,14 +327,20 @@ export const AdminProductsPage: React.FC = () => {
       toast.error('Không thể cập nhật trạng thái', error.message);
     } else {
       await refreshAll();
-      toast.success('Đã cập nhật trạng thái', prod.name);
+      toast.success(
+        field === 'is_available'
+          ? nextVal
+            ? `Đã mở bán lại: ${prod.name}`
+            : `Đã báo tạm hết: ${prod.name}`
+          : 'Đã cập nhật trạng thái',
+        prod.name
+      );
     }
   };
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     if (!isSupabaseConfigured) {
-      toast.error('Chưa kết nối Supabase');
       setDeleteTarget(null);
       return;
     }
@@ -273,25 +371,55 @@ export const AdminProductsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Header & Mode Switcher */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl font-semibold text-[#241914]">
             Quản Lý Thực Đơn & Sản Phẩm
           </h1>
           <p className="text-sm text-[#8C7565] mt-1">
-            Thêm món mới, điều chỉnh giá VNĐ, hình ảnh, trạng thái còn món và đánh dấu Featured.
+            Chạm vào giá tiền để sửa nhanh tại chỗ, bấm Nhân bản để tạo món tương tự hoặc bật Chế độ Tại Quầy.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Thêm Món Mới</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Counter Quick Mode Switch */}
+          <div className="inline-flex rounded-brand border border-[#D5C6AD] bg-white p-1">
+            <button
+              type="button"
+              onClick={() => setViewMode('full')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-brand transition-colors ${
+                viewMode === 'full'
+                  ? 'bg-[#4B2E24] text-[#F7F5EF]'
+                  : 'text-[#241914] hover:bg-[#E9E6D8]'
+              }`}
+            >
+              <LayoutList className="w-3.5 h-3.5" />
+              <span>Bảng Đầy Đủ</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('counter')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-brand transition-colors ${
+                viewMode === 'counter'
+                  ? 'bg-[#4B2E24] text-[#F7F5EF]'
+                  : 'text-[#241914] hover:bg-[#E9E6D8]'
+              }`}
+            >
+              <Zap className="w-3.5 h-3.5" />
+              <span>Chế Độ Tại Quầy (1-Chạm)</span>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Thêm Món Mới</span>
+          </button>
+        </div>
       </div>
 
       {/* Filters & Search Bar */}
@@ -305,7 +433,7 @@ export const AdminProductsPage: React.FC = () => {
               setSearch(e.target.value);
               setPage(1);
             }}
-            placeholder="Tìm theo tên món, mô tả hoặc slug..."
+            placeholder="Tìm nhanh tên món để báo hết / sửa giá..."
             className="w-full pl-10 pr-4 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24]"
           />
         </div>
@@ -341,6 +469,7 @@ export const AdminProductsPage: React.FC = () => {
           >
             <option value="all">Mọi trạng thái</option>
             <option value="visible">Đang hiển thị</option>
+            <option value="soldout">Đang báo Hết món</option>
             <option value="hidden">Đang tạm ẩn</option>
             <option value="featured">Món nổi bật (Featured)</option>
           </select>
@@ -361,181 +490,306 @@ export const AdminProductsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Responsive Table / Mobile Cards */}
-      <div className="bg-white border border-[#D5C6AD] rounded-brand overflow-hidden">
-        {paginatedProducts.length === 0 ? (
-          <div className="py-14 text-center">
-            <p className="font-serif text-xl text-[#241914]">
-              Không tìm thấy sản phẩm nào
-            </p>
-            <p className="text-xs text-[#8C7565] mt-1">
-              Hãy thử bộ lọc khác hoặc nhấn &ldquo;Thêm Món Mới&rdquo;.
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-[#E9E6D8] border-b border-[#D5C6AD] text-[11px] uppercase tracking-wider text-[#241914] font-semibold">
-                  <th className="py-3.5 px-4">Món đồ uống</th>
-                  <th className="py-3.5 px-4">Danh mục</th>
-                  <th className="py-3.5 px-4">Giá bán</th>
-                  <th className="py-3.5 px-4 text-center">Nổi bật</th>
-                  <th className="py-3.5 px-4 text-center">Còn món</th>
-                  <th className="py-3.5 px-4 text-center">Hiển thị</th>
-                  <th className="py-3.5 px-4 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E9E6D8] text-sm">
-                {paginatedProducts.map((prod) => (
-                  <tr
-                    key={prod.id}
-                    className="hover:bg-[#F7F5EF]/60 transition-colors"
-                  >
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-3 min-w-[220px]">
-                        <img
-                          src={prod.image_url}
-                          alt={prod.name}
-                          className="w-12 h-12 rounded-brand object-cover border border-[#D5C6AD] shrink-0"
-                        />
-                        <div className="min-w-0">
-                          <p className="font-semibold text-[#241914] truncate">
-                            {prod.name}
-                          </p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[11px] text-[#8C7565]">
-                              #{prod.sort_order}
-                            </span>
-                            {prod.badge && (
-                              <span className="px-1.5 py-0.5 text-[10px] bg-[#E9E6D8] text-[#4B2E24] rounded font-semibold">
-                                {prod.badge}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-xs text-[#241914] whitespace-nowrap">
-                      {getCategoryName(prod.category_id)}
-                    </td>
-
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className="font-semibold text-[#4B2E24]">
-                        {formatVND(prod.sale_price || prod.price)}
-                      </span>
-                      {prod.sale_price && prod.sale_price < prod.price && (
-                        <span className="block text-[11px] text-[#8C7565] line-through">
-                          {formatVND(prod.price)}
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-center">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleQuickField(prod, 'is_featured')}
-                        className={`p-1.5 rounded-brand transition-colors ${
-                          prod.is_featured
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'text-[#8C7565] hover:bg-[#E9E6D8]'
-                        }`}
-                        title="Bật/Tắt món nổi bật"
-                      >
-                        <Star
-                          className={`w-4 h-4 ${prod.is_featured ? 'fill-amber-600' : ''}`}
-                        />
-                      </button>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-center">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleQuickField(prod, 'is_available')}
-                        className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-semibold rounded-brand ${
-                          prod.is_available
-                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                            : 'bg-red-50 text-red-800 border border-red-200'
-                        }`}
-                      >
-                        {prod.is_available ? 'Còn món' : 'Hết món'}
-                      </button>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-center">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleQuickField(prod, 'is_visible')}
-                        className={`p-1.5 rounded-brand ${
-                          prod.is_visible
-                            ? 'text-emerald-700 hover:bg-emerald-50'
-                            : 'text-[#8C7565] hover:bg-stone-100'
-                        }`}
-                        title="Hiện / Ẩn trên website"
-                      >
-                        {prod.is_visible ? (
-                          <Eye className="w-4 h-4" />
-                        ) : (
-                          <EyeOff className="w-4 h-4" />
-                        )}
-                      </button>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                      <div className="inline-flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => openEditModal(prod)}
-                          className="p-2 text-[#4B2E24] hover:bg-[#E9E6D8] rounded-brand transition-colors"
-                          title="Chỉnh sửa"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(prod)}
-                          className="p-2 text-red-700 hover:bg-red-50 rounded-brand transition-colors"
-                          title="Xóa món"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="px-4 py-3 bg-[#F7F5EF] border-t border-[#D5C6AD] flex items-center justify-between text-xs">
-            <span className="text-[#8C7565]">
-              Trang {page} / {totalPages} ({filteredProducts.length} món)
+      {/* VIEW MODE 1: QUICK COUNTER MODE (1-TAP MOBILE/TABLET GRID) */}
+      {viewMode === 'counter' ? (
+        <div className="space-y-4">
+          <div className="p-3.5 bg-[#E9E6D8] border border-[#D5C6AD] rounded-brand flex items-center justify-between text-xs text-[#241914]">
+            <span>
+              ⚡ <strong>Chế độ Tại Quầy (1-Chạm):</strong> Chạm trực tiếp vào nút <strong>CÒN MÓN / TẠM HẾT</strong> để cập nhật ngay lên website khách hàng.
             </span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={page <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="p-1.5 border border-[#D5C6AD] bg-white rounded-brand disabled:opacity-40"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                disabled={page >= totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="p-1.5 border border-[#D5C6AD] bg-white rounded-brand disabled:opacity-40"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+            <span className="font-semibold">
+              {filteredProducts.filter((p) => p.is_available).length}/
+              {filteredProducts.length} món đang phục vụ
+            </span>
           </div>
-        )}
-      </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredProducts.map((prod) => (
+              <div
+                key={prod.id}
+                className={`p-4 rounded-brand border transition-all flex items-center justify-between gap-3 ${
+                  prod.is_available
+                    ? 'bg-white border-[#D5C6AD]'
+                    : 'bg-red-50/60 border-red-200'
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <img
+                    src={prod.image_url}
+                    alt={prod.name}
+                    className={`w-14 h-14 rounded-brand object-cover border border-[#D5C6AD] shrink-0 ${
+                      !prod.is_available ? 'grayscale opacity-70' : ''
+                    }`}
+                  />
+                  <div className="min-w-0">
+                    <p className="font-serif text-base font-bold text-[#241914] truncate">
+                      {prod.name}
+                    </p>
+                    <p className="text-xs font-semibold text-[#4B2E24] mt-0.5">
+                      {formatVND(prod.sale_price || prod.price)}
+                    </p>
+                    <p className="text-[10px] text-[#8C7565]">
+                      {getCategoryName(prod.category_id)}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleToggleQuickField(prod, 'is_available')}
+                  className={`px-4 py-3 rounded-brand text-xs font-bold uppercase tracking-wider shrink-0 transition-all shadow-xs ${
+                    prod.is_available
+                      ? 'bg-emerald-700 text-white hover:bg-emerald-800'
+                      : 'bg-red-700 text-white hover:bg-red-800'
+                  }`}
+                >
+                  {prod.is_available ? 'CÒN MÓN' : 'TẠM HẾT'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        /* VIEW MODE 2: FULL TABLE WITH INLINE PRICE EDIT & DUPLICATE */
+        <div className="bg-white border border-[#D5C6AD] rounded-brand overflow-hidden">
+          {paginatedProducts.length === 0 ? (
+            <div className="py-14 text-center">
+              <p className="font-serif text-xl text-[#241914]">
+                Không tìm thấy sản phẩm nào
+              </p>
+              <p className="text-xs text-[#8C7565] mt-1">
+                Hãy thử bộ lọc khác hoặc nhấn &ldquo;Thêm Món Mới&rdquo;.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[#E9E6D8] border-b border-[#D5C6AD] text-[11px] uppercase tracking-wider text-[#241914] font-semibold">
+                    <th className="py-3.5 px-4">Món đồ uống</th>
+                    <th className="py-3.5 px-4">Danh mục</th>
+                    <th className="py-3.5 px-4">Giá bán (Chạm để sửa nhanh)</th>
+                    <th className="py-3.5 px-4 text-center">Nổi bật</th>
+                    <th className="py-3.5 px-4 text-center">Còn món</th>
+                    <th className="py-3.5 px-4 text-center">Hiển thị</th>
+                    <th className="py-3.5 px-4 text-right">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E9E6D8] text-sm">
+                  {paginatedProducts.map((prod) => {
+                    const isEditingPrice = inlinePriceId === prod.id;
+                    return (
+                      <tr
+                        key={prod.id}
+                        className="hover:bg-[#F7F5EF]/60 transition-colors"
+                      >
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-3 min-w-[220px]">
+                            <img
+                              src={prod.image_url}
+                              alt={prod.name}
+                              className="w-12 h-12 rounded-brand object-cover border border-[#D5C6AD] shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <p className="font-semibold text-[#241914] truncate">
+                                {prod.name}
+                              </p>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="text-[11px] text-[#8C7565]">
+                                  #{prod.sort_order}
+                                </span>
+                                {prod.badge && (
+                                  <span className="px-1.5 py-0.5 text-[10px] bg-[#E9E6D8] text-[#4B2E24] rounded font-semibold">
+                                    {prod.badge}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-4 text-xs text-[#241914] whitespace-nowrap">
+                          {getCategoryName(prod.category_id)}
+                        </td>
+
+                        {/* Inline Price Editor Cell */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          {isEditingPrice ? (
+                            <div className="flex items-center gap-1.5 bg-[#F7F5EF] p-1.5 rounded-brand border border-[#4B2E24]">
+                              <div className="space-y-1">
+                                <input
+                                  type="number"
+                                  step="1000"
+                                  value={inlinePriceVal}
+                                  onChange={(e) => setInlinePriceVal(e.target.value)}
+                                  placeholder="Giá gốc"
+                                  className="w-24 px-2 py-1 text-xs bg-white border border-[#D5C6AD] rounded"
+                                />
+                                <input
+                                  type="number"
+                                  step="1000"
+                                  value={inlineSalePriceVal}
+                                  onChange={(e) =>
+                                    setInlineSalePriceVal(e.target.value)
+                                  }
+                                  placeholder="Giá KM (tùy chọn)"
+                                  className="w-24 px-2 py-1 text-xs bg-white border border-[#D5C6AD] rounded block"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                disabled={savingInline}
+                                onClick={() => handleSaveInlinePrice(prod)}
+                                className="p-1.5 bg-[#4B2E24] text-white rounded hover:bg-[#241914]"
+                                title="Lưu giá"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setInlinePriceId(null)}
+                                className="p-1.5 text-[#8C7565] hover:text-[#241914]"
+                                title="Hủy"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => startInlinePriceEdit(prod)}
+                              className="group text-left hover:bg-[#E9E6D8]/70 px-2 py-1 -mx-2 rounded transition-colors"
+                              title="Nhấn để sửa nhanh giá tiền"
+                            >
+                              <span className="font-semibold text-[#4B2E24] inline-flex items-center gap-1">
+                                {formatVND(prod.sale_price || prod.price)}
+                                <DollarSign className="w-3 h-3 opacity-0 group-hover:opacity-100 text-[#8C7565]" />
+                              </span>
+                              {prod.sale_price && prod.sale_price < prod.price && (
+                                <span className="block text-[11px] text-[#8C7565] line-through">
+                                  {formatVND(prod.price)}
+                                </span>
+                              )}
+                            </button>
+                          )}
+                        </td>
+
+                        <td className="py-3.5 px-4 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleQuickField(prod, 'is_featured')}
+                            className={`p-1.5 rounded-brand transition-colors ${
+                              prod.is_featured
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'text-[#8C7565] hover:bg-[#E9E6D8]'
+                            }`}
+                            title="Bật/Tắt món nổi bật"
+                          >
+                            <Star
+                              className={`w-4 h-4 ${
+                                prod.is_featured ? 'fill-amber-600' : ''
+                              }`}
+                            />
+                          </button>
+                        </td>
+
+                        <td className="py-3.5 px-4 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleQuickField(prod, 'is_available')}
+                            className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-semibold rounded-brand ${
+                              prod.is_available
+                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                : 'bg-red-50 text-red-800 border border-red-200'
+                            }`}
+                          >
+                            {prod.is_available ? 'Còn món' : 'Hết món'}
+                          </button>
+                        </td>
+
+                        <td className="py-3.5 px-4 text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleQuickField(prod, 'is_visible')}
+                            className={`p-1.5 rounded-brand ${
+                              prod.is_visible
+                                ? 'text-emerald-700 hover:bg-emerald-50'
+                                : 'text-[#8C7565] hover:bg-stone-100'
+                            }`}
+                            title="Hiện / Ẩn trên website"
+                          >
+                            {prod.is_visible ? (
+                              <Eye className="w-4 h-4" />
+                            ) : (
+                              <EyeOff className="w-4 h-4" />
+                            )}
+                          </button>
+                        </td>
+
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                          <div className="inline-flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleDuplicateProduct(prod)}
+                              className="p-2 text-[#8C7565] hover:text-[#241914] hover:bg-[#E9E6D8] rounded-brand transition-colors"
+                              title="Nhân bản món này (Duplicate)"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openEditModal(prod)}
+                              className="p-2 text-[#4B2E24] hover:bg-[#E9E6D8] rounded-brand transition-colors"
+                              title="Chỉnh sửa chi tiết"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget(prod)}
+                              className="p-2 text-red-700 hover:bg-red-50 rounded-brand transition-colors"
+                              title="Xóa món"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="px-4 py-3 bg-[#F7F5EF] border-t border-[#D5C6AD] flex items-center justify-between text-xs">
+              <span className="text-[#8C7565]">
+                Trang {page} / {totalPages} ({filteredProducts.length} món)
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="p-1.5 border border-[#D5C6AD] bg-white rounded-brand disabled:opacity-40"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  className="p-1.5 border border-[#D5C6AD] bg-white rounded-brand disabled:opacity-40"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Create / Edit Modal */}
       {modalOpen && (
@@ -547,7 +801,9 @@ export const AdminProductsPage: React.FC = () => {
           <div className="relative z-10 w-full max-w-2xl bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="px-6 py-4 bg-[#E9E6D8] border-b border-[#D5C6AD] flex items-center justify-between">
               <h3 className="font-serif text-xl font-semibold text-[#241914]">
-                {editingProduct ? `Chỉnh sửa: ${editingProduct.name}` : 'Thêm Món Đồ Uống Mới'}
+                {editingProduct
+                  ? `Chỉnh sửa: ${editingProduct.name}`
+                  : 'Thêm Món Đồ Uống Mới'}
               </h3>
               <button
                 type="button"
@@ -599,7 +855,6 @@ export const AdminProductsPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Category, Badge, Sort Order */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
@@ -642,7 +897,6 @@ export const AdminProductsPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Prices */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
@@ -670,7 +924,6 @@ export const AdminProductsPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Description */}
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
                   Mô tả hương vị & nguyên liệu *
@@ -688,7 +941,6 @@ export const AdminProductsPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Image Picker */}
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
                   Hình ảnh sản phẩm *
@@ -720,7 +972,6 @@ export const AdminProductsPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Checkboxes */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-[#D5C6AD]">
                 <label className="flex items-center gap-2 text-xs font-medium text-[#241914] cursor-pointer">
                   <input

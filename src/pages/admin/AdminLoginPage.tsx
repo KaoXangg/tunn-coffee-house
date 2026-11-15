@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -6,12 +6,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Lock,
   Mail,
-  UserPlus,
   KeyRound,
   ArrowLeft,
   Loader2,
   Database,
   CheckCircle2,
+  ShieldAlert,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -22,36 +22,48 @@ const loginSchema = z.object({
   password: z.string().min(6, 'Mật khẩu cần ít nhất 6 ký tự'),
 });
 
-const registerSchema = z.object({
-  fullName: z.string().min(2, 'Vui lòng nhập họ tên'),
-  email: z.string().email('Vui lòng nhập địa chỉ email hợp lệ'),
-  password: z.string().min(6, 'Mật khẩu cần ít nhất 6 ký tự'),
-});
-
 const resetSchema = z.object({
   email: z.string().email('Vui lòng nhập địa chỉ email hợp lệ'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
-type RegisterFormValues = z.infer<typeof registerSchema>;
 type ResetFormValues = z.infer<typeof resetSchema>;
 
+const LOCKOUT_KEY = 'tunn_login_lockout_until';
+const ATTEMPTS_KEY = 'tunn_login_failed_attempts';
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+
 export const AdminLoginPage: React.FC = () => {
-  const { signInWithEmail, signUpFirstAdmin, sendPasswordReset, isConfigured } = useAuth();
+  const { signInWithEmail, sendPasswordReset, isConfigured } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
-  const [mode, setMode] = useState<'login' | 'register' | 'reset'>('login');
+  const [mode, setMode] = useState<'login' | 'reset'>('login');
   const [submitting, setSubmitting] = useState(false);
+
+  // Brute-force Rate-limit Lockout State
+  const [lockoutRemainingSec, setLockoutRemainingSec] = useState<number>(0);
+
+  useEffect(() => {
+    const checkLockout = () => {
+      const until = Number(localStorage.getItem(LOCKOUT_KEY) || 0);
+      const diff = Math.ceil((until - Date.now()) / 1000);
+      if (diff > 0) {
+        setLockoutRemainingSec(diff);
+      } else {
+        setLockoutRemainingSec(0);
+      }
+    };
+
+    checkLockout();
+    const timer = setInterval(checkLockout, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
-  });
-
-  const registerForm = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: { fullName: '', email: '', password: '' },
   });
 
   const resetForm = useForm<ResetFormValues>({
@@ -60,32 +72,41 @@ export const AdminLoginPage: React.FC = () => {
   });
 
   const onLoginSubmit = async (values: LoginFormValues) => {
+    if (lockoutRemainingSec > 0) {
+      toast.error(
+        'Tạm khóa đăng nhập để bảo mật',
+        `Vui lòng thử lại sau ${lockoutRemainingSec} giây.`
+      );
+      return;
+    }
+
     setSubmitting(true);
     try {
       const { error } = await signInWithEmail(values.email, values.password);
       if (error) {
-        toast.error('Đăng nhập không thành công', error);
-      } else {
-        toast.success('Chào mừng trở lại!', 'Đã đăng nhập vào TUNN Admin CMS');
-        navigate('/admin/dashboard');
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
+        const currentAttempts = Number(localStorage.getItem(ATTEMPTS_KEY) || 0) + 1;
+        localStorage.setItem(ATTEMPTS_KEY, String(currentAttempts));
 
-  const onRegisterSubmit = async (values: RegisterFormValues) => {
-    setSubmitting(true);
-    try {
-      const { error, message } = await signUpFirstAdmin(
-        values.email,
-        values.password,
-        values.fullName
-      );
-      if (error) {
-        toast.error('Không thể khởi tạo tài khoản', error);
+        if (currentAttempts >= MAX_FAILED_ATTEMPTS) {
+          const until = Date.now() + LOCKOUT_DURATION_MS;
+          localStorage.setItem(LOCKOUT_KEY, String(until));
+          localStorage.setItem(ATTEMPTS_KEY, '0');
+          toast.error(
+            'Đã khóa tạm thời 5 phút (Chống dò mật khẩu)',
+            'Bạn đã nhập sai mật khẩu 5 lần liên tiếp.'
+          );
+        } else {
+          toast.error(
+            'Đăng nhập không thành công',
+            `Sai thông tin đăng nhập (Còn ${
+              MAX_FAILED_ATTEMPTS - currentAttempts
+            } lần thử trước khi khóa tạm thời).`
+          );
+        }
       } else {
-        toast.success('Khởi tạo thành công', message);
+        localStorage.removeItem(ATTEMPTS_KEY);
+        localStorage.removeItem(LOCKOUT_KEY);
+        toast.success('Chào mừng trở lại!', 'Đã đăng nhập vào TUNN Admin CMS');
         navigate('/admin/dashboard');
       }
     } finally {
@@ -113,10 +134,7 @@ export const AdminLoginPage: React.FC = () => {
 
   const handleEnterPreviewMode = () => {
     sessionStorage.setItem('tunn_cms_preview_unlocked', 'true');
-    toast.info(
-      'Chế độ xem trước CMS',
-      'Bạn đang trải nghiệm giao diện quản trị. Hãy kết nối biến môi trường Supabase để lưu dữ liệu vĩnh viễn.'
-    );
+    toast.info('Chế độ xem trước CMS', 'Bạn đang trải nghiệm giao diện quản trị.');
     navigate('/admin/dashboard');
   };
 
@@ -140,10 +158,20 @@ export const AdminLoginPage: React.FC = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand shadow-xl py-8 px-6 sm:px-10">
-          {/* Mode Switch Header */}
-          <div className="border-b border-[#D5C6AD] pb-3 mb-6 text-xs font-semibold uppercase tracking-wider text-[#241914]">
+          <div className="border-b border-[#D5C6AD] pb-3 mb-6 text-xs font-semibold uppercase tracking-wider text-[#241914] flex items-center justify-between">
             <span>Đăng nhập Quản trị viên</span>
+            <Lock className="w-3.5 h-3.5 text-[#4B2E24]" />
           </div>
+
+          {lockoutRemainingSec > 0 && (
+            <div className="mb-5 p-3.5 bg-red-50 border border-red-200 rounded-brand text-xs text-red-900 flex items-start gap-2.5">
+              <ShieldAlert className="w-4 h-4 text-red-700 shrink-0 mt-0.5" />
+              <div>
+                <strong>Chế độ bảo vệ chống dò mật khẩu đang bật:</strong> Vui lòng đợi{' '}
+                <span className="font-bold">{lockoutRemainingSec} giây</span> trước khi thử đăng nhập lại.
+              </div>
+            </div>
+          )}
 
           {/* Login Form */}
           {mode === 'login' && (
@@ -157,9 +185,10 @@ export const AdminLoginPage: React.FC = () => {
                   <input
                     type="email"
                     autoComplete="email"
+                    disabled={lockoutRemainingSec > 0}
                     {...loginForm.register('email')}
                     placeholder="admin@tunncoffee.com"
-                    className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24]"
+                    className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24] disabled:opacity-50"
                   />
                 </div>
                 {loginForm.formState.errors.email && (
@@ -187,9 +216,10 @@ export const AdminLoginPage: React.FC = () => {
                   <input
                     type="password"
                     autoComplete="current-password"
+                    disabled={lockoutRemainingSec > 0}
                     {...loginForm.register('password')}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24]"
+                    className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-white border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24] disabled:opacity-50"
                   />
                 </div>
                 {loginForm.formState.errors.password && (
@@ -201,87 +231,15 @@ export const AdminLoginPage: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || lockoutRemainingSec > 0}
                 className="w-full mt-2 py-3 px-4 bg-[#4B2E24] hover:bg-[#241914] text-[#F7F5EF] text-xs font-semibold uppercase tracking-[0.18em] rounded-brand transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                <span>Đăng Nhập Hệ Thống</span>
-              </button>
-            </form>
-          )}
-
-          {/* Register First Admin Form */}
-          {mode === 'register' && (
-            <form
-              onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
-              className="space-y-4"
-            >
-              <div className="p-3 bg-[#E9E6D8]/60 border border-[#D5C6AD] rounded-brand text-xs text-[#241914] leading-relaxed">
-                <strong>Cơ chế bảo mật:</strong> Tài khoản đầu tiên đăng ký trên Supabase Database sẽ tự động được gán quyền <code className="font-semibold">admin</code> thông qua PostgreSQL Trigger. Các tài khoản đăng ký sau mặc định là <code className="font-semibold">staff</code>.
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
-                  Họ và Tên
-                </label>
-                <input
-                  type="text"
-                  {...registerForm.register('fullName')}
-                  placeholder="Chủ quán TUNN Coffee"
-                  className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24]"
-                />
-                {registerForm.formState.errors.fullName && (
-                  <p className="text-xs text-red-700 mt-1">
-                    {registerForm.formState.errors.fullName.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
-                  Email Quản trị
-                </label>
-                <input
-                  type="email"
-                  {...registerForm.register('email')}
-                  placeholder="owner@tunncoffee.com"
-                  className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24]"
-                />
-                {registerForm.formState.errors.email && (
-                  <p className="text-xs text-red-700 mt-1">
-                    {registerForm.formState.errors.email.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
-                  Mật khẩu (Tối thiểu 6 ký tự)
-                </label>
-                <input
-                  type="password"
-                  {...registerForm.register('password')}
-                  placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24]"
-                />
-                {registerForm.formState.errors.password && (
-                  <p className="text-xs text-red-700 mt-1">
-                    {registerForm.formState.errors.password.message}
-                  </p>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full py-3 px-4 bg-[#4B2E24] hover:bg-[#241914] text-[#F7F5EF] text-xs font-semibold uppercase tracking-[0.18em] rounded-brand transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {submitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <UserPlus className="w-4 h-4" />
-                )}
-                <span>Khởi Tạo Tài Khoản Admin</span>
+                <span>
+                  {lockoutRemainingSec > 0
+                    ? `Tạm khóa (${lockoutRemainingSec}s)`
+                    : 'Đăng Nhập Hệ Thống'}
+                </span>
               </button>
             </form>
           )}
@@ -333,7 +291,6 @@ export const AdminLoginPage: React.FC = () => {
             </form>
           )}
 
-          {/* Setup Helper Notice when .env is not yet configured */}
           {!isConfigured && (
             <div className="mt-6 pt-6 border-t border-[#D5C6AD]">
               <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-brand text-xs text-amber-950 space-y-2">
@@ -341,9 +298,6 @@ export const AdminLoginPage: React.FC = () => {
                   <Database className="w-4 h-4 text-amber-700 shrink-0" />
                   <span>Chưa phát hiện biến môi trường Supabase (.env)</span>
                 </div>
-                <p className="text-[11px] leading-relaxed text-amber-900">
-                  Để bật xác thực Supabase Auth & lưu trữ PostgreSQL trực tuyến, hãy tạo file <code className="font-mono bg-amber-100 px-1 rounded">.env</code> từ <code className="font-mono bg-amber-100 px-1 rounded">.env.example</code>. Bạn cũng có thể mở giao diện quản trị ở chế độ xem trước ngay bây giờ:
-                </p>
                 <button
                   type="button"
                   onClick={handleEnterPreviewMode}

@@ -66,6 +66,16 @@ const AdminContactPage = lazy(() =>
 const AdminSeoPage = lazy(() =>
   import('./pages/admin/AdminSeoPage').then((m) => ({ default: m.AdminSeoPage }))
 );
+const AdminBackupQrPage = lazy(() =>
+  import('./pages/admin/AdminBackupQrPage').then((m) => ({
+    default: m.AdminBackupQrPage,
+  }))
+);
+const AdminSecurityPage = lazy(() =>
+  import('./pages/admin/AdminSecurityPage').then((m) => ({
+    default: m.AdminSecurityPage,
+  }))
+);
 
 const PageLoader: React.FC = () => (
   <div className="min-h-[60vh] flex flex-col items-center justify-center text-[#4B2E24]">
@@ -110,6 +120,8 @@ export function App() {
                   <Route path="settings/appearance" element={<AdminAppearancePage />} />
                   <Route path="settings/contact" element={<AdminContactPage />} />
                   <Route path="settings/seo" element={<AdminSeoPage />} />
+                  <Route path="settings/backup" element={<AdminBackupQrPage />} />
+                  <Route path="settings/security" element={<AdminSecurityPage />} />
                 </Route>
 
                 {/* Catch-all fallback */}
