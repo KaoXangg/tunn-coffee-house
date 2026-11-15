@@ -68,20 +68,30 @@ export const GallerySection: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 text-xs uppercase tracking-wider font-medium rounded-brand transition-colors ${
-                  selectedCategory === cat
-                    ? 'bg-coffee text-ivory-light'
-                    : 'bg-ivory text-coffee-dark/80 hover:text-coffee'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+            {categories.map((cat) => {
+              const isSelected = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`relative px-4 py-2 text-xs uppercase tracking-wider font-medium rounded-brand transition-colors ${
+                    isSelected
+                      ? 'text-ivory-light'
+                      : 'bg-ivory text-coffee-dark/80 hover:text-coffee'
+                  }`}
+                >
+                  {isSelected && (
+                    <motion.span
+                      layoutId="galleryCategoryPill"
+                      transition={{ type: 'spring', stiffness: 360, damping: 30 }}
+                      className="absolute inset-0 bg-coffee rounded-brand"
+                    />
+                  )}
+                  <span className="relative z-10">{cat}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -193,12 +203,19 @@ export const GallerySection: React.FC = () => {
                 </>
               )}
 
-              <div className="max-h-[72vh] bg-[#241914] flex items-center justify-center overflow-hidden">
-                <img
-                  src={lightboxItem.image_url}
-                  alt={lightboxItem.title}
-                  className="max-h-[72vh] w-auto object-contain"
-                />
+              <div className="max-h-[72vh] bg-[#140F0C] flex items-center justify-center overflow-hidden">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={lightboxItem.id}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    src={lightboxItem.image_url}
+                    alt={lightboxItem.title}
+                    className="max-h-[72vh] w-auto object-contain"
+                  />
+                </AnimatePresence>
               </div>
               <div className="p-6 bg-ivory-light flex items-start justify-between gap-4">
                 <div>

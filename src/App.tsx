@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { MotionConfig } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -86,10 +87,11 @@ const PageLoader: React.FC = () => (
 
 export function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <SiteDataProvider>
-          <BrowserRouter>
+    <MotionConfig reducedMotion="user">
+      <ToastProvider>
+        <AuthProvider>
+          <SiteDataProvider>
+            <BrowserRouter>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 {/* Customer Website */}
@@ -132,6 +134,7 @@ export function App() {
         </SiteDataProvider>
       </AuthProvider>
     </ToastProvider>
+    </MotionConfig>
   );
 }
 

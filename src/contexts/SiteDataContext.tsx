@@ -30,6 +30,8 @@ interface SiteDataContextType {
   activityLogs: AdminActivityLog[];
   loading: boolean;
   isLiveDatabase: boolean;
+  themeMode: 'light' | 'dark';
+  toggleTheme: () => void;
   refreshAll: () => Promise<void>;
   getSection: (key: PageSection['section_key']) => PageSection | undefined;
   updateSiteSettings: (partial: Partial<SiteSettings>) => Promise<{ error: string | null }>;
@@ -58,16 +60,52 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [activityLogs, setActivityLogs] = useState<AdminActivityLog[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isLiveDatabase, setIsLiveDatabase] = useState<boolean>(false);
+  const [themeOverride, setThemeOverride] = useState<'light' | 'dark' | null>(() => {
+    try {
+      const saved = localStorage.getItem('tunn_theme_preference');
+      return saved === 'dark' || saved === 'light' ? saved : null;
+    } catch {
+      return null;
+    }
+  });
 
-  // Sync CSS variables, document title, SEO meta tags, and favicon whenever settings change
+  const themeMode: 'light' | 'dark' =
+    themeOverride ?? (settings.theme_mode === 'dark' ? 'dark' : 'light');
+
+  const toggleTheme = useCallback(() => {
+    setThemeOverride((prev) => {
+      const current = prev ?? (settings.theme_mode === 'dark' ? 'dark' : 'light');
+      const next = current === 'dark' ? 'light' : 'dark';
+      try {
+        localStorage.setItem('tunn_theme_preference', next);
+      } catch {
+        // Ignore storage errors
+      }
+      return next;
+    });
+  }, [settings.theme_mode]);
+
+  // Sync CSS variables, document title, SEO meta tags, and favicon whenever settings or theme change
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty('--color-primary', settings.primary_color || '#4B2E24');
-    root.style.setProperty('--color-bg-secondary', settings.secondary_bg_color || '#E9E6D8');
-    root.style.setProperty('--color-bg-primary', settings.primary_bg_color || '#F7F5EF');
-    root.style.setProperty('--color-text-primary', settings.text_primary_color || '#241914');
-    root.style.setProperty('--color-text-muted', settings.text_muted_color || '#8C7565');
-    root.style.setProperty('--color-accent', settings.accent_color || '#D5C6AD');
+    if (themeMode === 'dark') {
+      root.style.setProperty('--color-primary', '#D4A574');
+      root.style.setProperty('--color-bg-secondary', '#1D1511');
+      root.style.setProperty('--color-bg-primary', '#140F0C');
+      root.style.setProperty('--color-text-primary', '#F5EFE6');
+      root.style.setProperty('--color-text-muted', '#A9988A');
+      root.style.setProperty('--color-accent', '#3A2A22');
+      root.classList.add('dark');
+    } else {
+      root.style.setProperty('--color-primary', settings.primary_color || '#4B2E24');
+      root.style.setProperty('--color-bg-secondary', settings.secondary_bg_color || '#E9E6D8');
+      root.style.setProperty('--color-bg-primary', settings.primary_bg_color || '#F7F5EF');
+      root.style.setProperty('--color-text-primary', settings.text_primary_color || '#241914');
+      root.style.setProperty('--color-text-muted', settings.text_muted_color || '#8C7565');
+      root.style.setProperty('--color-accent', settings.accent_color || '#D5C6AD');
+      root.classList.remove('dark');
+    }
+
     // Upgrade legacy 'Cormorant Garamond' or 'Georgia' to 'Lora' to prevent Vietnamese diacritic shifting on Windows
     const cleanHeadingFont =
       !settings.heading_font ||
@@ -84,12 +122,6 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     root.style.setProperty('--font-heading', `"${cleanHeadingFont}"`);
     root.style.setProperty('--font-body', `"${cleanBodyFont}"`);
     root.style.setProperty('--radius-brand', settings.border_radius || '0.25rem');
-
-    if (settings.theme_mode === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
 
     // Update Document Title & Meta SEO
     document.title = settings.seo_title || settings.site_title || 'TUNN Coffee House';
@@ -109,7 +141,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (favicon && settings.favicon_url) {
       favicon.href = settings.favicon_url;
     }
-  }, [settings]);
+  }, [settings, themeMode]);
 
   const refreshAll = useCallback(async () => {
     if (!isSupabaseConfigured) {
@@ -361,6 +393,8 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         activityLogs,
         loading,
         isLiveDatabase,
+        themeMode,
+        toggleTheme,
         refreshAll,
         getSection,
         updateSiteSettings,

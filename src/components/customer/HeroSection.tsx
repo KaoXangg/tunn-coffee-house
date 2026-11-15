@@ -1,13 +1,21 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { ArrowDownRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { DEFAULT_HERO_CONTENT } from '../../lib/defaultData';
+import { TUNN_EASE } from '../common/MotionPrimitives';
 import type { HeroSectionContent } from '../../types/database';
 
 export const HeroSection: React.FC = () => {
-  const { settings, getSection } = useSiteData();
+  const { settings, getSection, themeMode } = useSiteData();
   const section = getSection('hero');
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end start'],
+  });
+  const imageParallaxY = useTransform(scrollYProgress, [0, 1], [0, 28]);
 
   if (section && !section.is_enabled) return null;
 
@@ -32,12 +40,17 @@ export const HeroSection: React.FC = () => {
 
   return (
     <section
+      ref={sectionRef}
       id="hero"
-      style={{
-        backgroundColor: content.background_color || settings.secondary_bg_color || '#E9E6D8',
-        color: content.text_color || settings.text_primary_color || '#241914',
-      }}
-      className="relative min-h-[92vh] pt-28 pb-16 sm:pt-36 sm:pb-24 lg:pt-40 lg:pb-28 overflow-hidden border-b border-coffee-beige/70 flex items-center"
+      style={
+        themeMode === 'dark'
+          ? undefined
+          : {
+              backgroundColor: content.background_color || settings.secondary_bg_color || '#E9E6D8',
+              color: content.text_color || settings.text_primary_color || '#241914',
+            }
+      }
+      className="relative min-h-[92vh] pt-28 pb-16 sm:pt-36 sm:pb-24 lg:pt-40 lg:pb-28 overflow-hidden bg-ivory text-coffee-dark border-b border-coffee-beige/70 flex items-center"
     >
       {/* Subtle architectural frame lines */}
       <div
@@ -62,7 +75,7 @@ export const HeroSection: React.FC = () => {
             </div>
 
             {/* Large Editorial Headline */}
-            <h1 className="font-serif text-4xl sm:text-6xl xl:text-[4.15rem] font-normal leading-[1.1] tracking-tight whitespace-pre-line">
+            <h1 className="font-serif text-[clamp(2.25rem,4.6vw,4.25rem)] font-normal leading-[1.09] tracking-tight whitespace-pre-line">
               {content.headline || 'Một chút ngọt ngào,\ncho ngày thêm trọn vẹn.'}
             </h1>
 
@@ -75,16 +88,16 @@ export const HeroSection: React.FC = () => {
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <a
                 href={content.primary_cta_href || '#menu'}
-                className={`inline-flex items-center gap-3 px-7 py-4 text-xs uppercase tracking-[0.18em] font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-all duration-300 shadow-xs ${buttonRadiusClass}`}
+                className={`group inline-flex items-center gap-3 px-7 py-4 text-xs uppercase tracking-[0.18em] font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-all duration-300 shadow-editorial active:scale-[0.98] ${buttonRadiusClass}`}
               >
                 <span>{content.primary_cta_label || 'Khám phá Thực đơn'}</span>
-                <ArrowDownRight className="w-4 h-4" />
+                <ArrowDownRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:translate-y-0.5" />
               </a>
 
               {content.secondary_cta_label && (
                 <a
                   href={content.secondary_cta_href || '#about'}
-                  className={`inline-flex items-center gap-2 px-6 py-4 text-xs uppercase tracking-[0.18em] font-semibold border border-coffee/45 text-coffee-dark hover:border-coffee hover:bg-ivory-light/70 transition-all duration-300 ${buttonRadiusClass}`}
+                  className={`inline-flex items-center gap-2 px-6 py-4 text-xs uppercase tracking-[0.18em] font-semibold border border-coffee/45 text-coffee-dark hover:border-coffee hover:bg-ivory-light/70 transition-all duration-300 active:scale-[0.98] ${buttonRadiusClass}`}
                 >
                   <span>{content.secondary_cta_label}</span>
                 </a>
@@ -120,20 +133,21 @@ export const HeroSection: React.FC = () => {
             </div>
           </motion.div>
 
-          {/* Right Column: Asymmetric Archival Framing */}
+          {/* Right Column: Asymmetric Archival Framing with Subtle Parallax */}
           <motion.div
-            initial={{ opacity: 0, y: 18 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.75, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="lg:col-span-5 relative"
+            transition={{ duration: 0.75, delay: 0.12, ease: TUNN_EASE }}
+            style={{ y: imageParallaxY }}
+            className="lg:col-span-5 relative will-change-transform"
           >
             {/* Main Tall Frame */}
-            <div className="relative mx-auto max-w-md lg:max-w-none aspect-[4/5] overflow-hidden rounded-brand border border-coffee-beige shadow-xl bg-ivory-light p-2.5">
+            <div className="group relative mx-auto max-w-md lg:max-w-none aspect-[4/5] overflow-hidden rounded-brand border border-coffee-beige shadow-editorial-lg bg-ivory-light p-2.5">
               <div className="relative w-full h-full overflow-hidden rounded-brand">
                 <img
                   src={content.hero_image_url}
                   alt={content.headline}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-[1.03]"
                   loading="eager"
                 />
                 <div

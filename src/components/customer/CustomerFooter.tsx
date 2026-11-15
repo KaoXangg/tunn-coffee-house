@@ -47,7 +47,7 @@ export const CustomerFooter: React.FC = () => {
                 <li key={idx}>
                   <a
                     href={item.href}
-                    className="text-[#E9E6D8]/80 hover:text-white transition-colors"
+                    className="link-underline inline-block text-[#E9E6D8]/80 hover:text-white transition-colors"
                   >
                     {item.label}
                   </a>

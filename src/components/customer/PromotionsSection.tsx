@@ -55,8 +55,8 @@ export const PromotionsSection: React.FC = () => {
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-60px' }}
-                transition={{ duration: 0.6 }}
-                className="grid grid-cols-1 lg:grid-cols-12 bg-ivory-light border border-coffee-beige rounded-brand overflow-hidden shadow-sm"
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="group grid grid-cols-1 lg:grid-cols-12 bg-ivory-light border border-coffee-beige rounded-brand overflow-hidden shadow-editorial hover:border-coffee/60 transition-colors duration-300"
               >
                 {/* Banner Image */}
                 <div
@@ -67,12 +67,13 @@ export const PromotionsSection: React.FC = () => {
                   <img
                     src={promo.banner_image_url}
                     alt={promo.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                     loading="lazy"
                   />
                   {promo.tag && (
-                    <span className="absolute top-4 left-4 px-3.5 py-1 text-[10px] uppercase tracking-[0.2em] font-semibold bg-coffee-dark/90 text-ivory-light rounded-brand">
-                      {promo.tag}
+                    <span className="absolute top-4 left-4 inline-flex items-center gap-2 px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] font-semibold bg-coffee-dark/90 text-ivory-light rounded-brand backdrop-blur-xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>{promo.tag}</span>
                     </span>
                   )}
                 </div>

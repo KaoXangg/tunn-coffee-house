@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   MapPin,
   Phone,
@@ -7,15 +7,25 @@ import {
   Navigation,
   ShoppingBag,
   ArrowUpRight,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 
 export const ContactSection: React.FC = () => {
   const { settings, getSection } = useSiteData();
+  const [copiedField, setCopiedField] = useState<'address' | 'hotline' | null>(null);
   const section = getSection('contact');
 
   if (section && !section.is_enabled) return null;
+
+  const handleCopy = (field: 'address' | 'hotline', value: string) => {
+    if (!value || !navigator.clipboard) return;
+    navigator.clipboard.writeText(value);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 1800);
+  };
 
   const buttonRadiusClass =
     settings.button_style === 'pill'
@@ -61,36 +71,70 @@ export const ContactSection: React.FC = () => {
               <div className="space-y-4 text-sm">
                 <div className="flex items-start gap-3.5">
                   <MapPin className="w-4 h-4 text-coffee shrink-0 mt-1" />
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-xs uppercase tracking-wider text-coffee-muted font-semibold">
                       Địa chỉ
                     </p>
-                    <p className="text-coffee-dark mt-0.5">
-                      {settings.address
-                        ? settings.address
-                        : 'Đang cập nhật địa chỉ (Cập nhật tại Admin CMS → Liên hệ)'}
-                    </p>
+                    <div className="flex items-start justify-between gap-2 mt-0.5">
+                      <p className="text-coffee-dark">
+                        {settings.address
+                          ? settings.address
+                          : 'Đang cập nhật địa chỉ (Cập nhật tại Admin CMS → Liên hệ)'}
+                      </p>
+                      {settings.address && (
+                        <button
+                          type="button"
+                          onClick={() => handleCopy('address', settings.address)}
+                          className="shrink-0 p-1.5 rounded-brand text-coffee-muted hover:text-coffee hover:bg-ivory transition-colors"
+                          aria-label="Sao chép địa chỉ"
+                          title="Sao chép địa chỉ"
+                        >
+                          {copiedField === 'address' ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3.5">
                   <Phone className="w-4 h-4 text-coffee shrink-0 mt-1" />
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-xs uppercase tracking-wider text-coffee-muted font-semibold">
                       Hotline
                     </p>
-                    <p className="text-coffee-dark mt-0.5">
-                      {settings.hotline ? (
-                        <a
-                          href={`tel:${settings.hotline}`}
-                          className="hover:text-coffee underline underline-offset-4"
+                    <div className="flex items-center justify-between gap-2 mt-0.5">
+                      <p className="text-coffee-dark">
+                        {settings.hotline ? (
+                          <a
+                            href={`tel:${settings.hotline}`}
+                            className="hover:text-coffee underline underline-offset-4"
+                          >
+                            {settings.hotline}
+                          </a>
+                        ) : (
+                          'Đang cập nhật hotline (Cập nhật tại Admin CMS → Liên hệ)'
+                        )}
+                      </p>
+                      {settings.hotline && (
+                        <button
+                          type="button"
+                          onClick={() => handleCopy('hotline', settings.hotline)}
+                          className="shrink-0 p-1.5 rounded-brand text-coffee-muted hover:text-coffee hover:bg-ivory transition-colors"
+                          aria-label="Sao chép số hotline"
+                          title="Sao chép số hotline"
                         >
-                          {settings.hotline}
-                        </a>
-                      ) : (
-                        'Đang cập nhật hotline (Cập nhật tại Admin CMS → Liên hệ)'
+                          {copiedField === 'hotline' ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
                       )}
-                    </p>
+                    </div>
                   </div>
                 </div>
 

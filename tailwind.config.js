@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -24,8 +25,12 @@ export default {
       },
       borderRadius: {
         brand: 'var(--radius-brand, 0.25rem)',
-      }
+      },
+      boxShadow: {
+        editorial: '0 18px 45px -24px rgba(36, 25, 20, 0.22)',
+        'editorial-lg': '0 28px 65px -28px rgba(36, 25, 20, 0.30)',
+      },
     },
   },
   plugins: [],
-}
+};

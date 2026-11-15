@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, ArrowUpRight, ShieldCheck, Clock, Phone } from 'lucide-react';
+import { Menu, X, ArrowUpRight, ShieldCheck, Clock, Phone, Sun, Moon } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { BrandLogo } from '../common/BrandLogo';
+import { ScrollProgressBar, TUNN_EASE } from '../common/MotionPrimitives';
 import { getStoreOpenStatus } from '../../lib/utils';
 
 export const CustomerHeader: React.FC = () => {
-  const { settings } = useSiteData();
+  const { settings, themeMode, toggleTheme } = useSiteData();
   const { isAdmin } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -86,13 +87,15 @@ export const CustomerHeader: React.FC = () => {
       : 'rounded-brand';
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'bg-ivory-light/95 backdrop-blur-md border-b border-coffee-beige/80 shadow-xs'
-          : 'bg-ivory-light/90 backdrop-blur-sm border-b border-coffee-beige/50'
-      }`}
-    >
+    <>
+      <ScrollProgressBar />
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? 'bg-ivory-light/95 backdrop-blur-md border-b border-coffee-beige/80 shadow-editorial'
+            : 'bg-ivory-light/90 backdrop-blur-sm border-b border-coffee-beige/50'
+        }`}
+      >
       {/* Top Editorial Utility Strip (collapses on scroll) */}
       <div
         className={`hidden lg:block bg-[#241914] text-[#E9E6D8] overflow-hidden transition-all duration-300 ${
@@ -181,7 +184,31 @@ export const CustomerHeader: React.FC = () => {
         </nav>
 
         {/* Actions */}
-        <div className="hidden lg:flex items-center gap-3">
+        <div className="hidden lg:flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={themeMode === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
+            title={themeMode === 'dark' ? 'Giao diện sáng' : 'Giao diện tối'}
+            className="w-9 h-9 inline-flex items-center justify-center rounded-brand border border-coffee-beige/80 bg-ivory/60 text-coffee-dark hover:border-coffee hover:text-coffee transition-colors"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={themeMode}
+                initial={{ opacity: 0, rotate: -25, scale: 0.8 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 25, scale: 0.8 }}
+                transition={{ duration: 0.18, ease: TUNN_EASE }}
+                className="inline-flex"
+              >
+                {themeMode === 'dark' ? (
+                  <Sun className="w-4 h-4" />
+                ) : (
+                  <Moon className="w-4 h-4" />
+                )}
+              </motion.span>
+            </AnimatePresence>
+          </button>
           {isAdmin && (
             <Link
               to="/admin/dashboard"
@@ -193,23 +220,33 @@ export const CustomerHeader: React.FC = () => {
           )}
           <a
             href={settings.header_cta_href || '#menu'}
-            className={`inline-flex items-center gap-2 px-5 py-2.5 text-xs uppercase tracking-[0.16em] font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-all duration-300 ${buttonRadiusClass}`}
+            className={`group inline-flex items-center gap-2 px-5 py-2.5 text-xs uppercase tracking-[0.16em] font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-all duration-300 active:scale-[0.98] ${buttonRadiusClass}`}
           >
             <span>{settings.header_cta_label || 'Khám phá Thực đơn'}</span>
-            <ArrowUpRight className="w-3.5 h-3.5" />
+            <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
         </div>
 
-        {/* Mobile Menu Trigger */}
-        <button
-          type="button"
-          onClick={() => setMobileOpen((prev) => !prev)}
-          className="lg:hidden p-2.5 text-coffee-dark hover:text-coffee border border-coffee-beige/80 rounded-brand bg-ivory/50"
-          aria-label={mobileOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'}
-          aria-expanded={mobileOpen}
-        >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        {/* Mobile Actions & Menu Trigger */}
+        <div className="lg:hidden flex items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={themeMode === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
+            className="p-2.5 text-coffee-dark hover:text-coffee border border-coffee-beige/80 rounded-brand bg-ivory/50 transition-colors"
+          >
+            {themeMode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileOpen((prev) => !prev)}
+            className="p-2.5 text-coffee-dark hover:text-coffee border border-coffee-beige/80 rounded-brand bg-ivory/50"
+            aria-label={mobileOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'}
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Drawer */}
@@ -276,6 +313,7 @@ export const CustomerHeader: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+      </header>
+    </>
   );
 };

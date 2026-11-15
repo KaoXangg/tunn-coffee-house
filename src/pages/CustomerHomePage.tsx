@@ -12,6 +12,7 @@ import { GallerySection } from '../components/customer/GallerySection';
 import { ContactSection } from '../components/customer/ContactSection';
 import { CustomerFooter } from '../components/customer/CustomerFooter';
 import { ProductDetailModal } from '../components/customer/ProductDetailModal';
+import { BackToTopButton } from '../components/common/MotionPrimitives';
 import type { Product } from '../types/database';
 
 const StorefrontSkeleton: React.FC = () => (
@@ -109,6 +110,7 @@ export const CustomerHomePage: React.FC = () => {
         )}
       </main>
       <CustomerFooter />
+      <BackToTopButton />
 
       <ProductDetailModal
         product={selectedProduct}

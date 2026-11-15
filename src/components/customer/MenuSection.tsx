@@ -92,36 +92,55 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
           </p>
         </div>
 
-        {/* Dynamic Category Tabs */}
+        {/* Dynamic Category Tabs with Fluid Active Indicator */}
         <div className="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-3 mb-4 no-scrollbar border-b border-coffee-beige/60">
           <button
             type="button"
             onClick={() => setActiveCategoryId('all')}
-            className={`px-5 py-2.5 text-xs uppercase tracking-[0.16em] font-semibold whitespace-nowrap rounded-brand transition-all ${
+            className={`relative px-5 py-2.5 text-xs uppercase tracking-[0.16em] font-semibold whitespace-nowrap rounded-brand transition-colors ${
               activeCategoryId === 'all'
-                ? 'bg-coffee text-ivory-light shadow-xs'
-                : 'text-coffee-dark/80 hover:text-coffee hover:bg-ivory'
+                ? 'text-ivory-light'
+                : 'text-coffee-dark/80 hover:text-coffee hover:bg-ivory/60'
             }`}
           >
-            Tất cả ({products.filter((p) => p.is_visible).length})
+            {activeCategoryId === 'all' && (
+              <motion.span
+                layoutId="menuCategoryPill"
+                transition={{ type: 'spring', stiffness: 360, damping: 30 }}
+                className="absolute inset-0 bg-coffee rounded-brand shadow-xs -z-0"
+              />
+            )}
+            <span className="relative z-10">
+              Tất cả ({products.filter((p) => p.is_visible).length})
+            </span>
           </button>
 
           {activeCategories.map((cat) => {
             const count = products.filter(
               (p) => p.is_visible && p.category_id === cat.id
             ).length;
+            const isActive = activeCategoryId === cat.id;
             return (
               <button
                 key={cat.id}
                 type="button"
                 onClick={() => setActiveCategoryId(cat.id)}
-                className={`px-5 py-2.5 text-xs uppercase tracking-[0.16em] font-semibold whitespace-nowrap rounded-brand transition-all ${
-                  activeCategoryId === cat.id
-                    ? 'bg-coffee text-ivory-light shadow-xs'
-                    : 'text-coffee-dark/80 hover:text-coffee hover:bg-ivory'
+                className={`relative px-5 py-2.5 text-xs uppercase tracking-[0.16em] font-semibold whitespace-nowrap rounded-brand transition-colors ${
+                  isActive
+                    ? 'text-ivory-light'
+                    : 'text-coffee-dark/80 hover:text-coffee hover:bg-ivory/60'
                 }`}
               >
-                {cat.name} ({count})
+                {isActive && (
+                  <motion.span
+                    layoutId="menuCategoryPill"
+                    transition={{ type: 'spring', stiffness: 360, damping: 30 }}
+                    className="absolute inset-0 bg-coffee rounded-brand shadow-xs -z-0"
+                  />
+                )}
+                <span className="relative z-10">
+                  {cat.name} ({count})
+                </span>
               </button>
             );
           })}
@@ -247,7 +266,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                         onSelectProduct?.(item);
                       }
                     }}
-                    className={`group cursor-pointer flex items-start gap-4 sm:gap-5 pb-7 border-b border-coffee-beige/70 transition-opacity ${
+                    className={`group cursor-pointer flex items-start gap-4 sm:gap-5 px-3 -mx-3 pt-3 pb-7 rounded-brand border-b border-coffee-beige/70 hover:bg-ivory/45 transition-all duration-200 ${
                       !item.is_available ? 'opacity-65' : ''
                     }`}
                   >

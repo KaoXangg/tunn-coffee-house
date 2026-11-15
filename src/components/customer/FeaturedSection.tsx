@@ -72,7 +72,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                     onSelectProduct?.(product);
                   }
                 }}
-                className="group cursor-pointer flex flex-col bg-ivory-light border border-coffee-beige/80 rounded-brand overflow-hidden hover:border-coffee transition-all duration-300"
+                className="group cursor-pointer flex flex-col bg-ivory-light border border-coffee-beige/80 rounded-brand overflow-hidden hover:border-coffee hover:-translate-y-1 hover:shadow-editorial transition-all duration-300"
               >
                 {/* Product Photography */}
                 <div className="relative aspect-[4/5] overflow-hidden bg-ivory">
@@ -82,6 +82,10 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                     loading="lazy"
                   />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#140F0C]/35 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span className="pointer-events-none absolute bottom-3.5 right-3.5 px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] font-semibold bg-ivory-light/95 text-coffee-dark border border-coffee-beige rounded-brand opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-sm">
+                    Xem chi tiết
+                  </span>
 
                   {/* Top Badges */}
                   <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2 pointer-events-none">
@@ -134,7 +138,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
 
                     <span className="inline-flex items-center gap-1 text-xs uppercase tracking-[0.16em] font-semibold text-coffee group-hover:translate-x-0.5 transition-transform">
                       <span>Thưởng vị</span>
-                      <ArrowUpRight className="w-3.5 h-3.5" />
+                      <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </span>
                   </div>
                 </div>

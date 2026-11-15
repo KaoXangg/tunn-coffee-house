@@ -36,7 +36,7 @@ export const AboutSection: React.FC = () => {
             <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-3">
               {content.eyebrow || 'NGHỆ THUẬT THƯỞNG THỨC'}
             </p>
-            <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark leading-[1.15]">
+            <h2 className="font-serif text-[clamp(2rem,3.6vw,3.1rem)] font-normal text-coffee-dark leading-[1.15]">
               {content.headline}
             </h2>
           </motion.div>
@@ -64,24 +64,34 @@ export const AboutSection: React.FC = () => {
             transition={{ duration: 0.7 }}
             className="lg:col-span-6 relative"
           >
-            <div className="aspect-[16/11] overflow-hidden rounded-brand border border-coffee-beige bg-ivory">
-              <img
+            <div className="group aspect-[16/11] overflow-hidden rounded-brand border border-coffee-beige bg-ivory shadow-editorial">
+              <motion.img
+                initial={{ scale: 1.06 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
                 src={content.main_image_url}
                 alt={section?.title || 'TUNN Coffee House Story'}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                 loading="lazy"
               />
             </div>
 
             {content.secondary_image_url && (
-              <div className="hidden sm:block w-48 aspect-square rounded-brand overflow-hidden border-4 border-ivory-light shadow-xl -mt-20 ml-auto mr-6 relative z-10 bg-ivory">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-60px' }}
+                transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                className="hidden sm:block w-48 aspect-square rounded-brand overflow-hidden border-4 border-ivory-light shadow-editorial-lg -mt-20 ml-auto mr-6 relative z-10 bg-ivory"
+              >
                 <img
                   src={content.secondary_image_url}
                   alt="Crafted Atmosphere"
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
-              </div>
+              </motion.div>
             )}
           </motion.div>
 
@@ -114,13 +124,16 @@ export const AboutSection: React.FC = () => {
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="group"
+                transition={{ duration: 0.5, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                className="group p-6 -m-2 rounded-brand border border-transparent hover:border-coffee-beige/80 hover:bg-ivory/40 transition-all duration-300"
               >
-                <span className="font-serif text-3xl text-coffee/60 group-hover:text-coffee transition-colors">
-                  {pillar.number || `0${index + 1}`}
-                </span>
-                <h3 className="font-serif text-2xl font-semibold text-coffee-dark mt-2">
+                <div className="flex items-center gap-3">
+                  <span className="font-serif text-3xl text-coffee/60 group-hover:text-coffee transition-colors">
+                    {pillar.number || `0${index + 1}`}
+                  </span>
+                  <span className="h-px flex-1 bg-coffee-beige/60 group-hover:bg-coffee/50 transition-colors" />
+                </div>
+                <h3 className="font-serif text-2xl font-semibold text-coffee-dark mt-3">
                   {pillar.title}
                 </h3>
                 <p className="text-sm text-coffee-muted mt-2.5 leading-relaxed">
