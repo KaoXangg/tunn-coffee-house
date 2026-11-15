@@ -19,8 +19,8 @@ export default {
         },
       },
       fontFamily: {
-        serif: ['var(--font-heading, "Cormorant Garamond")', 'Georgia', 'serif'],
-        sans: ['var(--font-body, "Plus Jakarta Sans")', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-heading, "Lora")', '"Playfair Display"', 'serif'],
+        sans: ['var(--font-body, "Be Vietnam Pro")', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         brand: 'var(--radius-brand, 0.25rem)',

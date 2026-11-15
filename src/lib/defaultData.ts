@@ -24,8 +24,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   text_primary_color: '#241914', // Dark Espresso
   text_muted_color: '#8C7565',   // Muted Brown
   accent_color: '#D5C6AD',       // Warm Beige
-  heading_font: 'Cormorant Garamond',
-  body_font: 'Plus Jakarta Sans',
+  heading_font: 'Lora',
+  body_font: 'Be Vietnam Pro',
   border_radius: '0.25rem',
   button_style: 'editorial',
   theme_mode: 'light',
@@ -40,7 +40,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     { label: 'Không gian', href: '#gallery' },
     { label: 'Liên hệ', href: '#contact' },
   ],
-  header_cta_label: 'Khám phá Menu',
+  header_cta_label: 'Khám phá Thực đơn',
   header_cta_href: '#menu',
 
   // Contact Settings (Strictly no fake phone or address per prompt requirement)
@@ -59,7 +59,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   // Footer
   footer_description:
     'Nơi hội tụ của những hạt cà phê tuyển chọn, lá trà nguyên bản và nghệ thuật pha chế thủ công trong không gian tối giản ấm áp.',
-  copyright_text: '© 2026 TUNN Coffee House. Crafted with warmth & precision.',
+  copyright_text: '© 2026 TUNN Coffee House. Bản quyền thuộc về TUNN Coffee House.',
 
   // SEO
   seo_title: 'TUNN Coffee House — Trà Sữa, Cà Phê Đặc Sản & Matcha Thủ Công',
@@ -73,10 +73,10 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
 };
 
 export const DEFAULT_HERO_CONTENT: HeroSectionContent = {
-  badge: 'ARTISANAL ROASTERY & TEA BAR',
+  badge: 'TRÀ NGUYÊN LÁ & CÀ PHÊ THỦ CÔNG',
   headline: 'Một chút ngọt ngào,\ncho ngày thêm trọn vẹn.',
   subheadline:
-    'Your Daily Ritual, Made Extraordinary — Nơi hương cà phê rang mộc quyện cùng vị trà nguyên lá thượng hạng trong không gian tĩnh lặng đầy cảm hứng.',
+    'Nơi hương cà phê rang mộc quyện cùng vị trà nguyên lá thượng hạng trong không gian tĩnh lặng đầy cảm hứng.',
   primary_cta_label: 'Khám phá Thực đơn',
   primary_cta_href: '#menu',
   secondary_cta_label: 'Câu chuyện Thương hiệu',
@@ -94,7 +94,7 @@ export const DEFAULT_HERO_CONTENT: HeroSectionContent = {
 };
 
 export const DEFAULT_ABOUT_CONTENT: AboutSectionContent = {
-  eyebrow: 'THE ART OF SLOWNESS',
+  eyebrow: 'NGHỆ THUẬT THƯỞNG THỨC',
   headline: 'Từ những đồi trà sương mù đến tách cà phê thủ công mỗi sớm mai.',
   lead_paragraph:
     'Tại TUNN Coffee House, chúng tôi tin rằng một thức uống ngon không chỉ đến từ công thức chuẩn xác, mà bắt đầu từ sự trân trọng từng nguyên liệu tự nhiên và khoảnh khắc thưởng thức của bạn.',
@@ -157,7 +157,7 @@ export const DEFAULT_PAGE_SECTIONS: PageSection[] = [
     is_enabled: true,
     sort_order: 3,
     content: {
-      eyebrow: 'CURATED SIGNATURES',
+      eyebrow: 'TUYỂN CHỌN ĐẶC SẮC',
       description:
         'Những sáng tạo mang đậm dấu ấn riêng của TUNN — cân bằng hoàn hảo giữa hương thơm nguyên bản và cấu trúc vị giác tinh tế.',
     },
@@ -171,7 +171,7 @@ export const DEFAULT_PAGE_SECTIONS: PageSection[] = [
     is_enabled: true,
     sort_order: 4,
     content: {
-      eyebrow: 'SEASONAL & ARTISANAL MENU',
+      eyebrow: 'THỰC ĐƠN THỦ CÔNG',
       note: 'Tất cả đồ uống có thể tùy chỉnh mức đường và đá theo khẩu vị riêng của quý khách.',
     },
     updated_at: new Date().toISOString(),
@@ -184,7 +184,7 @@ export const DEFAULT_PAGE_SECTIONS: PageSection[] = [
     is_enabled: true,
     sort_order: 5,
     content: {
-      eyebrow: 'LIMITED EDITIONS & OFFERS',
+      eyebrow: 'ƯU ĐÃI ĐẶC BIỆT',
     },
     updated_at: new Date().toISOString(),
   },
@@ -196,7 +196,7 @@ export const DEFAULT_PAGE_SECTIONS: PageSection[] = [
     is_enabled: true,
     sort_order: 6,
     content: {
-      eyebrow: 'VISUAL JOURNAL',
+      eyebrow: 'NHẬT KÝ HÌNH ẢNH',
       description:
         'Từng góc nhỏ, từng vệt nắng chiều và những tách đồ uống được chăm chút tỉ mỉ mỗi ngày.',
     },
@@ -210,7 +210,7 @@ export const DEFAULT_PAGE_SECTIONS: PageSection[] = [
     is_enabled: true,
     sort_order: 7,
     content: {
-      eyebrow: 'VISIT & CONNECT',
+      eyebrow: 'ĐỊA CHỈ & LIÊN HỆ',
       invitation_note:
         'Thông tin liên hệ được đồng bộ trực tiếp từ hệ thống quản trị Admin CMS.',
     },
@@ -270,7 +270,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
   },
   {
     id: 'cat-5',
-    name: 'Signature Sáng Tạo',
+    name: 'Sáng Tạo Độc Bản',
     slug: 'signature',
     description: 'Những công thức độc bản chỉ có tại TUNN Coffee House.',
     image_url:
@@ -282,7 +282,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
   },
   {
     id: 'cat-6',
-    name: 'Seasonal Drinks',
+    name: 'Thức Uống Theo Mùa',
     slug: 'seasonal-drinks',
     description: 'Bộ sưu tập thức uống giới hạn theo từng mùa trong năm.',
     image_url:

@@ -43,20 +43,20 @@ interface NavGroupItem {
 
 const CMS_NAV_ITEMS: NavGroupItem[] = [
   // Basic Operational Pages (Accessible by Sub-Managers & Owner Admin)
-  { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard, ownerOnly: false },
-  { label: 'Sản phẩm (Products)', to: '/admin/products', icon: Coffee, ownerOnly: false },
-  { label: 'Danh mục (Categories)', to: '/admin/categories', icon: FolderTree, ownerOnly: false },
-  { label: 'Khuyến mãi (Promotions)', to: '/admin/promotions', icon: Megaphone, ownerOnly: false },
-  { label: 'Thư viện Ảnh (Gallery)', to: '/admin/gallery', icon: GalleryHorizontalEnd, ownerOnly: false },
-  { label: 'Thư viện Media', to: '/admin/media', icon: ImageIcon, ownerOnly: false },
+  { label: 'Tổng quan hệ thống', to: '/admin/dashboard', icon: LayoutDashboard, ownerOnly: false },
+  { label: 'Quản lý Sản phẩm', to: '/admin/products', icon: Coffee, ownerOnly: false },
+  { label: 'Quản lý Danh mục', to: '/admin/categories', icon: FolderTree, ownerOnly: false },
+  { label: 'Chương trình Khuyến mãi', to: '/admin/promotions', icon: Megaphone, ownerOnly: false },
+  { label: 'Thư viện Không gian', to: '/admin/gallery', icon: GalleryHorizontalEnd, ownerOnly: false },
+  { label: 'Kho Hình ảnh (Media)', to: '/admin/media', icon: ImageIcon, ownerOnly: false },
 
   // System, Brand & Security Pages (Accessible ONLY by Root Owner Admin)
-  { label: 'Hero Editor', to: '/admin/sections/hero', icon: Sparkles, ownerOnly: true },
-  { label: 'Nội dung Website', to: '/admin/content', icon: FileText, ownerOnly: true },
-  { label: 'Thương hiệu (Brand)', to: '/admin/brand', icon: Award, ownerOnly: true },
-  { label: 'Giao diện (Appearance)', to: '/admin/settings/appearance', icon: Palette, ownerOnly: true },
-  { label: 'Liên hệ (Contact)', to: '/admin/settings/contact', icon: PhoneCall, ownerOnly: true },
-  { label: 'Cấu hình SEO', to: '/admin/settings/seo', icon: Globe, ownerOnly: true },
+  { label: 'Banner Đầu trang', to: '/admin/sections/hero', icon: Sparkles, ownerOnly: true },
+  { label: 'Nội dung Trang chủ', to: '/admin/content', icon: FileText, ownerOnly: true },
+  { label: 'Nhận diện Thương hiệu', to: '/admin/brand', icon: Award, ownerOnly: true },
+  { label: 'Màu sắc & Giao diện', to: '/admin/settings/appearance', icon: Palette, ownerOnly: true },
+  { label: 'Thông tin Liên hệ', to: '/admin/settings/contact', icon: PhoneCall, ownerOnly: true },
+  { label: 'Cấu hình SEO Google', to: '/admin/settings/seo', icon: Globe, ownerOnly: true },
   { label: 'Sao lưu & Mã QR Menu', to: '/admin/settings/backup', icon: QrCode, ownerOnly: true },
   { label: 'Bảo mật & Tài khoản', to: '/admin/settings/security', icon: ShieldCheck, ownerOnly: true },
 ];
@@ -486,12 +486,12 @@ export const AdminLayout: React.FC = () => {
               {isConfigured && isLiveDatabase ? (
                 <>
                   <Database className="w-3 h-3 text-emerald-600" />
-                  <span>Supabase Connected</span>
+                  <span>Đã kết nối Máy chủ</span>
                 </>
               ) : (
                 <>
                   <AlertCircle className="w-3 h-3 text-amber-600" />
-                  <span>Chưa kết nối .env Supabase</span>
+                  <span>Chưa kết nối Máy chủ</span>
                 </>
               )}
             </div>

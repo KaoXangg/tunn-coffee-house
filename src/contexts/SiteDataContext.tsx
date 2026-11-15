@@ -68,11 +68,21 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     root.style.setProperty('--color-text-primary', settings.text_primary_color || '#241914');
     root.style.setProperty('--color-text-muted', settings.text_muted_color || '#8C7565');
     root.style.setProperty('--color-accent', settings.accent_color || '#D5C6AD');
-    root.style.setProperty(
-      '--font-heading',
-      `"${settings.heading_font || 'Cormorant Garamond'}"`
-    );
-    root.style.setProperty('--font-body', `"${settings.body_font || 'Plus Jakarta Sans'}"`);
+    // Upgrade legacy 'Cormorant Garamond' or 'Georgia' to 'Lora' to prevent Vietnamese diacritic shifting on Windows
+    const cleanHeadingFont =
+      !settings.heading_font ||
+      settings.heading_font === 'Cormorant Garamond' ||
+      settings.heading_font === 'Georgia'
+        ? 'Lora'
+        : settings.heading_font;
+
+    const cleanBodyFont =
+      !settings.body_font || settings.body_font === 'Plus Jakarta Sans'
+        ? 'Be Vietnam Pro'
+        : settings.body_font;
+
+    root.style.setProperty('--font-heading', `"${cleanHeadingFont}"`);
+    root.style.setProperty('--font-body', `"${cleanBodyFont}"`);
     root.style.setProperty('--radius-brand', settings.border_radius || '0.25rem');
 
     if (settings.theme_mode === 'dark') {

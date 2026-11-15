@@ -228,36 +228,40 @@ export const AdminAppearancePage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
-                Font tiêu đề (Serif)
+                Font tiêu đề (Serif chuẩn Tiếng Việt)
               </label>
               <select
                 value={headingFont}
                 onChange={(e) => setHeadingFont(e.target.value)}
                 className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
               >
-                <option value="Cormorant Garamond">
-                  Cormorant Garamond (Luxury Editorial)
+                <option value="Lora">
+                  Lora (Chuẩn dấu Tiếng Việt — Sang trọng)
                 </option>
                 <option value="Playfair Display">
-                  Playfair Display (Classic High-Contrast)
+                  Playfair Display (Cổ điển — Tương phản cao)
                 </option>
-                <option value="Georgia">Georgia (Traditional Serif)</option>
+                <option value="Be Vietnam Pro">
+                  Be Vietnam Pro (Hiện đại — Rõ nét)
+                </option>
               </select>
             </div>
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
-                Font nội dung (Sans-serif)
+                Font nội dung (Sans-serif chuẩn Tiếng Việt)
               </label>
               <select
                 value={bodyFont}
                 onChange={(e) => setBodyFont(e.target.value)}
                 className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
               >
-                <option value="Plus Jakarta Sans">
-                  Plus Jakarta Sans (Modern Clean)
+                <option value="Be Vietnam Pro">
+                  Be Vietnam Pro (Chuẩn Tiếng Việt — Khuyên dùng)
                 </option>
-                <option value="system-ui">System UI Sans</option>
+                <option value="Plus Jakarta Sans">
+                  Plus Jakarta Sans (Tối giản hiện đại)
+                </option>
               </select>
             </div>
 

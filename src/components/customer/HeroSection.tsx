@@ -153,7 +153,7 @@ export const HeroSection: React.FC = () => {
               <div className="absolute bottom-4 left-4 right-4 sm:right-auto sm:max-w-xs bg-ivory-light/95 backdrop-blur-md border border-coffee-beige p-4 rounded-brand shadow-lg">
                 <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-coffee font-semibold">
                   <Sparkles className="w-3 h-3" />
-                  <span>Tasting Note</span>
+                  <span>Hương vị đặc trưng</span>
                 </div>
                 <p className="font-serif text-lg font-semibold text-coffee-dark mt-1">
                   {content.featured_note_title || 'Ô Long Nướng Kem Phô Mai'}

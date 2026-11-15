@@ -229,17 +229,17 @@ export const AdminBackupQrPage: React.FC = () => {
 
       // Brand Header Text
       ctx.fillStyle = '#241914';
-      ctx.font = 'bold 48px Georgia, serif';
+      ctx.font = 'bold 48px Lora, "Playfair Display", serif';
       ctx.textAlign = 'center';
       ctx.fillText(settings.brand_name || 'TUNN Coffee House', 450, 175);
 
       ctx.fillStyle = '#8C7565';
-      ctx.font = '20px sans-serif';
+      ctx.font = '20px "Be Vietnam Pro", sans-serif';
       ctx.fillText(qrSubtitle || 'Your Daily Ritual, Made Extraordinary', 450, 220);
 
       if (tableNumber.trim()) {
         ctx.fillStyle = '#4B2E24';
-        ctx.font = 'bold 28px sans-serif';
+        ctx.font = 'bold 28px "Be Vietnam Pro", sans-serif';
         ctx.fillText(`BÀN SỐ: ${tableNumber.trim().toUpperCase()}`, 450, 275);
       }
 
@@ -260,11 +260,11 @@ export const AdminBackupQrPage: React.FC = () => {
 
       // Bottom Call to Action
       ctx.fillStyle = '#4B2E24';
-      ctx.font = 'bold 34px Georgia, serif';
+      ctx.font = 'bold 34px Lora, "Playfair Display", serif';
       ctx.fillText(qrTitle || 'QUÉT MÃ XEM THỰC ĐƠN', 450, 900);
 
       ctx.fillStyle = '#8C7565';
-      ctx.font = '20px sans-serif';
+      ctx.font = '20px "Be Vietnam Pro", sans-serif';
       ctx.fillText('Sử dụng Camera điện thoại hoặc Zalo để quét mã', 450, 950);
 
       ctx.fillStyle = '#241914';
