@@ -312,7 +312,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
 
           {activeTheme && (
             <div className="mt-5 pt-4 border-t border-[#E9E6D8] flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 {[
                   activeTheme.tokens.headerBg,
                   activeTheme.tokens.primary,
@@ -328,7 +328,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                   />
                 ))}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => openFullSitePreview(activeTheme)}
@@ -571,19 +571,22 @@ export const AdminSeasonalThemesPage: React.FC = () => {
 
       {/* Modal 1: Responsive Preview (Desktop / Tablet / Mobile + Full Live Site Preview) */}
       {previewModalTheme && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+        <div className="!mt-0 fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
           <div className="bg-white border border-[#D5C6AD] rounded-brand shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#E9E6D8] flex flex-wrap items-center justify-between gap-3">
-              <div>
+            <div className="px-5 py-4 border-b border-[#E9E6D8] flex flex-wrap lg:flex-nowrap items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-[#8C7565] font-semibold">
                   LIVE THEME PREVIEW
                 </p>
-                <h3 className="font-serif text-xl font-semibold text-[#241914]">
+                <h3
+                  className="font-serif text-lg sm:text-xl font-semibold text-[#241914] truncate"
+                  title={previewModalTheme.name}
+                >
                   {previewModalTheme.name}
                 </h3>
               </div>
 
-              <div className="flex items-center gap-1.5 bg-[#F7F5EF] p-1 rounded-brand border border-[#E9E6D8]">
+              <div className="flex items-center gap-1.5 bg-[#F7F5EF] p-1 rounded-brand border border-[#E9E6D8] shrink-0">
                 {(
                   [
                     { id: 'desktop', icon: Monitor, label: 'Desktop' },
@@ -610,7 +613,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                 })}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => openFullSitePreview(previewModalTheme)}
@@ -763,7 +766,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
 
       {/* Modal 2: Theme Studio Editor (Colors, Banner & Assets, Effects, Scheduler) */}
       {editingTheme && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs">
+        <div className="!mt-0 fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs">
           <div className="bg-white border border-[#D5C6AD] rounded-brand shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
             <div className="px-6 py-4 border-b border-[#E9E6D8] flex items-center justify-between gap-4">
               <div>
