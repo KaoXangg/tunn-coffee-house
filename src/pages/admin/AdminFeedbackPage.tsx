@@ -9,6 +9,9 @@ import {
   MapPin,
   Database,
   Loader2,
+  User,
+  Mail,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -89,9 +92,11 @@ export const AdminFeedbackPage: React.FC = () => {
       }
       if (!q) return true;
       const tableMatch = (item.table_number || '').toLowerCase().includes(q);
+      const nameMatch = (item.customer_name || '').toLowerCase().includes(q);
+      const emailMatch = (item.customer_email || '').toLowerCase().includes(q);
       const commentMatch = (item.comment || '').toLowerCase().includes(q);
       const tagMatch = (item.tags || []).some((t) => t.toLowerCase().includes(q));
-      return tableMatch || commentMatch || tagMatch;
+      return tableMatch || nameMatch || emailMatch || commentMatch || tagMatch;
     });
   }, [items, ratingFilter, searchQuery]);
 
@@ -210,7 +215,7 @@ export const AdminFeedbackPage: React.FC = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm theo số bàn (VD: 05), nội dung góp ý hoặc từ khóa tag..."
+                placeholder="Tìm theo tên khách, Gmail, số bàn (VD: 05), góp ý hoặc tag..."
                 className="w-full pl-9 pr-4 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24]"
               />
             </div>
@@ -302,6 +307,30 @@ export const AdminFeedbackPage: React.FC = () => {
                       </button>
                     )}
                   </div>
+                </div>
+
+                {/* Customer Identity & Verification */}
+                <div className="mt-3 p-2.5 bg-[#F7F5EF] border border-[#E9E6D8] rounded-brand space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#241914] truncate">
+                      <User className="w-3.5 h-3.5 text-[#4B2E24] shrink-0" />
+                      <span className="truncate">{fb.customer_name || 'Khách ẩn danh'}</span>
+                    </span>
+                    {fb.email_verified_status && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-brand shrink-0">
+                        <ShieldCheck className="w-3 h-3" />
+                        <span>
+                          {fb.email_verified_status === 'mx_verified' ? 'MX Verified' : 'Gmail hợp lệ'}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                  {fb.customer_email && (
+                    <p className="inline-flex items-center gap-1.5 text-[11px] text-[#8C7565] truncate max-w-full">
+                      <Mail className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{fb.customer_email}</span>
+                    </p>
+                  )}
                 </div>
 
                 {fb.tags && fb.tags.length > 0 && (
