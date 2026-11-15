@@ -97,14 +97,53 @@ export const AdminContentPage: React.FC = () => {
     );
   };
 
+  const SECTION_LABELS: Record<PageSection['section_key'], string> = {
+    hero: 'Đầu trang (Hero)',
+    about: 'Câu chuyện thương hiệu (About)',
+    featured: 'Tác phẩm nổi bật (Featured)',
+    menu: 'Thực đơn (Menu)',
+    promotions: 'Ưu đãi & Mùa vị mới (Promotions)',
+    gallery: 'Không gian & Khoảnh khắc (Gallery)',
+    contact: 'Địa điểm & Liên hệ (Contact)',
+  };
+
   const updateSectionHeaderField = (
     key: PageSection['section_key'],
     field: 'title' | 'subtitle',
     value: string
   ) => {
     setOrderedSections((prev) =>
+      prev.map((sec) => {
+        if (sec.section_key !== key) return sec;
+        if (key === 'hero') {
+          const contentField = field === 'title' ? 'headline' : 'subheadline';
+          return {
+            ...sec,
+            [field]: value,
+            content: { ...(sec.content || {}), [contentField]: value },
+          };
+        }
+        return { ...sec, [field]: value };
+      })
+    );
+  };
+
+  const updateSectionEyebrow = (
+    key: PageSection['section_key'],
+    value: string
+  ) => {
+    setOrderedSections((prev) =>
       prev.map((sec) =>
-        sec.section_key === key ? { ...sec, [field]: value } : sec
+        sec.section_key === key
+          ? {
+              ...sec,
+              content: {
+                ...(sec.content || {}),
+                eyebrow: value,
+                ...(key === 'hero' ? { badge: value } : {}),
+              },
+            }
+          : sec
       )
     );
   };
@@ -131,6 +170,7 @@ export const AdminContentPage: React.FC = () => {
             subtitle: sec.subtitle,
             is_enabled: sec.is_enabled,
             sort_order: sec.sort_order,
+            content: sec.content,
           });
         }
       }
@@ -293,40 +333,73 @@ export const AdminContentPage: React.FC = () => {
                     </button>
                   </div>
 
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <span className="text-[10px] uppercase tracking-widest font-semibold text-[#4B2E24]">
-                        #{sec.sort_order} · Section: {sec.section_key.toUpperCase()}
+                  <div className="flex-1 space-y-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] uppercase tracking-widest font-semibold text-[#4B2E24]">
+                        #{sec.sort_order} · {SECTION_LABELS[sec.section_key] || sec.section_key.toUpperCase()}
                       </span>
-                      <input
-                        type="text"
-                        value={sec.title}
-                        onChange={(e) =>
-                          updateSectionHeaderField(
-                            sec.section_key,
-                            'title',
-                            e.target.value
-                          )
-                        }
-                        className="mt-1 w-full px-3 py-1.5 text-sm font-semibold bg-white border border-[#D5C6AD] rounded-brand"
-                      />
                     </div>
-                    <div>
-                      <span className="text-[10px] uppercase tracking-widest font-semibold text-[#8C7565]">
-                        Mô tả phụ (Subtitle)
-                      </span>
-                      <input
-                        type="text"
-                        value={sec.subtitle}
-                        onChange={(e) =>
-                          updateSectionHeaderField(
-                            sec.section_key,
-                            'subtitle',
-                            e.target.value
-                          )
-                        }
-                        className="mt-1 w-full px-3 py-1.5 text-sm bg-white border border-[#D5C6AD] rounded-brand"
-                      />
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest font-semibold text-[#8C7565]">
+                          Nhãn nhỏ phía trên (Eyebrow)
+                        </label>
+                        <input
+                          type="text"
+                          value={
+                            sec.section_key === 'hero'
+                              ? String(sec.content?.badge ?? sec.content?.eyebrow ?? '')
+                              : String(sec.content?.eyebrow ?? '')
+                          }
+                          onChange={(e) =>
+                            updateSectionEyebrow(sec.section_key, e.target.value)
+                          }
+                          placeholder="VD: SEASONAL & ARTISANAL MENU"
+                          className="mt-1 w-full px-3 py-1.5 text-xs uppercase tracking-wider bg-white border border-[#D5C6AD] rounded-brand"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest font-semibold text-[#4B2E24]">
+                          Tiêu đề chính (Title)
+                        </label>
+                        <input
+                          type="text"
+                          value={
+                            sec.section_key === 'hero'
+                              ? String(sec.content?.headline ?? sec.title ?? '')
+                              : sec.title
+                          }
+                          onChange={(e) =>
+                            updateSectionHeaderField(
+                              sec.section_key,
+                              'title',
+                              e.target.value
+                            )
+                          }
+                          className="mt-1 w-full px-3 py-1.5 text-sm font-semibold bg-white border border-[#D5C6AD] rounded-brand"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest font-semibold text-[#8C7565]">
+                          Mô tả phụ (Subtitle)
+                        </label>
+                        <input
+                          type="text"
+                          value={
+                            sec.section_key === 'hero'
+                              ? String(sec.content?.subheadline ?? sec.subtitle ?? '')
+                              : sec.subtitle
+                          }
+                          onChange={(e) =>
+                            updateSectionHeaderField(
+                              sec.section_key,
+                              'subtitle',
+                              e.target.value
+                            )
+                          }
+                          className="mt-1 w-full px-3 py-1.5 text-sm bg-white border border-[#D5C6AD] rounded-brand"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -55,12 +55,6 @@ export const HeroSection: React.FC = () => {
       }
       className="relative min-h-[85vh] pt-12 pb-16 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28 overflow-hidden bg-ivory text-coffee-dark border-b border-coffee-beige/70 flex items-center"
     >
-      {/* Subtle architectural frame lines */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-7xl border-x border-coffee-beige/35 hidden xl:block"
-      />
-
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-12 items-center">
           {/* Left Column: Editorial Masthead & Craft Narrative */}

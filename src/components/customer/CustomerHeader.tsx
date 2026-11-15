@@ -90,7 +90,7 @@ export const CustomerHeader: React.FC = () => {
     <>
       <ScrollProgressBar />
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
             ? 'bg-ivory-light/95 backdrop-blur-md border-b border-coffee-beige/80 shadow-editorial'
             : 'bg-ivory-light/95 backdrop-blur-sm border-b border-coffee-beige/50'
@@ -190,7 +190,7 @@ export const CustomerHeader: React.FC = () => {
             onClick={toggleTheme}
             aria-label={themeMode === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
             title={themeMode === 'dark' ? 'Giao diện sáng' : 'Giao diện tối'}
-            className="w-9 h-9 inline-flex items-center justify-center rounded-brand border border-coffee-beige/80 bg-ivory/60 text-coffee-dark hover:border-coffee hover:text-coffee transition-colors"
+            className="w-9 h-9 inline-flex items-center justify-center rounded-full border-0 bg-coffee/[0.06] hover:bg-coffee/[0.13] dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-coffee-dark hover:text-coffee transition-all duration-300 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-coffee/35 active:scale-95"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.span
@@ -202,7 +202,7 @@ export const CustomerHeader: React.FC = () => {
                 className="inline-flex"
               >
                 {themeMode === 'dark' ? (
-                  <Sun className="w-4 h-4" />
+                  <Sun className="w-4 h-4 text-amber-300" />
                 ) : (
                   <Moon className="w-4 h-4" />
                 )}
@@ -233,9 +233,9 @@ export const CustomerHeader: React.FC = () => {
             type="button"
             onClick={toggleTheme}
             aria-label={themeMode === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
-            className="p-2.5 text-coffee-dark hover:text-coffee border border-coffee-beige/80 rounded-brand bg-ivory/50 transition-colors"
+            className="w-9 h-9 inline-flex items-center justify-center rounded-full border-0 bg-coffee/[0.06] hover:bg-coffee/[0.13] dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-coffee-dark hover:text-coffee transition-all duration-300 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-coffee/35 active:scale-95"
           >
-            {themeMode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {themeMode === 'dark' ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4" />}
           </button>
           <button
             type="button"
@@ -314,6 +314,7 @@ export const CustomerHeader: React.FC = () => {
         )}
       </AnimatePresence>
       </header>
+      <div className="h-[68px] lg:h-[104px] shrink-0" aria-hidden="true" />
     </>
   );
 };

@@ -63,7 +63,7 @@ export const GallerySection: React.FC = () => {
               {section?.title || 'Không Gian & Khoảnh Khắc'}
             </h2>
             <p className="text-sm text-coffee-muted mt-2 max-w-lg">
-              {section?.content?.description || section?.subtitle}
+              {section?.subtitle || section?.content?.description}
             </p>
           </div>
 

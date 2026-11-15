@@ -43,7 +43,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
             </h2>
           </div>
           <p className="text-sm text-coffee-muted max-w-md leading-relaxed">
-            {section?.content?.description || section?.subtitle}
+            {section?.subtitle || section?.content?.description}
           </p>
         </div>
 
