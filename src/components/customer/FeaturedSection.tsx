@@ -354,51 +354,86 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
             )}
           </div>
 
-          {/* Interactive Mini-Deck Selector */}
-          {featuredProducts.length > 1 && (
-            <div className="flex items-stretch gap-3 overflow-x-auto pb-2 no-scrollbar">
-              {featuredProducts.map((item, idx) => {
-                const isSelected = idx === safeIndex;
-                const itemSale =
-                  item.sale_price !== null &&
-                  item.sale_price !== undefined &&
-                  Number(item.sale_price) > 0 &&
-                  Number(item.sale_price) < Number(item.price);
+          {/* Interactive Mini-Deck Grid (Always unclipped; auto-paginates cleanly when > 6 items) */}
+          {featuredProducts.length > 1 && (() => {
+            const DECK_PAGE_SIZE = 6;
+            const totalDeckPages = Math.ceil(featuredProducts.length / DECK_PAGE_SIZE);
+            const currentDeckPage = Math.floor(safeIndex / DECK_PAGE_SIZE);
+            const deckStart = currentDeckPage * DECK_PAGE_SIZE;
+            const visibleDeckItems = featuredProducts.slice(
+              deckStart,
+              deckStart + DECK_PAGE_SIZE
+            );
 
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleSelectIndex(idx)}
-                    className={`group relative w-[148px] sm:w-[176px] shrink-0 rounded-xl p-2 text-left transition-all duration-300 border flex items-center gap-2.5 ${
-                      isSelected
-                        ? 'bg-coffee text-ivory-light border-coffee shadow-editorial -translate-y-0.5'
-                        : 'bg-ivory-light/90 text-coffee-dark border-coffee-beige/80 hover:border-coffee'
-                    }`}
-                  >
-                    <img
-                      src={item.image_url}
-                      alt={item.name}
-                      loading="lazy"
-                      className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg object-cover shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-serif text-xs sm:text-sm font-semibold truncate">
-                        {item.name}
-                      </p>
-                      <p
-                        className={`text-[11px] font-medium mt-0.5 ${
-                          isSelected ? 'text-ivory/85' : 'text-coffee'
+            return (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
+                  {visibleDeckItems.map((item, localIdx) => {
+                    const realIdx = deckStart + localIdx;
+                    const isSelected = realIdx === safeIndex;
+                    const itemSale =
+                      item.sale_price !== null &&
+                      item.sale_price !== undefined &&
+                      Number(item.sale_price) > 0 &&
+                      Number(item.sale_price) < Number(item.price);
+
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleSelectIndex(realIdx)}
+                        className={`group relative rounded-xl p-2 text-left transition-all duration-300 border flex items-center gap-2.5 min-w-0 ${
+                          isSelected
+                            ? 'bg-coffee text-ivory-light border-coffee shadow-editorial -translate-y-0.5'
+                            : 'bg-ivory-light/90 text-coffee-dark border-coffee-beige/80 hover:border-coffee'
                         }`}
                       >
-                        {formatVND(itemSale ? item.sale_price : item.price)}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          loading="lazy"
+                          className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg object-cover shrink-0"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-serif text-xs sm:text-[13px] font-semibold truncate">
+                            {item.name}
+                          </p>
+                          <p
+                            className={`text-[11px] font-medium mt-0.5 ${
+                              isSelected ? 'text-ivory/85' : 'text-coffee'
+                            }`}
+                          >
+                            {formatVND(itemSale ? item.sale_price : item.price)}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {totalDeckPages > 1 && (
+                  <div className="flex items-center justify-center gap-1.5 pt-1">
+                    {Array.from({ length: totalDeckPages }, (_, pageIdx) => {
+                      const activePage = pageIdx === currentDeckPage;
+                      return (
+                        <button
+                          key={pageIdx}
+                          type="button"
+                          onClick={() => handleSelectIndex(pageIdx * DECK_PAGE_SIZE)}
+                          aria-label={`Xem nhóm món nổi bật ${pageIdx + 1}`}
+                          className={`h-2 rounded-full transition-all duration-300 ${
+                            activePage
+                              ? 'w-6 bg-coffee'
+                              : 'w-2 bg-coffee-beige hover:bg-coffee/50'
+                          }`}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
     </section>
