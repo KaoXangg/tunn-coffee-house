@@ -2,11 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Lock } from 'lucide-react';
 import { useSiteData } from '../../contexts/SiteDataContext';
+import { useSeasonalTheme } from '../../contexts/SeasonalThemeContext';
 import { sanitizeUrl } from '../../lib/utils';
 import { BrandLogo } from '../common/BrandLogo';
 
 export const CustomerFooter: React.FC = () => {
   const { settings } = useSiteData();
+  const { effectiveTheme } = useSeasonalTheme();
 
   const navItems =
     Array.isArray(settings.nav_items) && settings.nav_items.length > 0
@@ -20,7 +22,17 @@ export const CustomerFooter: React.FC = () => {
         ];
 
   return (
-    <footer className="bg-[#241914] text-[#F7F5EF] pt-16 pb-12 border-t border-[#4B2E24]">
+    <footer
+      style={
+        effectiveTheme
+          ? {
+              backgroundColor: effectiveTheme.tokens.footerBg,
+              borderColor: effectiveTheme.tokens.border,
+            }
+          : undefined
+      }
+      className="bg-[#241914] text-[#F7F5EF] pt-16 pb-12 border-t border-[#4B2E24] transition-colors duration-300"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-[#4B2E24]/80">
           {/* Brand Column */}

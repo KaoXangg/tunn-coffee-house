@@ -90,10 +90,10 @@ export const CustomerHeader: React.FC = () => {
     <>
       <ScrollProgressBar />
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`sticky top-0 z-50 transition-all duration-300 ${
           scrolled
             ? 'bg-ivory-light/95 backdrop-blur-md border-b border-coffee-beige/80 shadow-editorial'
-            : 'bg-ivory-light/90 backdrop-blur-sm border-b border-coffee-beige/50'
+            : 'bg-ivory-light/95 backdrop-blur-sm border-b border-coffee-beige/50'
         }`}
       >
       {/* Top Editorial Utility Strip (collapses on scroll) */}
@@ -144,7 +144,7 @@ export const CustomerHeader: React.FC = () => {
         <a
           href="#hero"
           onClick={() => handleNavClick('#hero')}
-          className="focus:outline-none group"
+          className="focus:outline-none group shrink-0 whitespace-nowrap"
         >
           <BrandLogo
             size="md"
@@ -155,7 +155,7 @@ export const CustomerHeader: React.FC = () => {
 
         {/* Desktop Navigation */}
         <nav
-          className="hidden lg:flex items-center gap-6 xl:gap-8"
+          className="hidden lg:flex items-center gap-4 xl:gap-6"
           aria-label="Điều hướng chính"
         >
           {navItems.map((item, idx) => {
@@ -165,7 +165,7 @@ export const CustomerHeader: React.FC = () => {
                 key={`${item.href}-${idx}`}
                 href={item.href}
                 onClick={() => handleNavClick(item.href)}
-                className={`relative text-xs uppercase tracking-[0.16em] font-medium transition-colors py-1.5 ${
+                className={`relative whitespace-nowrap text-xs uppercase tracking-[0.14em] font-medium transition-colors py-1.5 ${
                   isActive
                     ? 'text-coffee font-semibold'
                     : 'text-coffee-dark/80 hover:text-coffee'
@@ -212,7 +212,7 @@ export const CustomerHeader: React.FC = () => {
           {isAdmin && (
             <Link
               to="/admin/dashboard"
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-[11px] uppercase tracking-wider font-medium text-coffee border border-coffee-beige hover:bg-ivory transition-colors rounded-brand"
+              className="whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-2 text-[11px] uppercase tracking-wider font-medium text-coffee border border-coffee-beige hover:bg-ivory transition-colors rounded-brand"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Quản trị CMS</span>
@@ -220,7 +220,7 @@ export const CustomerHeader: React.FC = () => {
           )}
           <a
             href={sanitizeUrl(settings.header_cta_href, '#menu')}
-            className={`group inline-flex items-center gap-2 px-5 py-2.5 text-xs uppercase tracking-[0.16em] font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-all duration-300 active:scale-[0.98] ${buttonRadiusClass}`}
+            className={`whitespace-nowrap group inline-flex items-center gap-2 px-4 xl:px-5 py-2.5 text-xs uppercase tracking-[0.14em] font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-all duration-300 active:scale-[0.98] ${buttonRadiusClass}`}
           >
             <span>{settings.header_cta_label || 'Khám phá Thực đơn'}</span>
             <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

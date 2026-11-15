@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { ArrowDownRight } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
+import { useSeasonalTheme } from '../../contexts/SeasonalThemeContext';
 import { DEFAULT_HERO_CONTENT } from '../../lib/defaultData';
 import { TUNN_EASE } from '../common/MotionPrimitives';
 import { sanitizeUrl } from '../../lib/utils';
@@ -9,6 +10,7 @@ import type { HeroSectionContent } from '../../types/database';
 
 export const HeroSection: React.FC = () => {
   const { settings, getSection, themeMode } = useSiteData();
+  const { effectiveTheme } = useSeasonalTheme();
   const section = getSection('hero');
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -44,14 +46,14 @@ export const HeroSection: React.FC = () => {
       ref={sectionRef}
       id="hero"
       style={
-        themeMode === 'dark'
+        themeMode === 'dark' || effectiveTheme
           ? undefined
           : {
               backgroundColor: content.background_color || settings.secondary_bg_color || '#E9E6D8',
               color: content.text_color || settings.text_primary_color || '#241914',
             }
       }
-      className="relative min-h-[92vh] pt-28 pb-16 sm:pt-36 sm:pb-24 lg:pt-40 lg:pb-28 overflow-hidden bg-ivory text-coffee-dark border-b border-coffee-beige/70 flex items-center"
+      className="relative min-h-[85vh] pt-12 pb-16 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28 overflow-hidden bg-ivory text-coffee-dark border-b border-coffee-beige/70 flex items-center"
     >
       {/* Subtle architectural frame lines */}
       <div

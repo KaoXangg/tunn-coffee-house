@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { SiteDataProvider } from './contexts/SiteDataContext';
+import { SeasonalThemeProvider } from './contexts/SeasonalThemeContext';
 import { CustomerHomePage } from './pages/CustomerHomePage';
 import { ProtectedRoute } from './components/admin/ProtectedRoute';
 import { AdminLayout } from './components/admin/AdminLayout';
@@ -77,6 +78,11 @@ const AdminSecurityPage = lazy(() =>
     default: m.AdminSecurityPage,
   }))
 );
+const AdminSeasonalThemesPage = lazy(() =>
+  import('./pages/admin/AdminSeasonalThemesPage').then((m) => ({
+    default: m.AdminSeasonalThemesPage,
+  }))
+);
 
 const PageLoader: React.FC = () => (
   <div className="min-h-[60vh] flex flex-col items-center justify-center text-[#4B2E24]">
@@ -91,7 +97,8 @@ export function App() {
       <ToastProvider>
         <AuthProvider>
           <SiteDataProvider>
-            <BrowserRouter>
+            <SeasonalThemeProvider>
+              <BrowserRouter>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 {/* Customer Website */}
@@ -124,16 +131,18 @@ export function App() {
                   <Route path="settings/seo" element={<AdminSeoPage />} />
                   <Route path="settings/backup" element={<AdminBackupQrPage />} />
                   <Route path="settings/security" element={<AdminSecurityPage />} />
+                  <Route path="seasonal-themes" element={<AdminSeasonalThemesPage />} />
                 </Route>
 
                 {/* Catch-all fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
-          </BrowserRouter>
-        </SiteDataProvider>
-      </AuthProvider>
-    </ToastProvider>
+            </BrowserRouter>
+            </SeasonalThemeProvider>
+          </SiteDataProvider>
+        </AuthProvider>
+      </ToastProvider>
     </MotionConfig>
   );
 }

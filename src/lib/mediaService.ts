@@ -19,6 +19,7 @@ export interface UploadOptions {
   folder?: string;
   allowSvg?: boolean;
   altText?: string;
+  removeWhiteBg?: boolean;
 }
 
 export function validateImageFile(
@@ -73,10 +74,10 @@ export function getImageDimensions(
 }
 
 /**
- * Resize large raster images (max 1600px) and compress to WebP for fast storefront loading.
- * Preserves SVG/transparent PNG fallback if WebP conversion is unsupported or larger.
+ * Resize large raster images (max 1600px), optionally remove edge-connected solid/white
+ * background via BFS flood-fill, and compress to WebP (supporting alpha transparency).
  */
-async function optimizeImageToWebP(file: File): Promise<File> {
+async function optimizeImageToWebP(file: File, removeWhiteBg = false): Promise<File> {
   if (file.type === 'image/svg+xml' || typeof document === 'undefined') {
     return file;
   }
@@ -87,7 +88,7 @@ async function optimizeImageToWebP(file: File): Promise<File> {
 
     img.onload = () => {
       URL.revokeObjectURL(objectUrl);
-      const maxDim = 1600;
+      const maxDim = removeWhiteBg ? 900 : 1600;
       let targetW = img.naturalWidth;
       let targetH = img.naturalHeight;
 
@@ -107,9 +108,14 @@ async function optimizeImageToWebP(file: File): Promise<File> {
       }
 
       ctx.drawImage(img, 0, 0, targetW, targetH);
+
+      if (removeWhiteBg) {
+        removeEdgeConnectedBackground(ctx, targetW, targetH);
+      }
+
       canvas.toBlob(
         (blob) => {
-          if (!blob || (blob.size >= file.size && file.type === 'image/webp')) {
+          if (!blob || (!removeWhiteBg && blob.size >= file.size && file.type === 'image/webp')) {
             resolve(file);
             return;
           }
@@ -121,7 +127,7 @@ async function optimizeImageToWebP(file: File): Promise<File> {
           resolve(webpFile);
         },
         'image/webp',
-        0.85
+        0.88
       );
     };
 
@@ -132,6 +138,77 @@ async function optimizeImageToWebP(file: File): Promise<File> {
 
     img.src = objectUrl;
   });
+}
+
+/**
+ * Flood-fill from all 4 image borders to make light/uniform outer backgrounds transparent
+ * while preserving interior white details (eyes, highlights, teeth).
+ */
+function removeEdgeConnectedBackground(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number
+) {
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const data = imageData.data;
+
+  // Sample top-left corner pixel as reference background color
+  const bgR = data[0];
+  const bgG = data[1];
+  const bgB = data[2];
+  const bgA = data[3];
+
+  // If already transparent at corner, skip
+  if (bgA < 20) return;
+
+  const isLightOrMatchesCorner = (idx: number) => {
+    const r = data[idx];
+    const g = data[idx + 1];
+    const b = data[idx + 2];
+    const a = data[idx + 3];
+    if (a < 20) return true;
+    const isNearWhite = r > 225 && g > 225 && b > 225;
+    const dist = Math.abs(r - bgR) + Math.abs(g - bgG) + Math.abs(b - bgB);
+    return isNearWhite || dist < 55;
+  };
+
+  const visited = new Uint8Array(width * height);
+  const queue = new Int32Array(width * height);
+  let head = 0;
+  let tail = 0;
+
+  const enqueue = (x: number, y: number) => {
+    const pos = y * width + x;
+    if (visited[pos]) return;
+    if (!isLightOrMatchesCorner(pos * 4)) return;
+    visited[pos] = 1;
+    queue[tail++] = pos;
+  };
+
+  for (let x = 0; x < width; x++) {
+    enqueue(x, 0);
+    enqueue(x, height - 1);
+  }
+  for (let y = 0; y < height; y++) {
+    enqueue(0, y);
+    enqueue(width - 1, y);
+  }
+
+  while (head < tail) {
+    const pos = queue[head++];
+    const p4 = pos * 4;
+    data[p4 + 3] = 0;
+
+    const x = pos % width;
+    const y = (pos - x) / width;
+
+    if (x > 0) enqueue(x - 1, y);
+    if (x < width - 1) enqueue(x + 1, y);
+    if (y > 0) enqueue(x, y - 1);
+    if (y < height - 1) enqueue(x, y + 1);
+  }
+
+  ctx.putImageData(imageData, 0, 0);
 }
 
 export async function sanitizeSvgFile(file: File): Promise<{ safe: boolean; error?: string }> {
@@ -160,7 +237,7 @@ export async function uploadMediaFile(
   file: File,
   options: UploadOptions = {}
 ): Promise<{ asset: MediaAsset | null; error: string | null }> {
-  const { folder = 'general', allowSvg = false, altText = '' } = options;
+  const { folder = 'general', allowSvg = false, altText = '', removeWhiteBg = false } = options;
 
   const validation = validateImageFile(file, allowSvg);
   if (!validation.valid) {
@@ -182,7 +259,7 @@ export async function uploadMediaFile(
     };
   }
 
-  const processedFile = await optimizeImageToWebP(file);
+  const processedFile = await optimizeImageToWebP(file, removeWhiteBg);
   const dimensions = await getImageDimensions(processedFile);
   const ext = processedFile.name.split('.').pop()?.toLowerCase() || 'webp';
   const cleanBaseName = processedFile.name

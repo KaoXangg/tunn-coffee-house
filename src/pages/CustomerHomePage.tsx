@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSiteData } from '../contexts/SiteDataContext';
+import { useSeasonalTheme } from '../contexts/SeasonalThemeContext';
 import { trackQrTableScan } from '../lib/analytics';
 import { CustomerHeader } from '../components/customer/CustomerHeader';
 import { HeroSection } from '../components/customer/HeroSection';
@@ -12,6 +13,8 @@ import { GallerySection } from '../components/customer/GallerySection';
 import { ContactSection } from '../components/customer/ContactSection';
 import { CustomerFooter } from '../components/customer/CustomerFooter';
 import { ProductDetailModal } from '../components/customer/ProductDetailModal';
+import { SeasonalEffectsLayer } from '../components/customer/SeasonalEffectsLayer';
+import { SeasonalBanner, SeasonalPreviewBar } from '../components/customer/SeasonalBanner';
 import { BackToTopButton } from '../components/common/MotionPrimitives';
 import type { Product } from '../types/database';
 
@@ -47,9 +50,54 @@ const StorefrontSkeleton: React.FC = () => (
 
 export const CustomerHomePage: React.FC = () => {
   const { sections, loading } = useSiteData();
+  const { effectiveTheme } = useSeasonalTheme();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchParams] = useSearchParams();
   const tableNumber = searchParams.get('table');
+
+  // Synchronize active or previewed seasonal theme tokens onto CSS custom properties
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!effectiveTheme) return;
+
+    const { tokens } = effectiveTheme;
+    const prev = {
+      primary: root.style.getPropertyValue('--color-primary'),
+      bgSecondary: root.style.getPropertyValue('--color-bg-secondary'),
+      bgPrimary: root.style.getPropertyValue('--color-bg-primary'),
+      textPrimary: root.style.getPropertyValue('--color-text-primary'),
+      textMuted: root.style.getPropertyValue('--color-text-muted'),
+      accent: root.style.getPropertyValue('--color-accent'),
+    };
+
+    root.style.setProperty('--color-primary', tokens.primary);
+    root.style.setProperty('--color-bg-secondary', tokens.surface || tokens.secondary);
+    root.style.setProperty('--color-bg-primary', tokens.background);
+    root.style.setProperty('--color-text-primary', tokens.text);
+    root.style.setProperty('--color-text-muted', tokens.textMuted);
+    root.style.setProperty('--color-accent', tokens.border || tokens.accent);
+
+    root.style.setProperty('--theme-primary', tokens.primary);
+    root.style.setProperty('--theme-secondary', tokens.secondary);
+    root.style.setProperty('--theme-accent', tokens.accent);
+    root.style.setProperty('--theme-background', tokens.background);
+    root.style.setProperty('--theme-surface', tokens.surface);
+    root.style.setProperty('--theme-text', tokens.text);
+    root.style.setProperty('--theme-border', tokens.border);
+    root.style.setProperty('--theme-header', tokens.headerBg);
+    root.style.setProperty('--theme-footer', tokens.footerBg);
+    root.style.setProperty('--theme-button', tokens.buttonBg);
+    root.style.setProperty('--theme-glow', tokens.glow);
+
+    return () => {
+      if (prev.primary) root.style.setProperty('--color-primary', prev.primary);
+      if (prev.bgSecondary) root.style.setProperty('--color-bg-secondary', prev.bgSecondary);
+      if (prev.bgPrimary) root.style.setProperty('--color-bg-primary', prev.bgPrimary);
+      if (prev.textPrimary) root.style.setProperty('--color-text-primary', prev.textPrimary);
+      if (prev.textMuted) root.style.setProperty('--color-text-muted', prev.textMuted);
+      if (prev.accent) root.style.setProperty('--color-accent', prev.accent);
+    };
+  }, [effectiveTheme]);
 
   useEffect(() => {
     if (tableNumber) {
@@ -93,8 +141,10 @@ export const CustomerHomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-ivory-light text-coffee-dark">
+    <div className="min-h-screen flex flex-col bg-ivory-light text-coffee-dark relative">
+      <SeasonalEffectsLayer />
       <CustomerHeader />
+      <SeasonalBanner />
       <main className="flex-1">
         {tableNumber && (
           <div className="fixed bottom-4 left-4 z-40 px-4 py-2 bg-[#241914] text-[#F7F5EF] border border-[#4B2E24] rounded-brand shadow-lg text-xs font-medium">
@@ -111,6 +161,7 @@ export const CustomerHomePage: React.FC = () => {
       </main>
       <CustomerFooter />
       <BackToTopButton />
+      <SeasonalPreviewBar />
 
       <ProductDetailModal
         product={selectedProduct}

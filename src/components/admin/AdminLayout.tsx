@@ -27,6 +27,7 @@ import {
   Clock,
   Crown,
   Lock,
+  PartyPopper,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSiteData } from '../../contexts/SiteDataContext';
@@ -60,6 +61,7 @@ const CMS_NAV_ITEMS: NavGroupItem[] = [
   { label: 'Nội dung Trang chủ', to: '/admin/content', icon: FileText, ownerOnly: true },
   { label: 'Nhận diện Thương hiệu', to: '/admin/brand', icon: Award, ownerOnly: true },
   { label: 'Màu sắc & Giao diện', to: '/admin/settings/appearance', icon: Palette, ownerOnly: true },
+  { label: 'Giao diện Lễ hội (Seasonal)', to: '/admin/seasonal-themes', icon: PartyPopper, ownerOnly: true },
   { label: 'Thông tin Liên hệ', to: '/admin/settings/contact', icon: PhoneCall, ownerOnly: true },
   { label: 'Cấu hình SEO Google', to: '/admin/settings/seo', icon: Globe, ownerOnly: true },
   { label: 'Sao lưu & Mã QR Menu', to: '/admin/settings/backup', icon: QrCode, ownerOnly: true },
@@ -568,9 +570,9 @@ export const AdminLayout: React.FC = () => {
           ) : (
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
             >
               <Outlet />
             </motion.div>
