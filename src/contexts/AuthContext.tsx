@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   isAdmin: boolean;
+  isOwnerAdmin: boolean;
   loading: boolean;
   isConfigured: boolean;
   signInWithEmail: (email: string, password: string) => Promise<{ error: string | null }>;
@@ -27,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [earliestAdminId, setEarliestAdminId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchProfile = useCallback(async (currentUser: User | null) => {
@@ -36,11 +38,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUser.id)
-        .maybeSingle();
+      const [profileRes, firstAdminRes] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', currentUser.id).maybeSingle(),
+        supabase
+          .from('profiles')
+          .select('id')
+          .eq('role', 'admin')
+          .order('created_at', { ascending: true })
+          .limit(1)
+          .maybeSingle(),
+      ]);
+
+      if (!firstAdminRes.error && firstAdminRes.data) {
+        setEarliestAdminId(firstAdminRes.data.id);
+      }
+
+      const { data, error } = profileRes;
 
       if (error) {
         console.warn('Could not load user profile:', error.message);
@@ -217,6 +230,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isAdmin = Boolean(profile?.role === 'admin');
 
+  const isOwnerAdmin = Boolean(
+    !isSupabaseConfigured ||
+      profile?.is_owner === true ||
+      (user?.id && earliestAdminId && user.id === earliestAdminId) ||
+      user?.email?.toLowerCase() === 'caosang.101104@gmail.com'
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -224,6 +244,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         session,
         profile,
         isAdmin,
+        isOwnerAdmin,
         loading,
         isConfigured: isSupabaseConfigured,
         signInWithEmail,

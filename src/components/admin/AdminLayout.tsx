@@ -24,6 +24,8 @@ import {
   Database,
   AlertCircle,
   Clock,
+  Crown,
+  Lock,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSiteData } from '../../contexts/SiteDataContext';
@@ -36,27 +38,31 @@ interface NavGroupItem {
   label: string;
   to: string;
   icon: React.ComponentType<{ className?: string }>;
+  ownerOnly?: boolean;
 }
 
 const CMS_NAV_ITEMS: NavGroupItem[] = [
-  { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard },
-  { label: 'Sản phẩm (Products)', to: '/admin/products', icon: Coffee },
-  { label: 'Danh mục (Categories)', to: '/admin/categories', icon: FolderTree },
-  { label: 'Thư viện Media', to: '/admin/media', icon: ImageIcon },
-  { label: 'Hero Editor', to: '/admin/sections/hero', icon: Sparkles },
-  { label: 'Nội dung Website', to: '/admin/content', icon: FileText },
-  { label: 'Khuyến mãi (Promotions)', to: '/admin/promotions', icon: Megaphone },
-  { label: 'Thư viện Ảnh (Gallery)', to: '/admin/gallery', icon: GalleryHorizontalEnd },
-  { label: 'Thương hiệu (Brand)', to: '/admin/brand', icon: Award },
-  { label: 'Giao diện (Appearance)', to: '/admin/settings/appearance', icon: Palette },
-  { label: 'Liên hệ (Contact)', to: '/admin/settings/contact', icon: PhoneCall },
-  { label: 'Cấu hình SEO', to: '/admin/settings/seo', icon: Globe },
-  { label: 'Sao lưu & Mã QR Menu', to: '/admin/settings/backup', icon: QrCode },
-  { label: 'Bảo mật & Tài khoản', to: '/admin/settings/security', icon: ShieldCheck },
+  // Basic Operational Pages (Accessible by Sub-Managers & Owner Admin)
+  { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard, ownerOnly: false },
+  { label: 'Sản phẩm (Products)', to: '/admin/products', icon: Coffee, ownerOnly: false },
+  { label: 'Danh mục (Categories)', to: '/admin/categories', icon: FolderTree, ownerOnly: false },
+  { label: 'Khuyến mãi (Promotions)', to: '/admin/promotions', icon: Megaphone, ownerOnly: false },
+  { label: 'Thư viện Ảnh (Gallery)', to: '/admin/gallery', icon: GalleryHorizontalEnd, ownerOnly: false },
+  { label: 'Thư viện Media', to: '/admin/media', icon: ImageIcon, ownerOnly: false },
+
+  // System, Brand & Security Pages (Accessible ONLY by Root Owner Admin)
+  { label: 'Hero Editor', to: '/admin/sections/hero', icon: Sparkles, ownerOnly: true },
+  { label: 'Nội dung Website', to: '/admin/content', icon: FileText, ownerOnly: true },
+  { label: 'Thương hiệu (Brand)', to: '/admin/brand', icon: Award, ownerOnly: true },
+  { label: 'Giao diện (Appearance)', to: '/admin/settings/appearance', icon: Palette, ownerOnly: true },
+  { label: 'Liên hệ (Contact)', to: '/admin/settings/contact', icon: PhoneCall, ownerOnly: true },
+  { label: 'Cấu hình SEO', to: '/admin/settings/seo', icon: Globe, ownerOnly: true },
+  { label: 'Sao lưu & Mã QR Menu', to: '/admin/settings/backup', icon: QrCode, ownerOnly: true },
+  { label: 'Bảo mật & Tài khoản', to: '/admin/settings/security', icon: ShieldCheck, ownerOnly: true },
 ];
 
 export const AdminLayout: React.FC = () => {
-  const { user, profile, signOut, isConfigured } = useAuth();
+  const { user, profile, isOwnerAdmin, signOut, isConfigured } = useAuth();
   const { isLiveDatabase, logAdminActivity, refreshAll } = useSiteData();
   const toast = useToast();
   const location = useLocation();
@@ -69,9 +75,13 @@ export const AdminLayout: React.FC = () => {
   const prevPageRef = useRef<{ path: string; label: string; enteredAt: number } | null>(null);
   const lastInteractionRef = useRef<number>(Date.now());
 
+  const basicNavItems = CMS_NAV_ITEMS.filter((item) => !item.ownerOnly);
+  const ownerNavItems = CMS_NAV_ITEMS.filter((item) => item.ownerOnly);
+
   const currentNav = CMS_NAV_ITEMS.find((item) =>
     location.pathname.startsWith(item.to)
   );
+  const isBlockedOwnerRoute = Boolean(currentNav?.ownerOnly && !isOwnerAdmin);
 
   // Initialize session start time & live second counter
   useEffect(() => {
@@ -242,32 +252,88 @@ export const AdminLayout: React.FC = () => {
           </button>
         </div>
 
-        <nav className="flex-1 py-4 px-2.5 space-y-1 overflow-y-auto">
-          {CMS_NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                title={collapsed ? item.label : undefined}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-brand text-xs font-medium tracking-wide transition-colors ${
-                    isActive
-                      ? 'bg-[#4B2E24] text-[#F7F5EF] font-semibold shadow-sm'
-                      : 'text-[#D5C6AD]/80 hover:bg-[#4B2E24]/40 hover:text-white'
-                  }`
-                }
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-                {!collapsed && <span className="truncate">{item.label}</span>}
-              </NavLink>
-            );
-          })}
+        <nav className="flex-1 py-4 px-2.5 space-y-4 overflow-y-auto">
+          <div className="space-y-1">
+            {!collapsed && (
+              <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-[#D5C6AD]/50">
+                Vận hành cơ bản
+              </p>
+            )}
+            {basicNavItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  title={collapsed ? item.label : undefined}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-3 py-2.5 rounded-brand text-xs font-medium tracking-wide transition-colors ${
+                      isActive
+                        ? 'bg-[#4B2E24] text-[#F7F5EF] font-semibold shadow-sm'
+                        : 'text-[#D5C6AD]/80 hover:bg-[#4B2E24]/40 hover:text-white'
+                    }`
+                  }
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  {!collapsed && <span className="truncate">{item.label}</span>}
+                </NavLink>
+              );
+            })}
+          </div>
+
+          {isOwnerAdmin && (
+            <div className="space-y-1 pt-2 border-t border-[#4B2E24]/60">
+              {!collapsed && (
+                <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-amber-300/80 flex items-center gap-1">
+                  <Crown className="w-3 h-3" />
+                  <span>Toàn quyền Admin Gốc</span>
+                </p>
+              )}
+              {ownerNavItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    title={collapsed ? item.label : undefined}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2.5 rounded-brand text-xs font-medium tracking-wide transition-colors ${
+                        isActive
+                          ? 'bg-[#4B2E24] text-[#F7F5EF] font-semibold shadow-sm'
+                          : 'text-[#D5C6AD]/80 hover:bg-[#4B2E24]/40 hover:text-white'
+                      }`
+                    }
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    {!collapsed && <span className="truncate">{item.label}</span>}
+                  </NavLink>
+                );
+              })}
+            </div>
+          )}
         </nav>
 
         <div className="p-3 border-t border-[#4B2E24] space-y-2">
           {!collapsed && (
-            <div className="px-2 py-1.5">
+            <div className="px-2 py-1.5 space-y-1">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded ${
+                    isOwnerAdmin
+                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30'
+                      : 'bg-[#4B2E24] text-[#D5C6AD]'
+                  }`}
+                >
+                  {isOwnerAdmin ? (
+                    <>
+                      <Crown className="w-3 h-3" />
+                      <span>Admin Gốc</span>
+                    </>
+                  ) : (
+                    <span>Quản lý con (Cơ bản)</span>
+                  )}
+                </span>
+              </div>
               <p className="text-xs font-semibold text-[#F7F5EF] truncate">
                 {profile?.full_name || user?.email || 'Admin Mode'}
               </p>
@@ -311,27 +377,61 @@ export const AdminLayout: React.FC = () => {
               </button>
             </div>
 
-            <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-              {CMS_NAV_ITEMS.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setMobileDrawerOpen(false)}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-2.5 rounded-brand text-xs font-medium ${
-                        isActive
-                          ? 'bg-[#4B2E24] text-[#F7F5EF] font-semibold'
-                          : 'text-[#D5C6AD]/80 hover:bg-[#4B2E24]/40 hover:text-white'
-                      }`
-                    }
-                  >
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span>{item.label}</span>
-                  </NavLink>
-                );
-              })}
+            <nav className="flex-1 py-4 px-3 space-y-4 overflow-y-auto">
+              <div className="space-y-1">
+                <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-[#D5C6AD]/50">
+                  Vận hành cơ bản
+                </p>
+                {basicNavItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      onClick={() => setMobileDrawerOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2.5 rounded-brand text-xs font-medium ${
+                          isActive
+                            ? 'bg-[#4B2E24] text-[#F7F5EF] font-semibold'
+                            : 'text-[#D5C6AD]/80 hover:bg-[#4B2E24]/40 hover:text-white'
+                        }`
+                      }
+                    >
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span>{item.label}</span>
+                    </NavLink>
+                  );
+                })}
+              </div>
+
+              {isOwnerAdmin && (
+                <div className="space-y-1 pt-2 border-t border-[#4B2E24]/60">
+                  <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-amber-300/80 flex items-center gap-1">
+                    <Crown className="w-3 h-3" />
+                    <span>Toàn quyền Admin Gốc</span>
+                  </p>
+                  {ownerNavItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => setMobileDrawerOpen(false)}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 px-3 py-2.5 rounded-brand text-xs font-medium ${
+                            isActive
+                              ? 'bg-[#4B2E24] text-[#F7F5EF] font-semibold'
+                              : 'text-[#D5C6AD]/80 hover:bg-[#4B2E24]/40 hover:text-white'
+                          }`
+                        }
+                      >
+                        <Icon className="w-4 h-4 shrink-0" />
+                        <span>{item.label}</span>
+                      </NavLink>
+                    );
+                  })}
+                </div>
+              )}
             </nav>
 
             <div className="p-4 border-t border-[#4B2E24]">
@@ -409,7 +509,34 @@ export const AdminLayout: React.FC = () => {
         </header>
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
-          <Outlet />
+          {isBlockedOwnerRoute ? (
+            <div className="py-16 flex items-center justify-center">
+              <div className="max-w-md w-full bg-white border border-[#D5C6AD] rounded-brand p-8 text-center shadow-lg space-y-4">
+                <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center mx-auto">
+                  <Lock className="w-6 h-6" />
+                </div>
+                <h2 className="font-serif text-2xl font-semibold text-[#241914]">
+                  Chỉ Dành Cho Admin Gốc
+                </h2>
+                <p className="text-sm text-[#8C7565] leading-relaxed">
+                  Tài khoản <strong>Quản lý con</strong> chỉ được phép truy cập các chức năng vận hành cơ bản (Dashboard, Sản phẩm, Danh mục, Khuyến mãi, Thư viện ảnh & Media).
+                </p>
+                <p className="text-xs text-[#8C7565]">
+                  Mục <strong>"{currentNav?.label}"</strong> thuộc quyền quản trị hệ thống của <strong>Admin Gốc (Chủ quán)</strong>.
+                </p>
+                <div className="pt-2">
+                  <Link
+                    to="/admin/products"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors"
+                  >
+                    <span>Về Quản Lý Sản Phẩm</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <Outlet />
+          )}
         </main>
       </div>
     </div>

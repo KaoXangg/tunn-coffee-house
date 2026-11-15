@@ -117,3 +117,18 @@ CREATE POLICY "Owner can delete activity_logs"
   ON public.admin_activity_logs
   FOR DELETE
   USING (public.is_owner_admin());
+
+-- 7. Only Root Owner can modify site_settings (Brand, Appearance, Contact, SEO) and page_sections (Hero, Content)
+DROP POLICY IF EXISTS "Admins can manage site_settings" ON public.site_settings;
+CREATE POLICY "Owner can manage site_settings"
+  ON public.site_settings
+  FOR ALL
+  USING (public.is_owner_admin())
+  WITH CHECK (public.is_owner_admin());
+
+DROP POLICY IF EXISTS "Admins can manage page_sections" ON public.page_sections;
+CREATE POLICY "Owner can manage page_sections"
+  ON public.page_sections
+  FOR ALL
+  USING (public.is_owner_admin())
+  WITH CHECK (public.is_owner_admin());

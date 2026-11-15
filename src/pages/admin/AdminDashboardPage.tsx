@@ -14,10 +14,12 @@ import {
   ArrowUpRight,
   RefreshCw,
 } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { formatVND, formatDateVi } from '../../lib/utils';
 
 export const AdminDashboardPage: React.FC = () => {
+  const { user, isOwnerAdmin } = useAuth();
   const {
     products,
     categories,
@@ -28,6 +30,14 @@ export const AdminDashboardPage: React.FC = () => {
     loading,
     refreshAll,
   } = useSiteData();
+
+  const displayedLogs = isOwnerAdmin
+    ? activityLogs.filter((l) => l.entity_type !== 'session_heartbeat')
+    : activityLogs.filter(
+        (l) =>
+          l.entity_type !== 'session_heartbeat' &&
+          (l.actor_email || '').toLowerCase() === (user?.email || '').toLowerCase()
+      );
 
   const visibleProductsCount = products.filter((p) => p.is_visible).length;
   const hiddenProductsCount = products.filter((p) => !p.is_visible).length;
@@ -180,31 +190,63 @@ export const AdminDashboardPage: React.FC = () => {
             <ArrowUpRight className="w-4 h-4 text-[#8C7565]" />
           </Link>
 
-          <Link
-            to="/admin/sections/hero"
-            className="flex items-center justify-between p-4 border border-[#D5C6AD] rounded-brand hover:bg-[#E9E6D8]/40 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <Sparkles className="w-5 h-5 text-[#4B2E24]" />
-              <span className="text-xs font-semibold uppercase tracking-wider">
-                Chỉnh sửa Hero Banner
-              </span>
-            </div>
-            <ArrowUpRight className="w-4 h-4 text-[#8C7565]" />
-          </Link>
+          {isOwnerAdmin ? (
+            <>
+              <Link
+                to="/admin/sections/hero"
+                className="flex items-center justify-between p-4 border border-[#D5C6AD] rounded-brand hover:bg-[#E9E6D8]/40 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Sparkles className="w-5 h-5 text-[#4B2E24]" />
+                  <span className="text-xs font-semibold uppercase tracking-wider">
+                    Chỉnh sửa Hero Banner
+                  </span>
+                </div>
+                <ArrowUpRight className="w-4 h-4 text-[#8C7565]" />
+              </Link>
 
-          <Link
-            to="/admin/brand"
-            className="flex items-center justify-between p-4 border border-[#D5C6AD] rounded-brand hover:bg-[#E9E6D8]/40 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <Award className="w-5 h-5 text-[#4B2E24]" />
-              <span className="text-xs font-semibold uppercase tracking-wider">
-                Đổi Logo & Thương hiệu
-              </span>
-            </div>
-            <ArrowUpRight className="w-4 h-4 text-[#8C7565]" />
-          </Link>
+              <Link
+                to="/admin/brand"
+                className="flex items-center justify-between p-4 border border-[#D5C6AD] rounded-brand hover:bg-[#E9E6D8]/40 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Award className="w-5 h-5 text-[#4B2E24]" />
+                  <span className="text-xs font-semibold uppercase tracking-wider">
+                    Đổi Logo & Thương hiệu
+                  </span>
+                </div>
+                <ArrowUpRight className="w-4 h-4 text-[#8C7565]" />
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/admin/categories"
+                className="flex items-center justify-between p-4 border border-[#D5C6AD] rounded-brand hover:bg-[#E9E6D8]/40 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <FolderTree className="w-5 h-5 text-[#4B2E24]" />
+                  <span className="text-xs font-semibold uppercase tracking-wider">
+                    Quản lý Danh mục
+                  </span>
+                </div>
+                <ArrowUpRight className="w-4 h-4 text-[#8C7565]" />
+              </Link>
+
+              <Link
+                to="/admin/promotions"
+                className="flex items-center justify-between p-4 border border-[#D5C6AD] rounded-brand hover:bg-[#E9E6D8]/40 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Megaphone className="w-5 h-5 text-[#4B2E24]" />
+                  <span className="text-xs font-semibold uppercase tracking-wider">
+                    Quản lý Khuyến mãi
+                  </span>
+                </div>
+                <ArrowUpRight className="w-4 h-4 text-[#8C7565]" />
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
@@ -277,25 +319,35 @@ export const AdminDashboardPage: React.FC = () => {
 
         {/* Recent Admin Activity Logs */}
         <div className="lg:col-span-5 bg-white border border-[#D5C6AD] rounded-brand p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Clock className="w-4 h-4 text-[#4B2E24]" />
-            <h2 className="font-serif text-xl font-semibold text-[#241914]">
-              Hoạt Động Gần Đây
-            </h2>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-[#4B2E24]" />
+              <h2 className="font-serif text-xl font-semibold text-[#241914]">
+                {isOwnerAdmin ? 'Hoạt Động Gần Đây' : 'Hoạt Động Của Bạn'}
+              </h2>
+            </div>
+            {isOwnerAdmin && (
+              <Link
+                to="/admin/settings/security"
+                className="text-xs font-semibold uppercase tracking-wider text-[#4B2E24] hover:underline"
+              >
+                Chi tiết →
+              </Link>
+            )}
           </div>
 
-          {activityLogs.length === 0 ? (
+          {displayedLogs.length === 0 ? (
             <div className="py-10 text-center border border-dashed border-[#D5C6AD] rounded-brand bg-[#F7F5EF]/50 p-4">
               <p className="text-sm font-medium text-[#241914]">
                 Chưa có nhật ký chỉnh sửa mới
               </p>
               <p className="text-xs text-[#8C7565] mt-1">
-                Mọi thao tác thêm, sửa, xóa sản phẩm hoặc cập nhật giao diện sẽ được ghi lại tại đây.
+                Mọi thao tác thêm, sửa, xóa sản phẩm sẽ được ghi lại tại đây.
               </p>
             </div>
           ) : (
             <div className="space-y-3.5 max-h-80 overflow-y-auto pr-1">
-              {activityLogs.map((log) => (
+              {displayedLogs.slice(0, 15).map((log) => (
                 <div
                   key={log.id}
                   className="p-3 bg-[#F7F5EF] border border-[#D5C6AD]/70 rounded-brand text-xs"
