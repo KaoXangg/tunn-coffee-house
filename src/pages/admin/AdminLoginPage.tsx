@@ -34,6 +34,7 @@ export const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [submitting, setSubmitting] = useState(false);
+  const [accountLockedMessage, setAccountLockedMessage] = useState<string | null>(null);
 
   // Brute-force Rate-limit Lockout State
   const [lockoutRemainingSec, setLockoutRemainingSec] = useState<number>(0);
@@ -69,9 +70,21 @@ export const AdminLoginPage: React.FC = () => {
     }
 
     setSubmitting(true);
+    setAccountLockedMessage(null);
     try {
       const { error } = await signInWithEmail(values.email, values.password);
       if (error) {
+        if (error === 'ACCOUNT_LOCKED') {
+          setAccountLockedMessage(
+            'Tài khoản quản lý này đã bị khóa bởi Admin Gốc (Chủ quán). Vui lòng liên hệ Chủ quán để được mở khóa.'
+          );
+          toast.error(
+            'Tài khoản đã bị khóa',
+            'Tài khoản của bạn hiện đang bị khóa quyền truy cập bởi Admin Gốc.'
+          );
+          return;
+        }
+
         const currentAttempts = Number(localStorage.getItem(ATTEMPTS_KEY) || 0) + 1;
         localStorage.setItem(ATTEMPTS_KEY, String(currentAttempts));
 
@@ -139,6 +152,16 @@ export const AdminLoginPage: React.FC = () => {
               <div>
                 <strong>Chế độ bảo vệ chống dò mật khẩu đang bật:</strong> Vui lòng đợi{' '}
                 <span className="font-bold">{lockoutRemainingSec} giây</span> trước khi thử đăng nhập lại.
+              </div>
+            </div>
+          )}
+
+          {accountLockedMessage && (
+            <div className="mb-5 p-3.5 bg-red-50 border border-red-300 rounded-brand text-xs text-red-900 flex items-start gap-2.5">
+              <ShieldAlert className="w-4 h-4 text-red-700 shrink-0 mt-0.5" />
+              <div>
+                <strong className="block mb-0.5">Tài Khoản Đã Bị Khóa</strong>
+                <span>{accountLockedMessage}</span>
               </div>
             </div>
           )}

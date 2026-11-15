@@ -23,7 +23,7 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
-  // If user is logged in on Supabase but does not have 'admin' role in profiles
+  // If user is logged in on Supabase but account is locked (not 'admin')
   if (isConfigured && user && profile && !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7F5EF] p-6">
@@ -32,21 +32,14 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
             <ShieldAlert className="w-6 h-6" />
           </div>
           <h2 className="font-serif text-2xl font-semibold text-[#241914]">
-            Không Đủ Quyền Truy Cập
+            Tài Khoản Đã Bị Khóa
           </h2>
-          <p className="text-sm text-[#8C7565] mt-2 leading-relaxed">
-            Tài khoản <strong>{user.email}</strong> hiện đang có vai trò{' '}
-            <code className="px-1.5 py-0.5 bg-[#E9E6D8] text-[#241914] rounded">
-              {profile.role}
-            </code>
-            . Chỉ tài khoản có vai trò <code className="font-semibold">admin</code> mới được phép chỉnh sửa nội dung hệ thống.
+          <p className="text-sm text-[#8C7565] mt-3 leading-relaxed">
+            Tài khoản <strong>{user.email}</strong> hiện đã bị tạm khóa quyền truy cập hệ thống quản trị bởi <strong>Admin Gốc (Chủ quán)</strong>.
           </p>
-          <div className="mt-6 p-3.5 bg-[#E9E6D8]/50 border border-[#D5C6AD] rounded-brand text-left text-xs text-[#241914] space-y-1">
-            <p className="font-semibold">Cách cấp quyền Admin trên Supabase:</p>
-            <p className="font-mono text-[11px] bg-white p-2 rounded border border-[#D5C6AD]">
-              UPDATE public.profiles SET role = &apos;admin&apos; WHERE email = &apos;{user.email}&apos;;
-            </p>
-          </div>
+          <p className="text-xs text-[#8C7565] mt-2">
+            Vui lòng liên hệ trực tiếp với Chủ quán nếu bạn cần mở khóa lại tài khoản.
+          </p>
           <div className="mt-6 flex items-center justify-center gap-3">
             <Link
               to="/"
