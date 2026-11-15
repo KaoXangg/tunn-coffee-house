@@ -149,16 +149,16 @@ export const CustomerHomePage: React.FC = () => {
       <CustomerHeader />
       <SeasonalBanner />
       <main className="flex-1">
-        <div className="fixed bottom-5 left-5 z-40 flex items-center gap-2">
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 max-w-[calc(100vw-2rem)]">
           {tableNumber && (
-            <div className="px-3.5 py-2 bg-[#241914] text-[#F7F5EF] border border-[#4B2E24] rounded-brand shadow-lg text-xs font-medium">
+            <div className="px-3.5 py-2 bg-[#241914]/95 backdrop-blur-sm text-[#F7F5EF] border border-[#4B2E24] rounded-full shadow-lg text-xs font-medium whitespace-nowrap">
               Đang xem tại <strong className="text-[#D5C6AD]">Bàn {tableNumber}</strong>
             </div>
           )}
           <button
             type="button"
             onClick={() => setFeedbackOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-ivory-light/95 backdrop-blur-sm text-coffee-dark border border-coffee-beige hover:border-coffee rounded-brand shadow-lg text-xs font-semibold transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-ivory-light/95 backdrop-blur-sm text-coffee-dark border border-coffee-beige hover:border-coffee rounded-full shadow-lg text-xs font-semibold transition-colors whitespace-nowrap"
           >
             <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
             <span>Đánh giá</span>

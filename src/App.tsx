@@ -83,6 +83,11 @@ const AdminSeasonalThemesPage = lazy(() =>
     default: m.AdminSeasonalThemesPage,
   }))
 );
+const AdminFeedbackPage = lazy(() =>
+  import('./pages/admin/AdminFeedbackPage').then((m) => ({
+    default: m.AdminFeedbackPage,
+  }))
+);
 
 const PageLoader: React.FC = () => (
   <div className="min-h-[60vh] flex flex-col items-center justify-center text-[#4B2E24]">
@@ -132,6 +137,7 @@ export function App() {
                   <Route path="settings/backup" element={<AdminBackupQrPage />} />
                   <Route path="settings/security" element={<AdminSecurityPage />} />
                   <Route path="seasonal-themes" element={<AdminSeasonalThemesPage />} />
+                  <Route path="feedback" element={<AdminFeedbackPage />} />
                 </Route>
 
                 {/* Catch-all fallback */}

@@ -314,7 +314,7 @@ export const CustomerHeader: React.FC = () => {
         )}
       </AnimatePresence>
       </header>
-      <div className="h-[68px] lg:h-[104px] shrink-0" aria-hidden="true" />
+      <div className="h-[76px] sm:h-[80px] lg:h-[116px] shrink-0" aria-hidden="true" />
     </>
   );
 };

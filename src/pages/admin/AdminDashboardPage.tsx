@@ -15,23 +15,14 @@ import {
   RefreshCw,
   QrCode,
   TrendingUp,
-  Star,
-  Trash2,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSiteData } from '../../contexts/SiteDataContext';
-import { useToast } from '../../contexts/ToastContext';
 import { formatVND, formatDateVi } from '../../lib/utils';
 import { fetchCustomerEvents, type CustomerEventRecord } from '../../lib/analytics';
-import {
-  fetchTableFeedback,
-  deleteTableFeedback,
-  type TableFeedbackRecord,
-} from '../../lib/feedback';
 
 export const AdminDashboardPage: React.FC = () => {
   const { user, isOwnerAdmin } = useAuth();
-  const toast = useToast();
   const {
     products,
     categories,
@@ -45,33 +36,13 @@ export const AdminDashboardPage: React.FC = () => {
 
   const [customerEvents, setCustomerEvents] = useState<CustomerEventRecord[]>([]);
   const [analyticsSource, setAnalyticsSource] = useState<'supabase' | 'local'>('local');
-  const [feedbackItems, setFeedbackItems] = useState<TableFeedbackRecord[]>([]);
 
   useEffect(() => {
     fetchCustomerEvents().then(({ events, source }) => {
       setCustomerEvents(events);
       setAnalyticsSource(source);
     });
-    fetchTableFeedback().then(({ items }) => {
-      setFeedbackItems(items);
-    });
   }, [loading]);
-
-  const avgRating = useMemo(() => {
-    if (feedbackItems.length === 0) return 0;
-    const sum = feedbackItems.reduce((acc, item) => acc + item.rating, 0);
-    return Number((sum / feedbackItems.length).toFixed(1));
-  }, [feedbackItems]);
-
-  const handleDeleteFeedback = async (id: string) => {
-    const { error } = await deleteTableFeedback(id);
-    if (error) {
-      toast.error(error);
-      return;
-    }
-    setFeedbackItems((prev) => prev.filter((item) => item.id !== id));
-    toast.success('Đã xóa đánh giá.');
-  };
 
   const analyticsSummary = useMemo(() => {
     const todayPrefix = new Date().toISOString().slice(0, 10);
@@ -570,111 +541,6 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           )}
         </div>
-      </div>
-
-      {/* Customer Table Feedback Summary */}
-      <div className="bg-white border border-[#D5C6AD] rounded-brand p-6">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
-          <div className="flex items-center gap-2.5">
-            <Star className="w-5 h-5 fill-amber-400 text-amber-500" />
-            <div>
-              <h2 className="font-serif text-xl font-semibold text-[#241914]">
-                Đánh Giá Trải Nghiệm Tại Bàn
-              </h2>
-              <p className="text-xs text-[#8C7565]">
-                Tổng hợp góp ý nhanh từ khách hàng khi quét mã QR tại quán
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="px-4 py-2 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand text-center">
-              <p className="font-serif text-xl font-bold text-[#241914]">
-                {feedbackItems.length > 0 ? `${avgRating} ★` : '—'}
-              </p>
-              <p className="text-[10px] uppercase tracking-wider text-[#8C7565]">
-                {feedbackItems.length} đánh giá
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {feedbackItems.length === 0 ? (
-          <div className="py-8 text-center border border-dashed border-[#D5C6AD] rounded-brand bg-[#F7F5EF]/50 p-4">
-            <p className="text-sm font-medium text-[#241914]">
-              Chưa có đánh giá nào từ khách hàng
-            </p>
-            <p className="text-xs text-[#8C7565] mt-1">
-              Khách hàng có thể bấm nút &ldquo;Đánh giá&rdquo; ở góc màn hình khi xem thực đơn.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {feedbackItems.slice(0, 9).map((fb) => (
-              <div
-                key={fb.id}
-                className="p-4 bg-[#F7F5EF] border border-[#D5C6AD]/80 rounded-brand flex flex-col justify-between gap-3"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-0.5">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star
-                          key={s}
-                          className={`w-3.5 h-3.5 ${
-                            s <= fb.rating
-                              ? 'fill-amber-400 text-amber-500'
-                              : 'text-[#D5C6AD]'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {fb.table_number && (
-                        <span className="px-2 py-0.5 text-[10px] font-semibold bg-[#4B2E24] text-[#F7F5EF] rounded-brand">
-                          Bàn {fb.table_number}
-                        </span>
-                      )}
-                      {isOwnerAdmin && (
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteFeedback(fb.id)}
-                          className="text-[#8C7565] hover:text-red-600 transition-colors"
-                          title="Xóa đánh giá"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {fb.tags && fb.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {fb.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-0.5 text-[10px] bg-white border border-[#D5C6AD] text-[#4B2E24] rounded-brand"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {fb.comment && (
-                    <p className="text-xs text-[#241914] mt-2 leading-relaxed">
-                      &ldquo;{fb.comment}&rdquo;
-                    </p>
-                  )}
-                </div>
-
-                <p className="text-[10px] text-[#8C7565]">
-                  {formatDateVi(fb.created_at)}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

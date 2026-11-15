@@ -28,6 +28,7 @@ import {
   Crown,
   Lock,
   PartyPopper,
+  Star,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSiteData } from '../../contexts/SiteDataContext';
@@ -55,6 +56,7 @@ const CMS_NAV_ITEMS: NavGroupItem[] = [
   { label: 'Chương trình Khuyến mãi', to: '/admin/promotions', icon: Megaphone, ownerOnly: false },
   { label: 'Thư viện Không gian', to: '/admin/gallery', icon: GalleryHorizontalEnd, ownerOnly: false },
   { label: 'Kho Hình ảnh (Media)', to: '/admin/media', icon: ImageIcon, ownerOnly: false },
+  { label: 'Đánh giá Khách hàng', to: '/admin/feedback', icon: Star, ownerOnly: false },
 
   // System, Brand & Security Pages (Accessible ONLY by Root Owner Admin)
   { label: 'Banner Đầu trang', to: '/admin/sections/hero', icon: Sparkles, ownerOnly: true },
