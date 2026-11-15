@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import {
   ShieldCheck,
@@ -12,6 +12,10 @@ import {
   Crown,
   X,
   Check,
+  Activity,
+  RefreshCw,
+  Filter,
+  Eye,
 } from 'lucide-react';
 import {
   supabase,
@@ -22,9 +26,9 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
-import { formatDateVi } from '../../lib/utils';
+import { formatDateVi, formatDateTimeVi, formatDurationVi } from '../../lib/utils';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
-import type { Profile } from '../../types/database';
+import type { Profile, AdminActivityLog } from '../../types/database';
 
 export const IDLE_TIMEOUT_STORAGE_KEY = 'tunn_admin_idle_timeout_minutes';
 
@@ -69,6 +73,13 @@ export const AdminSecurityPage: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<Profile | null>(null);
   const [deletingMgr, setDeletingMgr] = useState(false);
 
+  // 8. Activity Logs & Session Duration Filters
+  const [selectedManagerEmail, setSelectedManagerEmail] = useState<string>('all');
+  const [selectedActionCategory, setSelectedActionCategory] = useState<
+    'all' | 'data' | 'navigation' | 'session'
+  >('all');
+  const [refreshingLogs, setRefreshingLogs] = useState(false);
+
   const fetchAllProfiles = useCallback(async () => {
     if (!isSupabaseConfigured) return;
     setLoadingProfiles(true);
@@ -102,6 +113,213 @@ export const AdminSecurityPage: React.FC = () => {
 
   const isProfileRootOwner = (p: Profile) => {
     return Boolean(p.is_owner === true || p.id === earliestAdminId);
+  };
+
+  // Compute per-manager active duration, online status, current page, and action counts
+  const managerActivitySummary = useMemo(() => {
+    const emailSet = new Set<string>();
+    allProfiles.forEach((p) => {
+      if (p.email) emailSet.add(p.email.toLowerCase());
+    });
+    activityLogs.forEach((l) => {
+      if (l.actor_email) emailSet.add(l.actor_email.toLowerCase());
+    });
+
+    const nowMs = Date.now();
+
+    return Array.from(emailSet).map((email) => {
+      const matchedProfile = allProfiles.find(
+        (p) => p.email?.toLowerCase() === email
+      );
+      const userLogs = activityLogs.filter(
+        (l) => (l.actor_email || '').toLowerCase() === email
+      );
+
+      // Sort descending (newest first)
+      const sortedDesc = [...userLogs].sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      const latestLog = sortedDesc[0] || null;
+      const latestLogMs = latestLog ? new Date(latestLog.created_at).getTime() : 0;
+
+      // Online if latest log was within the last 5 minutes and not a logout ('session_end')
+      const isOnline =
+        Boolean(latestLog) &&
+        nowMs - latestLogMs <= 5 * 60 * 1000 &&
+        latestLog.entity_type !== 'session_end';
+
+      // Group logs into sessions to calculate accurate session durations
+      // 1) By explicit details.session_id if present
+      // 2) Fallback: group consecutive logs within 30 minutes of each other
+      const sessionDurationsMap = new Map<string, number>();
+      const ascendingLogs = [...userLogs].sort(
+        (a, b) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+
+      let fallbackSessionIndex = 0;
+      let prevTimeMs = 0;
+      let fallbackSessionStartMs = 0;
+
+      ascendingLogs.forEach((log) => {
+        const t = new Date(log.created_at).getTime();
+        const explicitSessionId = log.details?.session_id as string | undefined;
+        const explicitDurationSec = Number(log.details?.session_duration_sec || 0);
+
+        if (explicitSessionId) {
+          const prevMax = sessionDurationsMap.get(explicitSessionId) || 0;
+          if (explicitDurationSec > prevMax) {
+            sessionDurationsMap.set(explicitSessionId, explicitDurationSec);
+          } else if (prevMax === 0) {
+            sessionDurationsMap.set(explicitSessionId, 30); // minimum 30s if only 1 log in session
+          }
+        } else {
+          if (!prevTimeMs || t - prevTimeMs > 30 * 60 * 1000) {
+            fallbackSessionIndex += 1;
+            fallbackSessionStartMs = t;
+          }
+          const key = `legacy_${email}_${fallbackSessionIndex}`;
+          const elapsedSec = Math.max(
+            30,
+            Math.round((t - fallbackSessionStartMs) / 1000)
+          );
+          sessionDurationsMap.set(key, elapsedSec);
+          prevTimeMs = t;
+        }
+      });
+
+      let totalDurationSec = 0;
+      sessionDurationsMap.forEach((sec) => {
+        totalDurationSec += sec;
+      });
+
+      // Latest session duration
+      let latestSessionDurationSec = 0;
+      if (latestLog) {
+        const latestSessId = latestLog.details?.session_id;
+        if (latestSessId && sessionDurationsMap.has(latestSessId)) {
+          latestSessionDurationSec = sessionDurationsMap.get(latestSessId) || 0;
+        } else {
+          latestSessionDurationSec =
+            Number(latestLog.details?.session_duration_sec || 0) ||
+            (totalDurationSec > 0 ? totalDurationSec : 0);
+        }
+      }
+
+      const dataEditCount = userLogs.filter(
+        (l) =>
+          !['navigation', 'session_start', 'session_end', 'session_heartbeat'].includes(
+            l.entity_type
+          )
+      ).length;
+
+      const pageViewCount = userLogs.filter((l) =>
+        ['navigation', 'session_start'].includes(l.entity_type)
+      ).length;
+
+      const currentPage =
+        latestLog?.details?.page_label ||
+        latestLog?.details?.page_path ||
+        (latestLog?.entity_type === 'navigation' ? latestLog.action : null) ||
+        'Dashboard';
+
+      return {
+        email,
+        fullName:
+          matchedProfile?.full_name ||
+          latestLog?.details?.actor_name ||
+          email.split('@')[0],
+        profile: matchedProfile || null,
+        isOnline,
+        latestLog,
+        currentPage,
+        latestSessionDurationSec,
+        totalDurationSec,
+        sessionCount: sessionDurationsMap.size,
+        totalActions: userLogs.filter((l) => l.entity_type !== 'session_heartbeat')
+          .length,
+        dataEditCount,
+        pageViewCount,
+      };
+    });
+  }, [allProfiles, activityLogs]);
+
+  // Filter detailed activity logs (hide silent heartbeats unless needed, show page views, logins, data edits)
+  const filteredActivityLogs = useMemo(() => {
+    return activityLogs.filter((log) => {
+      if (log.entity_type === 'session_heartbeat') return false;
+
+      if (
+        selectedManagerEmail !== 'all' &&
+        (log.actor_email || '').toLowerCase() !== selectedManagerEmail.toLowerCase()
+      ) {
+        return false;
+      }
+
+      if (selectedActionCategory === 'data') {
+        return !['navigation', 'session_start', 'session_end', 'security'].includes(
+          log.entity_type
+        );
+      }
+      if (selectedActionCategory === 'navigation') {
+        return log.entity_type === 'navigation';
+      }
+      if (selectedActionCategory === 'session') {
+        return ['session_start', 'session_end', 'security', 'profiles'].includes(
+          log.entity_type
+        );
+      }
+      return true;
+    });
+  }, [activityLogs, selectedManagerEmail, selectedActionCategory]);
+
+  const handleRefreshLogs = async () => {
+    setRefreshingLogs(true);
+    try {
+      await refreshAll();
+      await fetchAllProfiles();
+      toast.info('Đã cập nhật nhật ký hoạt động mới nhất');
+    } finally {
+      setRefreshingLogs(false);
+    }
+  };
+
+  const getLogBadge = (log: AdminActivityLog) => {
+    if (log.entity_type === 'session_start') {
+      return {
+        label: 'Đăng nhập / Mở phiên',
+        cls: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+      };
+    }
+    if (log.entity_type === 'session_end') {
+      return {
+        label: 'Đăng xuất / Khóa phiên',
+        cls: 'bg-purple-100 text-purple-900 border-purple-300',
+      };
+    }
+    if (log.entity_type === 'navigation') {
+      return {
+        label: 'Chuyển trang / Xem mục',
+        cls: 'bg-sky-100 text-sky-900 border-sky-300',
+      };
+    }
+    if (log.entity_type === 'profiles' || log.entity_type === 'security') {
+      return {
+        label: 'Bảo mật & Tài khoản',
+        cls: 'bg-amber-100 text-amber-900 border-amber-300',
+      };
+    }
+    if (log.action.toLowerCase().includes('xóa') || log.action.toLowerCase().includes('tạm hết')) {
+      return {
+        label: 'Xóa / Báo hết',
+        cls: 'bg-red-100 text-red-900 border-red-300',
+      };
+    }
+    return {
+      label: 'Chỉnh sửa dữ liệu',
+      cls: 'bg-[#E9E6D8] text-[#4B2E24] border-[#D5C6AD]',
+    };
   };
 
   // Change own password
@@ -581,9 +799,290 @@ export const AdminSecurityPage: React.FC = () => {
         )}
       </div>
 
-      {/* SECTION 2: PERSONAL PASSWORD, IDLE TIMEOUT & AUDIT LOGS */}
+      {/* SECTION 2: MANAGER ACTIVITY DURATION & DETAILED AUDIT LOGS */}
+      <div className="bg-white border border-[#D5C6AD] rounded-brand p-6 space-y-6 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#D5C6AD]">
+          <div className="flex items-center gap-2.5">
+            <Activity className="w-5 h-5 text-[#4B2E24]" />
+            <div>
+              <h2 className="font-serif text-xl font-semibold text-[#241914]">
+                Giám Sát Thời Gian Hoạt Động & Nhật Ký Thao Tác Của Quản Lý
+              </h2>
+              <p className="text-xs text-[#8C7565]">
+                Theo dõi xem từng Quản lý đang online hay offline, đang mở trang nào, hoạt động trong bao lâu và đã chỉnh sửa những gì.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              disabled={refreshingLogs}
+              onClick={handleRefreshLogs}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#F7F5EF] text-[#241914] border border-[#D5C6AD] hover:bg-[#E9E6D8] rounded-brand transition-colors"
+            >
+              <RefreshCw
+                className={`w-3.5 h-3.5 ${refreshingLogs ? 'animate-spin' : ''}`}
+              />
+              <span>Làm mới nhật ký</span>
+            </button>
+
+            {isOwnerAdmin && activityLogs.length > 0 && (
+              <button
+                type="button"
+                disabled={clearingLogs}
+                onClick={handleClearLogs}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 border border-red-200 rounded-brand transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Xóa nhật ký</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* SUB-SECTION 2A: PER-MANAGER ONLINE STATUS & ACTIVE DURATION SUMMARY */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[#4B2E24]">
+            1. Thống Kê Thời Gian Trực & Trạng Thái Hoạt Động Theo Từng Quản Lý
+          </h3>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse border border-[#E9E6D8]">
+              <thead>
+                <tr className="bg-[#F7F5EF] border-b border-[#D5C6AD] text-[11px] uppercase tracking-wider text-[#241914] font-semibold">
+                  <th className="py-2.5 px-3.5">Quản lý</th>
+                  <th className="py-2.5 px-3.5">Trạng thái & Trang đang xem</th>
+                  <th className="py-2.5 px-3.5">Thời gian phiên gần nhất</th>
+                  <th className="py-2.5 px-3.5">Tổng thời gian hoạt động</th>
+                  <th className="py-2.5 px-3.5">Tổng thao tác</th>
+                  <th className="py-2.5 px-3.5 text-right">Lọc xem</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E9E6D8] text-xs">
+                {managerActivitySummary.map((mgr) => {
+                  const isSelected =
+                    selectedManagerEmail.toLowerCase() === mgr.email.toLowerCase();
+
+                  return (
+                    <tr
+                      key={mgr.email}
+                      className={`transition-colors ${
+                        isSelected
+                          ? 'bg-amber-50/70'
+                          : 'hover:bg-[#F7F5EF]/60'
+                      }`}
+                    >
+                      <td className="py-3 px-3.5">
+                        <p className="font-semibold text-[#241914]">
+                          {mgr.fullName}
+                        </p>
+                        <p className="text-[11px] text-[#8C7565]">{mgr.email}</p>
+                      </td>
+
+                      <td className="py-3 px-3.5">
+                        {mgr.isOnline ? (
+                          <div className="space-y-0.5">
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-semibold bg-emerald-100 text-emerald-900 rounded-full">
+                              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                              <span>Đang trực tuyến (Online)</span>
+                            </span>
+                            <p className="text-[11px] text-[#4B2E24] font-medium">
+                              Đang ở: {mgr.currentPage}
+                            </p>
+                          </div>
+                        ) : mgr.latestLog ? (
+                          <div className="space-y-0.5">
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium bg-stone-100 text-stone-700 rounded-full">
+                              <span className="w-2 h-2 rounded-full bg-stone-400" />
+                              <span>Ngoại tuyến</span>
+                            </span>
+                            <p className="text-[11px] text-[#8C7565]">
+                              Hoạt động cuối: {formatDateTimeVi(mgr.latestLog.created_at)}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-[11px] text-[#8C7565] italic">
+                            Chưa từng đăng nhập
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-3.5 whitespace-nowrap">
+                        {mgr.latestSessionDurationSec > 0 ? (
+                          <span className="font-semibold text-[#241914]">
+                            {formatDurationVi(mgr.latestSessionDurationSec)}
+                          </span>
+                        ) : (
+                          <span className="text-[#8C7565]">—</span>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-3.5 whitespace-nowrap">
+                        {mgr.totalDurationSec > 0 ? (
+                          <div>
+                            <span className="font-bold text-[#4B2E24]">
+                              {formatDurationVi(mgr.totalDurationSec)}
+                            </span>
+                            <p className="text-[10px] text-[#8C7565]">
+                              ({mgr.sessionCount} phiên đăng nhập)
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-[#8C7565]">0 phút</span>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-3.5 whitespace-nowrap">
+                        <span className="font-semibold text-[#241914]">
+                          {mgr.totalActions} hành động
+                        </span>
+                        <p className="text-[10px] text-[#8C7565]">
+                          {mgr.dataEditCount} chỉnh sửa · {mgr.pageViewCount} xem trang
+                        </p>
+                      </td>
+
+                      <td className="py-3 px-3.5 text-right whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSelectedManagerEmail(
+                              isSelected ? 'all' : mgr.email
+                            )
+                          }
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-brand border transition-colors ${
+                            isSelected
+                              ? 'bg-[#4B2E24] text-[#F7F5EF] border-[#4B2E24]'
+                              : 'bg-white text-[#241914] border-[#D5C6AD] hover:bg-[#E9E6D8]'
+                          }`}
+                        >
+                          <Eye className="w-3 h-3" />
+                          <span>{isSelected ? 'Đang lọc' : 'Xem chi tiết'}</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* SUB-SECTION 2B: DETAILED ACTION LOGS & FILTERS */}
+        <div className="space-y-3 pt-2 border-t border-[#E9E6D8]">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#4B2E24] flex items-center gap-1.5">
+              <Filter className="w-3.5 h-3.5" />
+              <span>
+                2. Nhật Ký Chi Tiết Từng Hành Động ({filteredActivityLogs.length} bản ghi)
+              </span>
+            </h3>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={selectedManagerEmail}
+                onChange={(e) => setSelectedManagerEmail(e.target.value)}
+                className="px-3 py-1.5 text-xs font-medium bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand text-[#241914]"
+              >
+                <option value="all">Tất cả Quản lý ({managerActivitySummary.length})</option>
+                {managerActivitySummary.map((m) => (
+                  <option key={m.email} value={m.email}>
+                    {m.fullName} ({m.email})
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={selectedActionCategory}
+                onChange={(e) =>
+                  setSelectedActionCategory(
+                    e.target.value as 'all' | 'data' | 'navigation' | 'session'
+                  )
+                }
+                className="px-3 py-1.5 text-xs font-medium bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand text-[#241914]"
+              >
+                <option value="all">Mọi hoạt động (Chỉnh sửa + Xem trang + Đăng nhập)</option>
+                <option value="data">Chỉ xem: Chỉnh sửa dữ liệu (Món, Giá, Cài đặt...)</option>
+                <option value="navigation">Chỉ xem: Di chuyển & Xem các trang</option>
+                <option value="session">Chỉ xem: Đăng nhập, Đăng xuất & Bảo mật</option>
+              </select>
+            </div>
+          </div>
+
+          {filteredActivityLogs.length === 0 ? (
+            <p className="text-xs text-[#8C7565] py-8 text-center bg-[#F7F5EF] border border-dashed border-[#D5C6AD] rounded-brand">
+              Chưa có hoạt động nào khớp với bộ lọc hiện tại.
+            </p>
+          ) : (
+            <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
+              {filteredActivityLogs.map((log) => {
+                const badge = getLogBadge(log);
+                const durationSec = Number(log.details?.session_duration_sec || 0);
+                const actorName =
+                  allProfiles.find(
+                    (p) =>
+                      p.email?.toLowerCase() ===
+                      (log.actor_email || '').toLowerCase()
+                  )?.full_name ||
+                  log.details?.actor_name ||
+                  log.actor_email ||
+                  'Quản lý';
+
+                return (
+                  <div
+                    key={log.id}
+                    className="p-3.5 bg-[#F7F5EF] border border-[#D5C6AD]/80 rounded-brand text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:border-[#4B2E24]/50 transition-colors"
+                  >
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider border rounded ${badge.cls}`}
+                        >
+                          {badge.label}
+                        </span>
+                        <span className="font-semibold text-[#241914] text-sm">
+                          {log.action}
+                        </span>
+                        {log.entity_name && (
+                          <span className="font-medium text-[#4B2E24] bg-white px-2 py-0.5 rounded border border-[#D5C6AD]/60">
+                            {log.entity_name}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#8C7565]">
+                        <span>
+                          Thực hiện bởi:{' '}
+                          <strong className="text-[#241914]">{actorName}</strong> (
+                          {log.actor_email || 'Admin'})
+                        </span>
+                        {durationSec > 0 && (
+                          <span className="inline-flex items-center gap-1 text-[#4B2E24] font-medium">
+                            <Clock className="w-3 h-3" />
+                            <span>
+                              Đã hoạt động trong phiên: {formatDurationVi(durationSec)}
+                            </span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-left sm:text-right shrink-0">
+                      <span className="inline-block px-2.5 py-1 bg-white border border-[#D5C6AD] rounded text-[11px] font-mono text-[#241914]">
+                        {formatDateTimeVi(log.created_at)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* SECTION 3: PERSONAL PASSWORD & IDLE TIMEOUT */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-6 space-y-6">
+        <div className="lg:col-span-6">
           {/* Personal Password Card */}
           <form
             onSubmit={handlePasswordChange}
@@ -647,7 +1146,9 @@ export const AdminSecurityPage: React.FC = () => {
               <span>Lưu Mật Khẩu Mới</span>
             </button>
           </form>
+        </div>
 
+        <div className="lg:col-span-6">
           {/* Auto Session Timeout Card */}
           <div className="bg-white border border-[#D5C6AD] rounded-brand p-6 space-y-4 shadow-xs">
             <div className="flex items-center gap-2.5 pb-3 border-b border-[#D5C6AD]">
@@ -702,63 +1203,6 @@ export const AdminSecurityPage: React.FC = () => {
                 {updatingProfile ? 'Đang lưu...' : 'Lưu Tên'}
               </button>
             </form>
-          </div>
-        </div>
-
-        {/* Right Column: Audit Logs */}
-        <div className="lg:col-span-6 space-y-6">
-          <div className="bg-white border border-[#D5C6AD] rounded-brand p-6 space-y-4 shadow-xs">
-            <div className="flex items-center justify-between pb-3 border-b border-[#D5C6AD]">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-[#4B2E24]" />
-                <h2 className="font-serif text-xl font-semibold text-[#241914]">
-                  Nhật Ký Hoạt Động Quản Trị ({activityLogs.length})
-                </h2>
-              </div>
-              {isOwnerAdmin && activityLogs.length > 0 && (
-                <button
-                  type="button"
-                  disabled={clearingLogs}
-                  onClick={handleClearLogs}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-red-700 hover:underline"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Xóa nhật ký</span>
-                </button>
-              )}
-            </div>
-
-            {activityLogs.length === 0 ? (
-              <p className="text-xs text-[#8C7565] py-6 text-center">
-                Chưa có nhật ký hoạt động nào.
-              </p>
-            ) : (
-              <div className="space-y-2.5 max-h-96 overflow-y-auto pr-1">
-                {activityLogs.map((log) => (
-                  <div
-                    key={log.id}
-                    className="p-3 bg-[#F7F5EF] border border-[#D5C6AD]/70 rounded-brand text-xs flex items-center justify-between gap-2"
-                  >
-                    <div>
-                      <span className="font-semibold text-[#241914]">
-                        {log.action}
-                      </span>
-                      {log.entity_name && (
-                        <span className="text-[#4B2E24] ml-1.5">
-                          · {log.entity_name}
-                        </span>
-                      )}
-                      <p className="text-[10px] text-[#8C7565] mt-0.5">
-                        Thực hiện bởi: {log.actor_email || 'Admin'}
-                      </p>
-                    </div>
-                    <span className="text-[10px] text-[#8C7565] shrink-0">
-                      {formatDateVi(log.created_at)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>

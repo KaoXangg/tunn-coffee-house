@@ -49,3 +49,34 @@ export function formatDateVi(dateStr: string | null | undefined): string {
     return '';
   }
 }
+
+export function formatDateTimeVi(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  try {
+    return new Intl.DateTimeFormat('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(new Date(dateStr));
+  } catch {
+    return '';
+  }
+}
+
+export function formatDurationVi(seconds: number | null | undefined): string {
+  const totalSec = Math.max(0, Math.round(Number(seconds) || 0));
+  if (totalSec === 0) return 'Vừa bắt đầu';
+  if (totalSec < 60) return `${totalSec} giây`;
+
+  const hours = Math.floor(totalSec / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  const secs = totalSec % 60;
+
+  if (hours > 0) {
+    return minutes > 0 ? `${hours} giờ ${minutes} phút` : `${hours} giờ`;
+  }
+  return secs > 0 ? `${minutes} phút ${secs} giây` : `${minutes} phút`;
+}

@@ -110,3 +110,10 @@ BEGIN
   DELETE FROM auth.users WHERE id = target_user_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 6. Only Root Owner can delete activity logs (Sub-Managers cannot delete logs to hide actions)
+DROP POLICY IF EXISTS "Owner can delete activity_logs" ON public.admin_activity_logs;
+CREATE POLICY "Owner can delete activity_logs"
+  ON public.admin_activity_logs
+  FOR DELETE
+  USING (public.is_owner_admin());

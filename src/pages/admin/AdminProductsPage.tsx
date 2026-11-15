@@ -326,6 +326,19 @@ export const AdminProductsPage: React.FC = () => {
     if (error) {
       toast.error('Không thể cập nhật trạng thái', error.message);
     } else {
+      const actionLabel =
+        field === 'is_available'
+          ? nextVal
+            ? 'Mở bán lại món'
+            : 'Báo tạm hết món'
+          : field === 'is_visible'
+            ? nextVal
+              ? 'Hiện món trên thực đơn'
+              : 'Ẩn món khỏi thực đơn'
+            : nextVal
+              ? 'Đánh dấu món nổi bật'
+              : 'Bỏ đánh dấu nổi bật';
+      await logAdminActivity(actionLabel, 'products', prod.name);
       await refreshAll();
       toast.success(
         field === 'is_available'

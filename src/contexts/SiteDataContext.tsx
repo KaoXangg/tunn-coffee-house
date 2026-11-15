@@ -133,7 +133,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           .from('admin_activity_logs')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(25),
+          .limit(200),
       ]);
 
       if (!settingsRes.error && settingsRes.data) {
@@ -225,13 +225,41 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           data: { user },
         } = await supabase.auth.getUser();
         if (!user) return;
+
+        let sessionId = sessionStorage.getItem('tunn_admin_session_id');
+        let sessionStartMs = Number(sessionStorage.getItem('tunn_admin_session_start') || 0);
+        if (!sessionId || !sessionStartMs) {
+          sessionId =
+            typeof crypto !== 'undefined' && crypto.randomUUID
+              ? crypto.randomUUID()
+              : `sess_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+          sessionStartMs = Date.now();
+          sessionStorage.setItem('tunn_admin_session_id', sessionId);
+          sessionStorage.setItem('tunn_admin_session_start', String(sessionStartMs));
+        }
+
+        const sessionDurationSec = Math.max(
+          1,
+          Math.round((Date.now() - sessionStartMs) / 1000)
+        );
+
         await supabase.from('admin_activity_logs').insert({
           actor_id: user.id,
           actor_email: user.email,
           action,
           entity_type: entityType,
           entity_name: entityName || null,
-          details,
+          details: {
+            session_id: sessionId,
+            session_started_at: new Date(sessionStartMs).toISOString(),
+            session_duration_sec: sessionDurationSec,
+            actor_name:
+              user.user_metadata?.full_name ||
+              user.email?.split('@')[0] ||
+              'Quản lý',
+            page_path: window.location.pathname,
+            ...details,
+          },
         });
       } catch {
         // non-blocking

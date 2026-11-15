@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { NavLink, Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -23,11 +23,13 @@ import {
   ExternalLink,
   Database,
   AlertCircle,
+  Clock,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
 import { BrandLogo } from '../common/BrandLogo';
+import { formatDurationVi } from '../../lib/utils';
 import { IDLE_TIMEOUT_STORAGE_KEY } from '../../pages/admin/AdminSecurityPage';
 
 interface NavGroupItem {
@@ -55,29 +57,135 @@ const CMS_NAV_ITEMS: NavGroupItem[] = [
 
 export const AdminLayout: React.FC = () => {
   const { user, profile, signOut, isConfigured } = useAuth();
-  const { isLiveDatabase } = useSiteData();
+  const { isLiveDatabase, logAdminActivity, refreshAll } = useSiteData();
   const toast = useToast();
   const location = useLocation();
   const navigate = useNavigate();
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [sessionElapsedSec, setSessionElapsedSec] = useState<number>(0);
+
+  const prevPageRef = useRef<{ path: string; label: string; enteredAt: number } | null>(null);
+  const lastInteractionRef = useRef<number>(Date.now());
 
   const currentNav = CMS_NAV_ITEMS.find((item) =>
     location.pathname.startsWith(item.to)
   );
 
+  // Initialize session start time & live second counter
+  useEffect(() => {
+    let startMs = Number(sessionStorage.getItem('tunn_admin_session_start') || 0);
+    let sessionId = sessionStorage.getItem('tunn_admin_session_id');
+    if (!startMs || !sessionId) {
+      startMs = Date.now();
+      sessionId =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `sess_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      sessionStorage.setItem('tunn_admin_session_start', String(startMs));
+      sessionStorage.setItem('tunn_admin_session_id', sessionId);
+    }
+
+    const updateTimer = () => {
+      const s = Number(sessionStorage.getItem('tunn_admin_session_start') || startMs);
+      setSessionElapsedSec(Math.max(1, Math.round((Date.now() - s) / 1000)));
+    };
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Log initial session start when entering Admin
+  useEffect(() => {
+    if (!isConfigured || !user) return;
+    const alreadyLogged = sessionStorage.getItem('tunn_admin_session_logged_start');
+    if (!alreadyLogged) {
+      sessionStorage.setItem('tunn_admin_session_logged_start', 'true');
+      logAdminActivity(
+        'Bắt đầu phiên làm việc (Đăng nhập Admin)',
+        'session_start',
+        currentNav?.label || 'Dashboard',
+        { page_label: currentNav?.label || 'Dashboard' }
+      ).then(() => refreshAll());
+    }
+  }, [isConfigured, user, currentNav?.label, logAdminActivity, refreshAll]);
+
+  // Track page navigation & how long the manager stayed on each page
+  useEffect(() => {
+    if (!isConfigured || !user) return;
+    const currentLabel = currentNav?.label || location.pathname;
+    const now = Date.now();
+
+    if (prevPageRef.current && prevPageRef.current.path !== location.pathname) {
+      const spentSec = Math.max(1, Math.round((now - prevPageRef.current.enteredAt) / 1000));
+      const prevLabel = prevPageRef.current.label;
+
+      logAdminActivity(
+        `Vào xem mục: ${currentLabel}`,
+        'navigation',
+        `Ở mục "${prevLabel}" trong ${formatDurationVi(spentSec)}`,
+        {
+          page_label: currentLabel,
+          previous_page: prevLabel,
+          previous_page_sec: spentSec,
+        }
+      );
+    }
+
+    prevPageRef.current = {
+      path: location.pathname,
+      label: currentLabel,
+      enteredAt: now,
+    };
+  }, [location.pathname, currentNav?.label, isConfigured, user, logAdminActivity]);
+
+  // Periodic active heartbeat every 2 minutes if manager is actively working on a single page
+  useEffect(() => {
+    if (!isConfigured || !user) return;
+    const heartbeat = setInterval(() => {
+      // Only log heartbeat if user interacted within the last 2 minutes
+      if (Date.now() - lastInteractionRef.current < 120 * 1000) {
+        const currentLabel = currentNav?.label || location.pathname;
+        logAdminActivity(
+          `Đang làm việc tại mục: ${currentLabel}`,
+          'session_heartbeat',
+          currentLabel,
+          { page_label: currentLabel }
+        );
+      }
+    }, 120 * 1000);
+
+    return () => clearInterval(heartbeat);
+  }, [isConfigured, user, currentNav?.label, location.pathname, logAdminActivity]);
+
   const handleLogout = useCallback(async () => {
+    const startMs = Number(sessionStorage.getItem('tunn_admin_session_start') || Date.now());
+    const totalSec = Math.max(1, Math.round((Date.now() - startMs) / 1000));
+
+    if (isConfigured && user) {
+      await logAdminActivity(
+        'Kết thúc phiên làm việc (Đăng xuất)',
+        'session_end',
+        `Tổng thời gian hoạt động: ${formatDurationVi(totalSec)}`,
+        { session_duration_sec: totalSec }
+      );
+    }
+
     sessionStorage.removeItem('tunn_cms_preview_unlocked');
+    sessionStorage.removeItem('tunn_admin_session_id');
+    sessionStorage.removeItem('tunn_admin_session_start');
+    sessionStorage.removeItem('tunn_admin_session_logged_start');
     await signOut();
     navigate('/admin/login');
-  }, [signOut, navigate]);
+  }, [signOut, navigate, isConfigured, user, logAdminActivity]);
 
   // Auto Session Timeout (Idle Lock)
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const resetIdleTimer = () => {
+      lastInteractionRef.current = Date.now();
       if (timeoutId) clearTimeout(timeoutId);
       const savedMinutes = Number(
         localStorage.getItem(IDLE_TIMEOUT_STORAGE_KEY) ?? 30
@@ -263,6 +371,11 @@ export const AdminLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
+            <div className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-[#F7F5EF] text-[#4B2E24] border border-[#D5C6AD]">
+              <Clock className="w-3 h-3 text-[#4B2E24]" />
+              <span>Phiên hiện tại: {formatDurationVi(sessionElapsedSec)}</span>
+            </div>
+
             <div
               className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium border ${
                 isConfigured && isLiveDatabase
