@@ -140,30 +140,9 @@ export const AdminLoginPage: React.FC = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand shadow-xl py-8 px-6 sm:px-10">
-          {/* Mode Switch Tabs */}
-          <div className="flex border-b border-[#D5C6AD] mb-6 text-xs font-semibold uppercase tracking-wider">
-            <button
-              type="button"
-              onClick={() => setMode('login')}
-              className={`flex-1 pb-3 border-b-2 transition-colors ${
-                mode === 'login'
-                  ? 'border-[#4B2E24] text-[#241914]'
-                  : 'border-transparent text-[#8C7565] hover:text-[#241914]'
-              }`}
-            >
-              Đăng nhập
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode('register')}
-              className={`flex-1 pb-3 border-b-2 transition-colors ${
-                mode === 'register'
-                  ? 'border-[#4B2E24] text-[#241914]'
-                  : 'border-transparent text-[#8C7565] hover:text-[#241914]'
-              }`}
-            >
-              Tạo Admin đầu tiên
-            </button>
+          {/* Mode Switch Header */}
+          <div className="border-b border-[#D5C6AD] pb-3 mb-6 text-xs font-semibold uppercase tracking-wider text-[#241914]">
+            <span>Đăng nhập Quản trị viên</span>
           </div>
 
           {/* Login Form */}

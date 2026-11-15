@@ -179,14 +179,16 @@ export const CustomerHeader: React.FC = () => {
                   <span>{settings.header_cta_label || 'Khám phá Menu'}</span>
                   <ArrowUpRight className="w-4 h-4" />
                 </a>
-                <Link
-                  to="/admin/dashboard"
-                  onClick={() => setMobileOpen(false)}
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-3 text-xs uppercase tracking-wider font-medium text-coffee border border-coffee-beige rounded-brand"
-                >
-                  <ShieldCheck className="w-4 h-4" />
-                  Quản trị CMS
-                </Link>
+                {isAdmin && (
+                  <Link
+                    to="/admin/dashboard"
+                    onClick={() => setMobileOpen(false)}
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-3 text-xs uppercase tracking-wider font-medium text-coffee border border-coffee-beige rounded-brand"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    Quản trị CMS
+                  </Link>
+                )}
               </div>
             </div>
           </motion.div>

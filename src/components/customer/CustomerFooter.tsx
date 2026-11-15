@@ -109,16 +109,9 @@ export const CustomerFooter: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom Copyright & Admin Link */}
+        {/* Bottom Copyright */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#D5C6AD]/70">
           <p>{settings.copyright_text}</p>
-          <Link
-            to="/admin"
-            className="inline-flex items-center gap-1.5 text-[#D5C6AD]/70 hover:text-[#F7F5EF] transition-colors"
-          >
-            <Lock className="w-3.5 h-3.5" />
-            <span>Admin CMS</span>
-          </Link>
         </div>
       </div>
     </footer>
