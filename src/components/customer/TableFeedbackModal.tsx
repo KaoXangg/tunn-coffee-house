@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { submitTableFeedback, validateGmailFormat, type PublicReviewRecord } from '../../lib/feedback';
-import { formatDateVi } from '../../lib/utils';
+import { formatDateTimeVi } from '../../lib/utils';
 import { useToast } from '../../contexts/ToastContext';
 
 interface TableFeedbackModalProps {
@@ -52,15 +52,15 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [nowStr, setNowStr] = useState(() => formatDateVi(new Date().toISOString()));
+  const [nowStr, setNowStr] = useState(() => formatDateTimeVi(new Date().toISOString()));
   const pendingRecordRef = useRef<PublicReviewRecord | null>(null);
   const closeTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!open) return;
-    setNowStr(formatDateVi(new Date().toISOString()));
+    setNowStr(formatDateTimeVi(new Date().toISOString()));
     const clockTimer = window.setInterval(() => {
-      setNowStr(formatDateVi(new Date().toISOString()));
+      setNowStr(formatDateTimeVi(new Date().toISOString()));
     }, 30_000);
     return () => window.clearInterval(clockTimer);
   }, [open]);

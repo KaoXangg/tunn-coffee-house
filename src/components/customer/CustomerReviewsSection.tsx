@@ -1,9 +1,16 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { Star, Quote, MessageSquarePlus, Sparkles } from 'lucide-react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
+import {
+  Star,
+  Quote,
+  MessageSquarePlus,
+  Sparkles,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { fetchPublicPositiveReviews, type PublicReviewRecord } from '../../lib/feedback';
 import { useSiteData } from '../../contexts/SiteDataContext';
-import { formatDateVi } from '../../lib/utils';
+import { formatDateTimeVi } from '../../lib/utils';
 
 interface CustomerReviewsSectionProps {
   onOpenFeedback?: () => void;
@@ -52,6 +59,12 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
   const [liveReviews, setLiveReviews] = useState<PublicReviewRecord[]>([]);
   const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isPausedRef = useRef(false);
+  const isDraggingRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const dragScrollLeftRef = useRef(0);
+
   useEffect(() => {
     fetchPublicPositiveReviews().then((items) => {
       setLiveReviews(items);
@@ -65,6 +78,9 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
       if (!rec || rec.rating < 4) return;
       setLiveReviews((prev) => [rec, ...prev.filter((r) => r.id !== rec.id)]);
       setNewlyAddedId(rec.id);
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+      }
       window.setTimeout(() => {
         setNewlyAddedId((curr) => (curr === rec.id ? null : curr));
       }, 7500);
@@ -88,6 +104,69 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
     const sum = displayedReviews.reduce((acc, r) => acc + r.rating, 0);
     return (sum / displayedReviews.length).toFixed(1);
   }, [displayedReviews]);
+
+  // Smooth auto-glide that still supports touch swipe & mouse drag
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || displayedReviews.length === 0) return;
+
+    const prefersReduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    let rafId = 0;
+    let carry = 0;
+
+    const tick = () => {
+      if (!isPausedRef.current && !isDraggingRef.current && el) {
+        carry += 0.55;
+        if (carry >= 1) {
+          const step = Math.floor(carry);
+          carry -= step;
+          el.scrollLeft += step;
+          const half = el.scrollWidth / 2;
+          if (half > 0 && el.scrollLeft >= half) {
+            el.scrollLeft -= half;
+          }
+        }
+      }
+      rafId = window.requestAnimationFrame(tick);
+    };
+
+    rafId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(rafId);
+  }, [displayedReviews.length]);
+
+  const handleStepScroll = (direction: -1 | 1) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const step = window.innerWidth < 640 ? 306 : 360;
+    if (direction === -1 && el.scrollLeft <= 10) {
+      el.scrollLeft = el.scrollWidth / 2;
+    }
+    el.scrollBy({ left: direction * step, behavior: 'smooth' });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    isDraggingRef.current = true;
+    dragStartXRef.current = e.pageX - el.offsetLeft;
+    dragScrollLeftRef.current = el.scrollLeft;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - dragStartXRef.current) * 1.25;
+    scrollRef.current.scrollLeft = dragScrollLeftRef.current - walk;
+  };
+
+  const stopDragging = () => {
+    isDraggingRef.current = false;
+  };
 
   return (
     <section
@@ -118,7 +197,7 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0">
             <div className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-ivory dark:bg-white/[0.04] border border-coffee-beige/70 dark:border-white/[0.08]">
               <div className="flex items-center gap-0.5">
                 {[1, 2, 3, 4, 5].map((s) => (
@@ -146,17 +225,52 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
                 <span>{String(contactContent.reviews_cta_label || 'Viết đánh giá')}</span>
               </button>
             )}
+
+            <div className="hidden sm:flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleStepScroll(-1)}
+                aria-label="Xem đánh giá trước"
+                className="w-9 h-9 rounded-full border border-coffee-beige/80 dark:border-white/[0.1] bg-ivory dark:bg-white/[0.04] text-coffee-dark hover:border-coffee hover:bg-coffee hover:text-ivory-light inline-flex items-center justify-center transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleStepScroll(1)}
+                aria-label="Xem đánh giá tiếp theo"
+                className="w-9 h-9 rounded-full border border-coffee-beige/80 dark:border-white/[0.1] bg-ivory dark:bg-white/[0.04] text-coffee-dark hover:border-coffee hover:bg-coffee hover:text-ivory-light inline-flex items-center justify-center transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </motion.div>
 
-        {/* Smooth Infinite Marquee Stage (Never leaves orphan rows; pauses on hover) */}
-        <div className="group/marquee relative -mx-4 px-4 sm:mx-0 sm:px-0 py-2 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_3%,black_97%,transparent)]">
-          <div
-            className="animate-reviews-marquee"
-            style={{
-              animationDuration: `${Math.max(28, displayedReviews.length * 7)}s`,
-            }}
-          >
+        {/* Interactive Auto-Gliding Reviews Track (Supports Touch Swipe + Mouse Drag) */}
+        <div
+          ref={scrollRef}
+          onMouseEnter={() => {
+            isPausedRef.current = true;
+          }}
+          onMouseLeave={() => {
+            isPausedRef.current = false;
+            stopDragging();
+          }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={stopDragging}
+          onTouchStart={() => {
+            isPausedRef.current = true;
+          }}
+          onTouchEnd={() => {
+            window.setTimeout(() => {
+              isPausedRef.current = false;
+            }, 1200);
+          }}
+          className="-mx-4 px-4 sm:mx-0 sm:px-0 py-3 overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing select-none"
+        >
+          <div className="flex items-stretch w-max">
             {[0, 1].map((dupIndex) => (
               <div
                 key={dupIndex}
@@ -166,92 +280,92 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
                 {displayedReviews.map((rev) => {
                   const isJustAdded = rev.id === newlyAddedId;
                   return (
-                  <motion.article
-                    key={`${dupIndex}-${rev.id}`}
-                    initial={
-                      isJustAdded
-                        ? { opacity: 0, scale: 0.72, y: -28, rotate: -2 }
-                        : false
-                    }
-                    animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
-                    transition={{ type: 'spring', stiffness: 280, damping: 20 }}
-                    className={`w-[290px] sm:w-[340px] shrink-0 p-6 rounded-2xl border shadow-sm hover:shadow-editorial hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-4 ${
-                      isJustAdded
-                        ? 'bg-ivory dark:bg-white/[0.08] border-amber-400/70 ring-2 ring-amber-400/45 shadow-[0_0_28px_rgba(245,158,11,0.28)]'
-                        : 'bg-ivory/65 dark:bg-white/[0.03] border-coffee-beige/60 dark:border-white/[0.08]'
-                    }`}
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5">
-                          <div className="flex items-center gap-0.5">
-                            {[1, 2, 3, 4, 5].map((s) => (
-                              <Star
-                                key={s}
-                                className={`w-4 h-4 ${
-                                  s <= rev.rating
-                                    ? 'fill-amber-400 text-amber-500'
-                                    : 'text-coffee-beige'
-                                }`}
-                              />
+                    <motion.article
+                      key={`${dupIndex}-${rev.id}`}
+                      initial={
+                        isJustAdded
+                          ? { opacity: 0, scale: 0.72, y: -28, rotate: -2 }
+                          : false
+                      }
+                      animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+                      transition={{ type: 'spring', stiffness: 280, damping: 20 }}
+                      className={`w-[290px] sm:w-[340px] shrink-0 p-6 rounded-2xl border shadow-sm hover:shadow-editorial hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-4 ${
+                        isJustAdded
+                          ? 'bg-ivory dark:bg-white/[0.08] border-amber-400/70 ring-2 ring-amber-400/45 shadow-[0_0_28px_rgba(245,158,11,0.28)]'
+                          : 'bg-ivory/65 dark:bg-white/[0.03] border-coffee-beige/60 dark:border-white/[0.08]'
+                      }`}
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-0.5">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <Star
+                                  key={s}
+                                  className={`w-4 h-4 ${
+                                    s <= rev.rating
+                                      ? 'fill-amber-400 text-amber-500'
+                                      : 'text-coffee-beige'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            {isJustAdded && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] uppercase tracking-wider font-bold rounded-full bg-emerald-600 text-white shadow-sm animate-pulse">
+                                <Sparkles className="w-2.5 h-2.5" />
+                                <span>Đánh giá của bạn</span>
+                              </span>
+                            )}
+                          </div>
+                          <Quote className="w-5 h-5 text-coffee/30" />
+                        </div>
+
+                        {rev.comment ? (
+                          <p className="text-sm text-coffee-dark/90 leading-relaxed line-clamp-3 min-h-[3.75rem]">
+                            &ldquo;{rev.comment}&rdquo;
+                          </p>
+                        ) : (
+                          <p className="text-sm italic text-coffee-muted min-h-[3.75rem]">
+                            Trải nghiệm tuyệt vời tại TUNN Coffee House.
+                          </p>
+                        )}
+
+                        {rev.tags && rev.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {rev.tags.slice(0, 3).map((tag) => (
+                              <span
+                                key={tag}
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-coffee/10 text-coffee"
+                              >
+                                <Sparkles className="w-2.5 h-2.5" />
+                                <span>{tag}</span>
+                              </span>
                             ))}
                           </div>
-                          {isJustAdded && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] uppercase tracking-wider font-bold rounded-full bg-emerald-600 text-white shadow-sm animate-pulse">
-                              <Sparkles className="w-2.5 h-2.5" />
-                              <span>Đánh giá của bạn</span>
-                            </span>
-                          )}
-                        </div>
-                        <Quote className="w-5 h-5 text-coffee/30" />
+                        )}
                       </div>
 
-                      {rev.comment ? (
-                        <p className="text-sm text-coffee-dark/90 leading-relaxed line-clamp-3 min-h-[3.75rem]">
-                          &ldquo;{rev.comment}&rdquo;
-                        </p>
-                      ) : (
-                        <p className="text-sm italic text-coffee-muted min-h-[3.75rem]">
-                          Trải nghiệm tuyệt vời tại TUNN Coffee House.
-                        </p>
-                      )}
-
-                      {rev.tags && rev.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          {rev.tags.slice(0, 3).map((tag) => (
-                            <span
-                              key={tag}
-                              className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-coffee/10 text-coffee"
-                            >
-                              <Sparkles className="w-2.5 h-2.5" />
-                              <span>{tag}</span>
-                            </span>
-                          ))}
+                      <div className="pt-3 border-t border-coffee-beige/50 dark:border-white/[0.07] flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-coffee text-ivory-light flex items-center justify-center font-serif text-xs font-bold shrink-0">
+                            {(rev.customer_name || 'K').charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold text-coffee-dark truncate">
+                              {rev.customer_name || 'Khách TUNN'}
+                            </p>
+                            <p className="text-[10px] text-coffee-muted">
+                              {rev.table_number
+                                ? `Bàn ${rev.table_number}`
+                                : 'Khách ghé quán'}
+                            </p>
+                          </div>
                         </div>
-                      )}
-                    </div>
-
-                    <div className="pt-3 border-t border-coffee-beige/50 dark:border-white/[0.07] flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-coffee text-ivory-light flex items-center justify-center font-serif text-xs font-bold shrink-0">
-                          {(rev.customer_name || 'K').charAt(0).toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-coffee-dark truncate">
-                            {rev.customer_name || 'Khách TUNN'}
-                          </p>
-                          <p className="text-[10px] text-coffee-muted">
-                            {rev.table_number
-                              ? `Bàn ${rev.table_number}`
-                              : 'Khách ghé quán'}
-                          </p>
-                        </div>
+                        <span className="text-[10px] text-coffee-muted shrink-0 whitespace-nowrap">
+                          {formatDateTimeVi(rev.created_at)}
+                        </span>
                       </div>
-                      <span className="text-[10px] text-coffee-muted shrink-0 whitespace-nowrap">
-                        {formatDateVi(rev.created_at)}
-                      </span>
-                    </div>
-                  </motion.article>
+                    </motion.article>
                   );
                 })}
               </div>
