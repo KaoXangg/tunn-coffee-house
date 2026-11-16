@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { NavLink, Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
   Coffee,
@@ -80,6 +80,31 @@ export const AdminLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [sessionElapsedSec, setSessionElapsedSec] = useState<number>(0);
+
+  // Background-preload Admin route chunks so switching tabs is instant without white flashes
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void import('../../pages/admin/AdminDashboardPage');
+      void import('../../pages/admin/AdminProductsPage');
+      void import('../../pages/admin/AdminCategoriesPage');
+      void import('../../pages/admin/AdminPromotionsPage');
+      void import('../../pages/admin/AdminGalleryPage');
+      void import('../../pages/admin/AdminMediaPage');
+      void import('../../pages/admin/AdminFeedbackPage');
+      if (isOwnerAdmin) {
+        void import('../../pages/admin/AdminHeroEditorPage');
+        void import('../../pages/admin/AdminContentPage');
+        void import('../../pages/admin/AdminBrandPage');
+        void import('../../pages/admin/AdminAppearancePage');
+        void import('../../pages/admin/AdminSeasonalThemesPage');
+        void import('../../pages/admin/AdminContactPage');
+        void import('../../pages/admin/AdminSeoPage');
+        void import('../../pages/admin/AdminBackupQrPage');
+        void import('../../pages/admin/AdminSecurityPage');
+      }
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [isOwnerAdmin]);
 
   const prevPageRef = useRef<{ path: string; label: string; enteredAt: number } | null>(null);
   const lastInteractionRef = useRef<number>(Date.now());
@@ -279,25 +304,31 @@ export const AdminLayout: React.FC = () => {
             )}
             {basicNavItems.map((item) => {
               const Icon = item.icon;
+              const isItemActive = location.pathname === item.to;
               return (
                 <NavLink
                   key={item.to}
                   to={item.to}
                   title={collapsed ? item.label : undefined}
-                  className={({ isActive }) =>
-                    `flex items-center rounded-brand text-xs font-medium tracking-wide transition-colors ${
-                      collapsed
-                        ? 'justify-center py-2.5 px-0'
-                        : 'gap-3 px-3 py-2.5'
-                    } ${
-                      isActive
-                        ? 'bg-[#4B2E24] text-[#F7F5EF] font-semibold shadow-sm'
-                        : 'text-[#D5C6AD]/80 hover:bg-[#4B2E24]/40 hover:text-white'
-                    }`
-                  }
+                  className={`relative flex items-center rounded-brand text-xs font-medium tracking-wide transition-all duration-200 ${
+                    collapsed
+                      ? 'justify-center py-2.5 px-0'
+                      : 'gap-3 px-3 py-2.5 hover:translate-x-0.5'
+                  } ${
+                    isItemActive
+                      ? 'text-[#F7F5EF] font-semibold'
+                      : 'text-[#D5C6AD]/80 hover:bg-[#4B2E24]/35 hover:text-white'
+                  }`}
                 >
-                  <Icon className="w-4 h-4 shrink-0" />
-                  {!collapsed && <span className="truncate">{item.label}</span>}
+                  {isItemActive && (
+                    <motion.span
+                      layoutId="adminSidebarActivePill"
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                      className="absolute inset-0 bg-[#4B2E24] rounded-brand shadow-sm -z-0"
+                    />
+                  )}
+                  <Icon className="relative z-10 w-4 h-4 shrink-0" />
+                  {!collapsed && <span className="relative z-10 truncate">{item.label}</span>}
                 </NavLink>
               );
             })}
@@ -313,25 +344,31 @@ export const AdminLayout: React.FC = () => {
               )}
               {ownerNavItems.map((item) => {
                 const Icon = item.icon;
+                const isItemActive = location.pathname === item.to;
                 return (
                   <NavLink
                     key={item.to}
                     to={item.to}
                     title={collapsed ? item.label : undefined}
-                    className={({ isActive }) =>
-                      `flex items-center rounded-brand text-xs font-medium tracking-wide transition-colors ${
-                        collapsed
-                          ? 'justify-center py-2.5 px-0'
-                          : 'gap-3 px-3 py-2.5'
-                      } ${
-                        isActive
-                          ? 'bg-[#4B2E24] text-[#F7F5EF] font-semibold shadow-sm'
-                          : 'text-[#D5C6AD]/80 hover:bg-[#4B2E24]/40 hover:text-white'
-                      }`
-                    }
+                    className={`relative flex items-center rounded-brand text-xs font-medium tracking-wide transition-all duration-200 ${
+                      collapsed
+                        ? 'justify-center py-2.5 px-0'
+                        : 'gap-3 px-3 py-2.5 hover:translate-x-0.5'
+                    } ${
+                      isItemActive
+                        ? 'text-[#F7F5EF] font-semibold'
+                        : 'text-[#D5C6AD]/80 hover:bg-[#4B2E24]/35 hover:text-white'
+                    }`}
                   >
-                    <Icon className="w-4 h-4 shrink-0" />
-                    {!collapsed && <span className="truncate">{item.label}</span>}
+                    {isItemActive && (
+                      <motion.span
+                        layoutId="adminSidebarActivePill"
+                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                        className="absolute inset-0 bg-[#4B2E24] rounded-brand shadow-sm -z-0"
+                      />
+                    )}
+                    <Icon className="relative z-10 w-4 h-4 shrink-0" />
+                    {!collapsed && <span className="relative z-10 truncate">{item.label}</span>}
                   </NavLink>
                 );
               })}
@@ -570,14 +607,31 @@ export const AdminLayout: React.FC = () => {
               </div>
             </div>
           ) : (
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
+            <Suspense
+              fallback={
+                <div className="space-y-5 animate-pulse py-2">
+                  <div className="h-8 w-64 bg-[#E9E6D8] rounded-brand" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="h-28 bg-white border border-[#E9E6D8] rounded-brand" />
+                    ))}
+                  </div>
+                  <div className="h-64 bg-white border border-[#E9E6D8] rounded-brand" />
+                </div>
+              }
             >
-              <Outlet />
-            </motion.div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={location.pathname}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <Outlet />
+                </motion.div>
+              </AnimatePresence>
+            </Suspense>
           )}
         </main>
       </div>

@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, type ComponentType } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MotionConfig } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
@@ -10,87 +10,114 @@ import { CustomerHomePage } from './pages/CustomerHomePage';
 import { ProtectedRoute } from './components/admin/ProtectedRoute';
 import { AdminLayout } from './components/admin/AdminLayout';
 
-// Route-based lazy loading for Admin CMS modules
-const AdminLoginPage = lazy(() =>
+function lazyWithRetry<T extends ComponentType<any>>(
+  importer: () => Promise<{ default: T }>
+) {
+  return lazy(async () => {
+    const reloadKey = 'tunn_chunk_retry_v1';
+    try {
+      const mod = await importer();
+      try {
+        sessionStorage.removeItem(reloadKey);
+      } catch {
+        // ignore
+      }
+      return mod;
+    } catch (err) {
+      try {
+        if (!sessionStorage.getItem(reloadKey)) {
+          sessionStorage.setItem(reloadKey, '1');
+          window.location.reload();
+        }
+      } catch {
+        // ignore
+      }
+      throw err;
+    }
+  });
+}
+
+// Route-based lazy loading for Admin CMS modules (with stale-chunk recovery)
+const AdminLoginPage = lazyWithRetry(() =>
   import('./pages/admin/AdminLoginPage').then((m) => ({ default: m.AdminLoginPage }))
 );
-const AdminDashboardPage = lazy(() =>
+const AdminDashboardPage = lazyWithRetry(() =>
   import('./pages/admin/AdminDashboardPage').then((m) => ({
     default: m.AdminDashboardPage,
   }))
 );
-const AdminProductsPage = lazy(() =>
+const AdminProductsPage = lazyWithRetry(() =>
   import('./pages/admin/AdminProductsPage').then((m) => ({
     default: m.AdminProductsPage,
   }))
 );
-const AdminCategoriesPage = lazy(() =>
+const AdminCategoriesPage = lazyWithRetry(() =>
   import('./pages/admin/AdminCategoriesPage').then((m) => ({
     default: m.AdminCategoriesPage,
   }))
 );
-const AdminMediaPage = lazy(() =>
+const AdminMediaPage = lazyWithRetry(() =>
   import('./pages/admin/AdminMediaPage').then((m) => ({ default: m.AdminMediaPage }))
 );
-const AdminHeroEditorPage = lazy(() =>
+const AdminHeroEditorPage = lazyWithRetry(() =>
   import('./pages/admin/AdminHeroEditorPage').then((m) => ({
     default: m.AdminHeroEditorPage,
   }))
 );
-const AdminContentPage = lazy(() =>
+const AdminContentPage = lazyWithRetry(() =>
   import('./pages/admin/AdminContentPage').then((m) => ({
     default: m.AdminContentPage,
   }))
 );
-const AdminPromotionsPage = lazy(() =>
+const AdminPromotionsPage = lazyWithRetry(() =>
   import('./pages/admin/AdminPromotionsPage').then((m) => ({
     default: m.AdminPromotionsPage,
   }))
 );
-const AdminGalleryPage = lazy(() =>
+const AdminGalleryPage = lazyWithRetry(() =>
   import('./pages/admin/AdminGalleryPage').then((m) => ({
     default: m.AdminGalleryPage,
   }))
 );
-const AdminBrandPage = lazy(() =>
+const AdminBrandPage = lazyWithRetry(() =>
   import('./pages/admin/AdminBrandPage').then((m) => ({ default: m.AdminBrandPage }))
 );
-const AdminAppearancePage = lazy(() =>
+const AdminAppearancePage = lazyWithRetry(() =>
   import('./pages/admin/AdminAppearancePage').then((m) => ({
     default: m.AdminAppearancePage,
   }))
 );
-const AdminContactPage = lazy(() =>
+const AdminContactPage = lazyWithRetry(() =>
   import('./pages/admin/AdminContactPage').then((m) => ({
     default: m.AdminContactPage,
   }))
 );
-const AdminSeoPage = lazy(() =>
+const AdminSeoPage = lazyWithRetry(() =>
   import('./pages/admin/AdminSeoPage').then((m) => ({ default: m.AdminSeoPage }))
 );
-const AdminBackupQrPage = lazy(() =>
+const AdminBackupQrPage = lazyWithRetry(() =>
   import('./pages/admin/AdminBackupQrPage').then((m) => ({
     default: m.AdminBackupQrPage,
   }))
 );
-const AdminSecurityPage = lazy(() =>
+const AdminSecurityPage = lazyWithRetry(() =>
   import('./pages/admin/AdminSecurityPage').then((m) => ({
     default: m.AdminSecurityPage,
   }))
 );
-const AdminSeasonalThemesPage = lazy(() =>
+const AdminSeasonalThemesPage = lazyWithRetry(() =>
   import('./pages/admin/AdminSeasonalThemesPage').then((m) => ({
     default: m.AdminSeasonalThemesPage,
   }))
 );
-const AdminFeedbackPage = lazy(() =>
+const AdminFeedbackPage = lazyWithRetry(() =>
   import('./pages/admin/AdminFeedbackPage').then((m) => ({
     default: m.AdminFeedbackPage,
   }))
 );
 
 const PageLoader: React.FC = () => (
-  <div className="min-h-[60vh] flex flex-col items-center justify-center text-[#4B2E24]">
+  <div className="min-h-screen flex flex-col items-center justify-center bg-ivory-light text-coffee">
     <Loader2 className="w-7 h-7 animate-spin mb-2" />
     <span className="font-serif text-base">Đang tải...</span>
   </div>
