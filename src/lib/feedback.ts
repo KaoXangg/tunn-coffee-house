@@ -380,7 +380,7 @@ export async function fetchPublicPositiveReviews(): Promise<PublicReviewRecord[]
       .from('public_positive_reviews')
       .select('id, customer_name, table_number, rating, tags, comment, created_at')
       .order('created_at', { ascending: false })
-      .limit(12);
+      .limit(24);
 
     if (error || !data) {
       return localPositive;

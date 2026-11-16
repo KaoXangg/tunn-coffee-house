@@ -84,8 +84,17 @@ body {
 }
 
 .group\/marquee:hover .animate-category-marquee,
-.group\/marquee:focus-within .animate-category-marquee {
+.group\/marquee:focus-within .animate-category-marquee,
+.group\/marquee:hover .animate-reviews-marquee,
+.group\/marquee:focus-within .animate-reviews-marquee {
   animation-play-state: paused;
+}
+
+.animate-reviews-marquee {
+  display: flex;
+  width: max-content;
+  animation: category-marquee 45s linear infinite;
+  will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {

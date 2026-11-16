@@ -473,6 +473,54 @@ export const AdminContentPage: React.FC = () => {
                         />
                       </div>
                     )}
+                    {sec.section_key === 'contact' && (
+                      <div className="pt-2.5 mt-1 border-t border-[#D5C6AD]/60 space-y-2">
+                        <p className="text-[10px] uppercase tracking-widest font-semibold text-[#4B2E24]">
+                          Mục Cảm nhận Khách hàng (Hiển thị ngay phía trên Liên hệ)
+                        </p>
+                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2.5">
+                          <input
+                            type="text"
+                            value={String(sec.content?.reviews_eyebrow ?? 'CẢM NHẬN TỪ KHÁCH HÀNG')}
+                            onChange={(e) =>
+                              updateSectionContentValue('contact', 'reviews_eyebrow', e.target.value)
+                            }
+                            placeholder="Nhãn nhỏ (Eyebrow)"
+                            className="px-3 py-1.5 text-xs uppercase tracking-wider bg-white border border-[#D5C6AD] rounded-brand"
+                          />
+                          <input
+                            type="text"
+                            value={String(sec.content?.reviews_title ?? 'Khách Hàng Nói Gì Về TUNN')}
+                            onChange={(e) =>
+                              updateSectionContentValue('contact', 'reviews_title', e.target.value)
+                            }
+                            placeholder="Tiêu đề chính"
+                            className="px-3 py-1.5 text-sm font-semibold bg-white border border-[#D5C6AD] rounded-brand"
+                          />
+                          <input
+                            type="text"
+                            value={String(
+                              sec.content?.reviews_subtitle ??
+                                'Những chia sẻ chân thực từ khách ghé quán là động lực để chúng tôi chăm chút từng ly trà và cà phê mỗi ngày.'
+                            )}
+                            onChange={(e) =>
+                              updateSectionContentValue('contact', 'reviews_subtitle', e.target.value)
+                            }
+                            placeholder="Mô tả phụ"
+                            className="px-3 py-1.5 text-xs bg-white border border-[#D5C6AD] rounded-brand"
+                          />
+                          <input
+                            type="text"
+                            value={String(sec.content?.reviews_cta_label ?? 'Viết đánh giá')}
+                            onChange={(e) =>
+                              updateSectionContentValue('contact', 'reviews_cta_label', e.target.value)
+                            }
+                            placeholder="Chữ nút bấm"
+                            className="px-3 py-1.5 text-xs font-medium bg-white border border-[#D5C6AD] rounded-brand"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
