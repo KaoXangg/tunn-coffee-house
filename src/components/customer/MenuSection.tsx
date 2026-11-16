@@ -167,7 +167,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                         className={`group relative w-[180px] sm:w-[205px] lg:w-[220px] h-32 sm:h-36 shrink-0 rounded-xl overflow-hidden text-left transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] ${
                           isActive
                             ? 'ring-2 ring-coffee ring-offset-2 ring-offset-ivory-light shadow-editorial-lg'
-                            : 'border border-coffee-beige/60 shadow-sm hover:shadow-editorial opacity-95 hover:opacity-100'
+                            : 'border border-coffee-beige/60 dark:border-white/[0.08] shadow-sm hover:shadow-editorial opacity-95 hover:opacity-100'
                         }`}
                       >
                         {/* Background Image or Artisanal Fallback */}
@@ -377,7 +377,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               <AnimatePresence mode="popLayout">
                 {paginatedProducts.map((item) => {
                 const hasSale =
@@ -403,12 +403,12 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                         onSelectProduct?.(item);
                       }
                     }}
-                    className={`group cursor-pointer flex items-start gap-4 sm:gap-5 px-3 -mx-3 pt-3 pb-7 rounded-brand border-b border-coffee-beige/70 hover:bg-ivory/45 transition-all duration-200 ${
+                    className={`group cursor-pointer flex items-start gap-4 sm:gap-5 p-3.5 sm:p-4 rounded-xl bg-ivory/40 hover:bg-ivory/85 dark:bg-white/[0.03] dark:hover:bg-white/[0.06] border border-coffee-beige/50 dark:border-white/[0.06] hover:border-coffee/40 dark:hover:border-coffee/40 hover:-translate-y-0.5 hover:shadow-editorial transition-all duration-300 ${
                       !item.is_available ? 'opacity-65' : ''
                     }`}
                   >
                     {/* Thumbnail */}
-                    <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-brand overflow-hidden shrink-0 border border-coffee-beige bg-ivory">
+                    <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden shrink-0 border border-coffee-beige/60 dark:border-white/[0.08] bg-ivory">
                       <img
                         src={item.image_url}
                         alt={item.name}
@@ -446,7 +446,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                       {(item.badge || item.is_best_seller || !item.is_available) && (
                         <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                           {item.badge && (
-                            <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-ivory text-coffee border border-coffee-beige rounded-brand">
+                            <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-ivory text-coffee border border-coffee-beige/70 dark:border-white/[0.1] rounded-brand">
                               {item.badge}
                             </span>
                           )}
@@ -470,7 +470,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
 
             {/* Pagination Bar */}
             {totalPages > 1 && (
-              <div className="mt-12 pt-8 border-t border-coffee-beige/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="mt-12 pt-8 border-t border-coffee-beige/60 dark:border-white/[0.07] flex flex-col sm:flex-row items-center justify-between gap-4">
                 <p className="text-xs text-coffee-muted">
                   Hiển thị{' '}
                   <strong className="text-coffee-dark font-semibold">
@@ -493,7 +493,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                     disabled={safePage === 1}
                     onClick={() => handlePageChange(safePage - 1)}
                     aria-label="Trang trước"
-                    className="w-9 h-9 inline-flex items-center justify-center rounded-full border border-coffee-beige bg-ivory/60 text-coffee-dark hover:border-coffee hover:bg-ivory transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                    className="w-9 h-9 inline-flex items-center justify-center rounded-full border border-coffee-beige dark:border-white/[0.1] bg-ivory/60 dark:bg-white/[0.04] text-coffee-dark hover:border-coffee hover:bg-ivory transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -515,7 +515,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                         className={`min-w-[36px] h-9 px-3 inline-flex items-center justify-center rounded-full text-xs font-semibold transition-all ${
                           page === safePage
                             ? 'bg-coffee text-ivory-light shadow-editorial'
-                            : 'border border-coffee-beige/80 bg-ivory/50 text-coffee-dark hover:border-coffee hover:bg-ivory'
+                            : 'border border-coffee-beige/80 dark:border-white/[0.1] bg-ivory/50 dark:bg-white/[0.04] text-coffee-dark hover:border-coffee hover:bg-ivory'
                         }`}
                       >
                         {page}
@@ -528,7 +528,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                     disabled={safePage === totalPages}
                     onClick={() => handlePageChange(safePage + 1)}
                     aria-label="Trang sau"
-                    className="w-9 h-9 inline-flex items-center justify-center rounded-full border border-coffee-beige bg-ivory/60 text-coffee-dark hover:border-coffee hover:bg-ivory transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                    className="w-9 h-9 inline-flex items-center justify-center rounded-full border border-coffee-beige dark:border-white/[0.1] bg-ivory/60 dark:bg-white/[0.04] text-coffee-dark hover:border-coffee hover:bg-ivory transition-colors disabled:opacity-40 disabled:pointer-events-none"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>

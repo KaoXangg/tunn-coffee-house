@@ -240,11 +240,11 @@ export const CustomerHeader: React.FC = () => {
           <button
             type="button"
             onClick={() => setMobileOpen((prev) => !prev)}
-            className="p-2.5 text-coffee-dark hover:text-coffee border border-coffee-beige/80 rounded-brand bg-ivory/50"
+            className="w-9 h-9 inline-flex items-center justify-center rounded-full border-0 bg-coffee/[0.06] hover:bg-coffee/[0.13] dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-coffee-dark hover:text-coffee transition-all duration-300 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-coffee/35 active:scale-95"
             aria-label={mobileOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'}
             aria-expanded={mobileOpen}
           >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </div>
@@ -257,10 +257,10 @@ export const CustomerHeader: React.FC = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.22 }}
-            className="lg:hidden bg-ivory-light border-b border-coffee-beige overflow-hidden shadow-lg"
+            className="lg:hidden bg-ivory-light border-b border-coffee-beige dark:border-white/[0.08] overflow-hidden shadow-lg"
           >
             <div className="px-5 py-5 flex flex-col gap-2">
-              <div className="flex items-center justify-between px-3 py-2 mb-1 bg-ivory border border-coffee-beige/70 rounded-brand text-xs">
+              <div className="flex items-center justify-between px-3 py-2 mb-1 bg-ivory border border-coffee-beige/70 dark:border-white/[0.07] rounded-brand text-xs">
                 <span className="inline-flex items-center gap-2 font-semibold text-coffee-dark">
                   <span
                     className={`w-2 h-2 rounded-full ${

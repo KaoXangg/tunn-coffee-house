@@ -385,7 +385,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                         className={`group relative rounded-xl p-2 text-left transition-all duration-300 border flex items-center gap-2.5 min-w-0 ${
                           isSelected
                             ? 'bg-coffee text-ivory-light border-coffee shadow-editorial -translate-y-0.5'
-                            : 'bg-ivory-light/90 text-coffee-dark border-coffee-beige/80 hover:border-coffee'
+                            : 'bg-ivory-light/90 dark:bg-white/[0.04] text-coffee-dark border-coffee-beige/80 dark:border-white/[0.08] hover:border-coffee dark:hover:bg-white/[0.08] dark:hover:border-coffee/50'
                         }`}
                       >
                         <img
