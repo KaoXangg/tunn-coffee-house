@@ -21,9 +21,22 @@ export const isSupabaseConfigured = Boolean(
   !supabaseAnonKey.includes('your-public-anon-key')
 );
 
+const useVercelProxy =
+  typeof window !== 'undefined' &&
+  isSupabaseConfigured &&
+  import.meta.env.PROD &&
+  window.location.hostname !== 'localhost' &&
+  window.location.hostname !== '127.0.0.1';
+
+const clientUrl = useVercelProxy
+  ? `${window.location.origin}/sb`
+  : isSupabaseConfigured
+  ? supabaseUrl
+  : 'https://placeholder-project.supabase.co';
+
 // Initialize Supabase Client safely (falls back to placeholder URL when env is not yet configured so app doesn't crash on boot)
 export const supabase = createClient(
-  isSupabaseConfigured ? supabaseUrl : 'https://placeholder-project.supabase.co',
+  clientUrl,
   isSupabaseConfigured ? supabaseAnonKey : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder',
   {
     auth: {

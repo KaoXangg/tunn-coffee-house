@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tunn-storefront-v4';
+const CACHE_NAME = 'tunn-storefront-v5';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -31,8 +31,14 @@ self.addEventListener('fetch', (event) => {
   if (request.cache === 'only-if-cached' && request.mode !== 'same-origin') return;
 
   const url = new URL(request.url);
-  // Never intercept Supabase API / Auth requests or Admin routes
-  if (url.hostname.includes('supabase.co') || url.pathname.startsWith('/admin')) return;
+  // Never intercept Supabase API / Auth requests (direct or proxied via /sb) or Admin routes
+  if (
+    url.hostname.includes('supabase.co') ||
+    url.pathname.startsWith('/sb') ||
+    url.pathname.startsWith('/admin')
+  ) {
+    return;
+  }
 
   // Network-first for HTML navigation so fresh deploys take effect immediately
   if (request.mode === 'navigate') {

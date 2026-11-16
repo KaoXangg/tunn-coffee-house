@@ -25,6 +25,10 @@
   ],
   "rewrites": [
     {
+      "source": "/sb/(.*)",
+      "destination": "https://nofsynvwvrqubbcucxcu.supabase.co/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
