@@ -98,7 +98,7 @@ export const SeasonalThemeProvider: React.FC<{ children: React.ReactNode }> = ({
       if (debounceTimer) window.clearTimeout(debounceTimer);
       debounceTimer = window.setTimeout(() => {
         refreshThemes();
-      }, 220);
+      }, 50);
     };
 
     const unsubLocal = subscribeLiveSync((scope) => {
@@ -122,7 +122,7 @@ export const SeasonalThemeProvider: React.FC<{ children: React.ReactNode }> = ({
           if (document.visibilityState === 'visible') {
             refreshThemes();
           }
-        }, 12_000)
+        }, 8_000)
       : null;
 
     const channel = isSupabaseConfigured

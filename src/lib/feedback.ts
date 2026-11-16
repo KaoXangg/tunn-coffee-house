@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from './supabase';
+import { broadcastLiveSync } from './liveSync';
 
 export interface TableFeedbackRecord {
   id: string;
@@ -320,6 +321,7 @@ export async function submitTableFeedback(input: {
   };
 
   if (!isSupabaseConfigured) {
+    broadcastLiveSync('feedback');
     return { error: null, record: publicRecord };
   }
 
@@ -336,8 +338,10 @@ export async function submitTableFeedback(input: {
     if (error) {
       console.warn('Supabase table_feedback insert warning:', error.message);
     }
+    broadcastLiveSync('feedback');
     return { error: null, record: publicRecord };
   } catch {
+    broadcastLiveSync('feedback');
     return { error: null, record: publicRecord };
   }
 }
@@ -406,11 +410,13 @@ export async function deleteTableFeedback(id: string): Promise<{ error: string |
   writeLocalFeedback(readLocalFeedback().filter((item) => item.id !== id));
 
   if (!isSupabaseConfigured || id.startsWith('fb_')) {
+    broadcastLiveSync('feedback');
     return { error: null };
   }
 
   try {
     const { error } = await supabase.from('table_feedback').delete().eq('id', id);
+    if (!error) broadcastLiveSync('feedback');
     return { error: error ? error.message : null };
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Không thể xóa đánh giá.' };

@@ -1,7 +1,7 @@
 const CHANNEL_NAME = 'tunn_cms_live_sync_v1';
 const STORAGE_PING_KEY = 'tunn_cms_sync_ping_v1';
 
-export type LiveSyncScope = 'cms' | 'themes' | 'all';
+export type LiveSyncScope = 'cms' | 'themes' | 'feedback' | 'all';
 
 export function broadcastLiveSync(scope: LiveSyncScope = 'all') {
   try {

@@ -15,7 +15,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { formatDateVi } from '../../lib/utils';
+import { formatDateTimeVi } from '../../lib/utils';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { subscribeLiveSync } from '../../lib/liveSync';
 import {
   fetchTableFeedback,
   deleteTableFeedback,
@@ -33,19 +35,67 @@ export const AdminFeedbackPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const loadFeedback = useCallback(async () => {
-    setLoading(true);
+  const loadFeedback = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const res = await fetchTableFeedback();
       setItems(res.items);
       setSource(res.source);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadFeedback();
+    loadFeedback(false);
+  }, [loadFeedback]);
+
+  // Instant live sync when a customer submits feedback (same browser or across devices)
+  useEffect(() => {
+    const unsubLocal = subscribeLiveSync((scope) => {
+      if (scope === 'feedback' || scope === 'all') {
+        loadFeedback(true);
+      }
+    });
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        loadFeedback(true);
+      }
+    };
+    const onFocus = () => loadFeedback(true);
+
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('focus', onFocus);
+
+    const pollTimer = isSupabaseConfigured
+      ? window.setInterval(() => {
+          if (document.visibilityState === 'visible') {
+            loadFeedback(true);
+          }
+        }, 8_000)
+      : null;
+
+    const channel = isSupabaseConfigured
+      ? supabase
+          .channel('tunn-admin-feedback-realtime')
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'table_feedback' },
+            () => {
+              loadFeedback(true);
+            }
+          )
+          .subscribe()
+      : null;
+
+    return () => {
+      unsubLocal();
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('focus', onFocus);
+      if (pollTimer) window.clearInterval(pollTimer);
+      if (channel) supabase.removeChannel(channel);
+    };
   }, [loadFeedback]);
 
   const handleDelete = async (id: string) => {
@@ -120,7 +170,7 @@ export const AdminFeedbackPage: React.FC = () => {
           </span>
           <button
             type="button"
-            onClick={loadFeedback}
+            onClick={() => loadFeedback(false)}
             disabled={loading}
             className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors disabled:opacity-60"
           >
@@ -358,7 +408,7 @@ export const AdminFeedbackPage: React.FC = () => {
               </div>
 
               <div className="pt-3 border-t border-[#E9E6D8] flex items-center justify-between text-[11px] text-[#8C7565]">
-                <span>{formatDateVi(fb.created_at)}</span>
+                <span>{formatDateTimeVi(fb.created_at)}</span>
                 <span>{fb.rating}/5 điểm</span>
               </div>
             </div>

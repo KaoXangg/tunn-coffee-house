@@ -7,11 +7,9 @@ import {
   MessageSquareHeart,
   AlertCircle,
   Clock,
-  Sparkles,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { submitTableFeedback, validateGmailFormat, type PublicReviewRecord } from '../../lib/feedback';
-import { formatDateTimeVi } from '../../lib/utils';
 import { useToast } from '../../contexts/ToastContext';
 
 interface TableFeedbackModalProps {
@@ -52,18 +50,37 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [nowStr, setNowStr] = useState(() => formatDateTimeVi(new Date().toISOString()));
+  const [countdownSec, setCountdownSec] = useState(5);
+  const formatCurrentTime = () => {
+    const d = new Date();
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${hh}:${mm} · ${dd}/${mo}/${yyyy}`;
+  };
+  const [nowStr, setNowStr] = useState(formatCurrentTime);
   const pendingRecordRef = useRef<PublicReviewRecord | null>(null);
   const closeTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!open) return;
-    setNowStr(formatDateTimeVi(new Date().toISOString()));
+    setNowStr(formatCurrentTime());
     const clockTimer = window.setInterval(() => {
-      setNowStr(formatDateTimeVi(new Date().toISOString()));
-    }, 30_000);
+      setNowStr(formatCurrentTime());
+    }, 15_000);
     return () => window.clearInterval(clockTimer);
   }, [open]);
+
+  useEffect(() => {
+    if (!submitted) return;
+    setCountdownSec(5);
+    const interval = window.setInterval(() => {
+      setCountdownSec((prev) => (prev > 1 ? prev - 1 : 1));
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, [submitted]);
 
   const finishAndRevealReview = useCallback(() => {
     if (closeTimerRef.current) {
@@ -228,21 +245,21 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
                     />
                   </motion.div>
 
-                  <div className="space-y-1.5">
-                    <p className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.2em] font-semibold text-coffee">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                      <span>Gửi đánh giá thành công</span>
+                  <div className="space-y-2">
+                    <p className="text-[11px] uppercase tracking-[0.22em] font-semibold text-coffee/80">
+                      TUNN Coffee House
                     </p>
                     <h4 className="font-serif text-2xl font-semibold text-coffee-dark">
-                      Cảm ơn {customerName.trim() || 'bạn'} thật nhiều!
+                      Cảm ơn {customerName.trim() || 'bạn'} đã ghé quán!
                     </h4>
                     <p className="text-sm text-coffee-muted leading-relaxed">
-                      Góp ý của bạn lúc <strong>{nowStr}</strong> đã được ghi nhận để TUNN Coffee House phục vụ bạn ngày một tốt hơn.
+                      Tụi mình đã nhận được chia sẻ của bạn lúc{' '}
+                      <strong className="text-coffee-dark">{nowStr}</strong>. Chúc bạn có những phút giây thật thư giãn bên ly trà và cà phê tại TUNN nhé.
                     </p>
                   </div>
 
                   {/* 5-second smooth progress bar */}
-                  <div className="pt-2 space-y-2">
+                  <div className="pt-2 space-y-2.5">
                     <div className="w-full h-1.5 bg-coffee-beige/50 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ scaleX: 1 }}
@@ -253,13 +270,13 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
                       />
                     </div>
                     <div className="flex items-center justify-between text-[11px] text-coffee-muted">
-                      <span>Tự động đóng sau 5 giây...</span>
+                      <span>Tự động đóng sau {countdownSec}s...</span>
                       <button
                         type="button"
                         onClick={finishAndRevealReview}
-                        className="font-semibold text-coffee hover:underline"
+                        className="px-3 py-1 rounded-full bg-coffee/10 text-coffee font-semibold hover:bg-coffee hover:text-ivory-light transition-colors"
                       >
-                        Đóng &amp; xem ngay
+                        Xem đánh giá ngay
                       </button>
                     </div>
                   </div>

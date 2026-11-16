@@ -324,7 +324,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (debounceTimer) window.clearTimeout(debounceTimer);
       debounceTimer = window.setTimeout(() => {
         refreshAll();
-      }, 220);
+      }, 50);
     };
 
     const unsubLocal = subscribeLiveSync((scope) => {
@@ -348,7 +348,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           if (document.visibilityState === 'visible') {
             refreshAll();
           }
-        }, 12_000)
+        }, 8_000)
       : null;
 
     const channel = isSupabaseConfigured

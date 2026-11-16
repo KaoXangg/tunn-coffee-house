@@ -10,6 +10,8 @@ import {
 import { motion } from 'framer-motion';
 import { fetchPublicPositiveReviews, type PublicReviewRecord } from '../../lib/feedback';
 import { useSiteData } from '../../contexts/SiteDataContext';
+import { subscribeLiveSync } from '../../lib/liveSync';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { formatDateVi } from '../../lib/utils';
 
 interface CustomerReviewsSectionProps {
@@ -71,6 +73,32 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
       setLiveReviews(items);
     });
   }, [refreshTrigger]);
+
+  useEffect(() => {
+    const unsubLocal = subscribeLiveSync((scope) => {
+      if (scope === 'feedback' || scope === 'all') {
+        fetchPublicPositiveReviews().then(setLiveReviews);
+      }
+    });
+
+    const channel = isSupabaseConfigured
+      ? supabase
+          .channel('tunn-public-reviews-realtime')
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'table_feedback' },
+            () => {
+              fetchPublicPositiveReviews().then(setLiveReviews);
+            }
+          )
+          .subscribe()
+      : null;
+
+    return () => {
+      unsubLocal();
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, []);
 
   useEffect(() => {
     const onNewReview = (event: Event) => {
