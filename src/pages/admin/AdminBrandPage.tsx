@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Save, Image as ImageIcon, Loader2, RotateCcw, Eye } from 'lucide-react';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -20,7 +20,9 @@ export const AdminBrandPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<'logo' | 'favicon' | null>(null);
 
-  useEffect(() => {
+  const [prevSettings, setPrevSettings] = useState(settings);
+  if (settings !== prevSettings) {
+    setPrevSettings(settings);
     setBrandName(settings.brand_name);
     setSiteTitle(settings.site_title);
     setSlogan(settings.slogan);
@@ -28,7 +30,7 @@ export const AdminBrandPage: React.FC = () => {
     setFaviconUrl(settings.favicon_url);
     setFooterDescription(settings.footer_description);
     setCopyrightText(settings.copyright_text);
-  }, [settings]);
+  }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +40,8 @@ export const AdminBrandPage: React.FC = () => {
         brand_name: brandName.trim(),
         site_title: siteTitle.trim(),
         slogan: slogan.trim(),
-        logo_url: logoUrl.trim() || '/logo.png',
-        favicon_url: faviconUrl.trim() || '/logo.png',
+        logo_url: logoUrl.trim() || '/logo.jpg',
+        favicon_url: faviconUrl.trim() || '/logo.jpg',
         footer_description: footerDescription.trim(),
         copyright_text: copyrightText.trim(),
       });
@@ -135,17 +137,17 @@ export const AdminBrandPage: React.FC = () => {
               </label>
               <button
                 type="button"
-                onClick={() => setLogoUrl('/logo.png')}
+                onClick={() => setLogoUrl('/logo.jpg')}
                 className="inline-flex items-center gap-1 text-xs text-[#4B2E24] hover:underline"
               >
-                <RotateCcw className="w-3 h-3" /> Khôi phục Logo gốc (/logo.png)
+                <RotateCcw className="w-3 h-3" /> Khôi phục Logo gốc (/logo.jpg)
               </button>
             </div>
 
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-full bg-[#E9E6D8] border border-[#D5C6AD] overflow-hidden shrink-0 flex items-center justify-center">
                 <img
-                  src={logoUrl || '/logo.png'}
+                  src={logoUrl || '/logo.jpg'}
                   alt="Logo Preview"
                   className="w-full h-full object-contain"
                 />
@@ -177,7 +179,7 @@ export const AdminBrandPage: React.FC = () => {
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-brand bg-[#E9E6D8] border border-[#D5C6AD] overflow-hidden shrink-0 flex items-center justify-center">
                 <img
-                  src={faviconUrl || '/logo.png'}
+                  src={faviconUrl || '/logo.jpg'}
                   alt="Favicon Preview"
                   className="w-8 h-8 object-contain"
                 />

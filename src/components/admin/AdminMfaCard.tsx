@@ -51,8 +51,22 @@ export const AdminMfaCard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadFactors();
-  }, [loadFactors]);
+    let active = true;
+    if (!isSupabaseConfigured) {
+      return;
+    }
+    supabase.auth.mfa.listFactors().then(({ data, error }) => {
+      if (!active) return;
+      if (!error && data) {
+        const verified = data.totp.find((f) => f.status === 'verified') || null;
+        setVerifiedFactor(verified);
+      }
+      setLoading(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleStartEnroll = async () => {
     if (!isSupabaseConfigured) {

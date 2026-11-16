@@ -218,8 +218,8 @@ export const AdminProductsPage: React.FC = () => {
       await refreshAll();
       toast.success('Đã cập nhật giá bán!', prod.name);
       setInlinePriceId(null);
-    } catch (err: any) {
-      toast.error('Lỗi cập nhật giá', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi cập nhật giá', err instanceof Error ? err.message : undefined);
     } finally {
       setSavingInline(false);
     }
@@ -308,8 +308,8 @@ export const AdminProductsPage: React.FC = () => {
 
       await refreshAll();
       setModalOpen(false);
-    } catch (err: any) {
-      toast.error('Lỗi lưu sản phẩm', err?.message || 'Không thể lưu vào database');
+    } catch (err: unknown) {
+      toast.error('Lỗi lưu sản phẩm', err instanceof Error ? err.message : 'Không thể lưu vào database');
     } finally {
       setSaving(false);
     }
@@ -377,8 +377,8 @@ export const AdminProductsPage: React.FC = () => {
       await refreshAll();
       toast.success('Đã xóa sản phẩm', deleteTarget.name);
       setDeleteTarget(null);
-    } catch (err: any) {
-      toast.error('Lỗi khi xóa sản phẩm', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi khi xóa sản phẩm', err instanceof Error ? err.message : undefined);
     } finally {
       setDeleting(false);
     }
@@ -433,8 +433,8 @@ export const AdminProductsPage: React.FC = () => {
       await refreshAll();
       toast.success(`Đã ${label.toLowerCase()} cho ${selectedIds.length} món`);
       setSelectedIds([]);
-    } catch (err: any) {
-      toast.error('Lỗi thao tác hàng loạt', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi thao tác hàng loạt', err instanceof Error ? err.message : undefined);
     } finally {
       setBulkProcessing(false);
     }
@@ -485,8 +485,8 @@ export const AdminProductsPage: React.FC = () => {
       toast.success(`Đã cập nhật giá cho ${targets.length} món`);
       setBulkPriceInput('');
       setSelectedIds([]);
-    } catch (err: any) {
-      toast.error('Lỗi cập nhật giá hàng loạt', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi cập nhật giá hàng loạt', err instanceof Error ? err.message : undefined);
     } finally {
       setBulkProcessing(false);
     }
@@ -754,7 +754,7 @@ export const AdminProductsPage: React.FC = () => {
           <select
             value={filterStatus}
             onChange={(e) => {
-              setFilterStatus(e.target.value as any);
+              setFilterStatus(e.target.value as Parameters<typeof setFilterStatus>[0]);
               setPage(1);
             }}
             aria-label="Lọc theo trạng thái"
@@ -771,7 +771,7 @@ export const AdminProductsPage: React.FC = () => {
         <div className="lg:col-span-2">
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => setSortBy(e.target.value as Parameters<typeof setSortBy>[0])}
             aria-label="Sắp xếp"
             className="w-full px-3 py-2 text-xs font-medium bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
           >

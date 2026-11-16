@@ -90,7 +90,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-8 sm:mb-12 pb-5 sm:pb-6 border-b border-coffee-beige/70 dark:border-b-0 dark:pb-0">
           <div>
             <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2">
-              {section?.content?.eyebrow || 'TUYỂN CHỌN ĐẶC SẮC'}
+              {String(section?.content?.eyebrow || 'TUYỂN CHỌN ĐẶC SẮC')}
             </p>
             <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
               {section?.title || 'Tác Phẩm Nổi Bật'}
@@ -99,7 +99,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
 
           <div className="flex items-center justify-between md:justify-end gap-4">
             <p className="text-sm text-coffee-muted max-w-md leading-relaxed">
-              {section?.subtitle || section?.content?.description}
+              {section?.subtitle || String(section?.content?.description || '')}
             </p>
 
             {featuredProducts.length > 1 && (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Save, Image as ImageIcon, Loader2, Globe, Share2 } from 'lucide-react';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -16,13 +16,15 @@ export const AdminSeoPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<'og' | 'favicon' | null>(null);
 
-  useEffect(() => {
+  const [prevSettings, setPrevSettings] = useState(settings);
+  if (settings !== prevSettings) {
+    setPrevSettings(settings);
     setSeoTitle(settings.seo_title);
     setSeoDescription(settings.seo_description);
     setSeoKeywords(settings.seo_keywords);
     setOgImageUrl(settings.og_image_url);
     setFaviconUrl(settings.favicon_url);
-  }, [settings]);
+  }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,8 +34,8 @@ export const AdminSeoPage: React.FC = () => {
         seo_title: seoTitle.trim(),
         seo_description: seoDescription.trim(),
         seo_keywords: seoKeywords.trim(),
-        og_image_url: ogImageUrl.trim() || '/logo.png',
-        favicon_url: faviconUrl.trim() || '/logo.png',
+        og_image_url: ogImageUrl.trim() || '/logo.jpg',
+        favicon_url: faviconUrl.trim() || '/logo.jpg',
       });
 
       if (error) {
@@ -131,7 +133,7 @@ export const AdminSeoPage: React.FC = () => {
             </label>
             <div className="flex items-center gap-4">
               <img
-                src={ogImageUrl || '/logo.png'}
+                src={ogImageUrl || '/logo.jpg'}
                 alt="OG Preview"
                 className="w-24 h-16 object-cover rounded-brand border border-[#D5C6AD] bg-[#E9E6D8]"
               />
@@ -159,7 +161,7 @@ export const AdminSeoPage: React.FC = () => {
             </label>
             <div className="flex items-center gap-4">
               <img
-                src={faviconUrl || '/logo.png'}
+                src={faviconUrl || '/logo.jpg'}
                 alt="Favicon"
                 className="w-10 h-10 object-contain rounded border border-[#D5C6AD] bg-[#E9E6D8] p-1"
               />
@@ -207,7 +209,7 @@ export const AdminSeoPage: React.FC = () => {
             </div>
             <div className="aspect-[16/9] bg-[#E9E6D8] overflow-hidden">
               <img
-                src={ogImageUrl || '/logo.png'}
+                src={ogImageUrl || '/logo.jpg'}
                 alt="Social Share Preview"
                 className="w-full h-full object-cover"
               />

@@ -203,8 +203,8 @@ export const AdminMediaPage: React.FC = () => {
         await refreshAll();
         toast.success('Đã thêm ảnh vào Gallery!');
       }
-    } catch (err: any) {
-      toast.error('Lỗi gắn hình ảnh', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi gắn hình ảnh', err instanceof Error ? err.message : undefined);
     } finally {
       setAssigning(false);
     }
@@ -485,7 +485,7 @@ export const AdminMediaPage: React.FC = () => {
 
               <select
                 value={assignTargetType}
-                onChange={(e) => setAssignTargetType(e.target.value as any)}
+                onChange={(e) => setAssignTargetType(e.target.value as 'product' | 'hero' | 'about' | 'promotion' | 'gallery')}
                 className="w-full px-3 py-2 text-xs bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand font-medium"
               >
                 <option value="product">Gắn vào Sản phẩm (Product)</option>

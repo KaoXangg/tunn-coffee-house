@@ -47,7 +47,10 @@ export const AdminFeedbackPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadFeedback(false);
+    const timer = window.setTimeout(() => {
+      void loadFeedback(false);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [loadFeedback]);
 
   // Instant live sync when a customer submits feedback (same browser or across devices)

@@ -10,7 +10,7 @@ import { CustomerHomePage } from './pages/CustomerHomePage';
 import { ProtectedRoute } from './components/admin/ProtectedRoute';
 import { AdminLayout } from './components/admin/AdminLayout';
 
-function lazyWithRetry<T extends ComponentType<any>>(
+function lazyWithRetry<T extends ComponentType<Record<string, unknown>>>(
   importer: () => Promise<{ default: T }>
 ) {
   return lazy(async () => {

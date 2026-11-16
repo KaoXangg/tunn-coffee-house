@@ -88,7 +88,10 @@ export const SeasonalThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-    refreshThemes();
+    const timer = window.setTimeout(() => {
+      void refreshThemes();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [refreshThemes]);
 
   // Realtime + Cross-Tab + Visibility + Fallback Polling sync across customer & admin tabs

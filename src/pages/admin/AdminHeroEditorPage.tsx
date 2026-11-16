@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Save,
   Image as ImageIcon,
@@ -26,15 +26,15 @@ export const AdminHeroEditorPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<'main' | 'secondary' | null>(null);
 
-  useEffect(() => {
-    if (heroSection) {
-      setFormState({
-        ...DEFAULT_HERO_CONTENT,
-        ...(heroSection.content || {}),
-      });
-      setIsEnabled(heroSection.is_enabled);
-    }
-  }, [heroSection]);
+  const [prevHeroSection, setPrevHeroSection] = useState(heroSection);
+  if (heroSection && heroSection !== prevHeroSection) {
+    setPrevHeroSection(heroSection);
+    setFormState({
+      ...DEFAULT_HERO_CONTENT,
+      ...(heroSection.content || {}),
+    });
+    setIsEnabled(heroSection.is_enabled);
+  }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -254,7 +254,7 @@ export async function submitTableFeedback(input: {
   rating: number;
   tags: string[];
   comment: string;
-}): Promise<{ error: string | null; record?: PublicReviewRecord }> {
+}): Promise<{ error: string | null; record?: PublicReviewRecord; rateLimited?: boolean }> {
   if (input.honeypot && input.honeypot.trim().length > 0) {
     return { error: 'Yêu cầu không hợp lệ.' };
   }
@@ -302,13 +302,6 @@ export async function submitTableFeedback(input: {
   };
 
   writeLocalFeedback([localRecord, ...readLocalFeedback()]);
-  recordEmailSubmission(gmailCheck.canonicalEmail);
-
-  try {
-    sessionStorage.setItem(FEEDBACK_COOLDOWN_KEY, String(Date.now()));
-  } catch {
-    // ignore
-  }
 
   const publicRecord: PublicReviewRecord = {
     id: localRecord.id,
@@ -320,7 +313,17 @@ export async function submitTableFeedback(input: {
     created_at: localRecord.created_at,
   };
 
+  const markSubmittedLocally = () => {
+    recordEmailSubmission(gmailCheck.canonicalEmail);
+    try {
+      sessionStorage.setItem(FEEDBACK_COOLDOWN_KEY, String(Date.now()));
+    } catch {
+      // ignore
+    }
+  };
+
   if (!isSupabaseConfigured) {
+    markSubmittedLocally();
     broadcastLiveSync('feedback');
     return { error: null, record: publicRecord };
   }
@@ -335,14 +338,35 @@ export async function submitTableFeedback(input: {
       tags: cleanTags,
       comment: cleanComment,
     });
+
     if (error) {
-      console.warn('Supabase table_feedback insert warning:', error.message);
+      if (error.code === '23505') {
+        markSubmittedLocally();
+        broadcastLiveSync('feedback');
+        return { error: null, record: publicRecord, rateLimited: true };
+      }
+
+      if (error.code === 'P0001' || error.message?.includes('EMAIL_RATE_LIMIT')) {
+        recordEmailSubmission(gmailCheck.canonicalEmail);
+        return {
+          error: 'Gmail này vừa gửi đánh giá trong 24 giờ qua. Cảm ơn bạn đã góp ý!',
+        };
+      }
+
+      console.error('Supabase table_feedback insert error:', error);
+      return {
+        error: 'Không thể gửi đánh giá lúc này. Vui lòng thử lại sau ít phút.',
+      };
     }
+
+    markSubmittedLocally();
     broadcastLiveSync('feedback');
     return { error: null, record: publicRecord };
-  } catch {
-    broadcastLiveSync('feedback');
-    return { error: null, record: publicRecord };
+  } catch (err) {
+    console.error('Supabase table_feedback insert exception:', err);
+    return {
+      error: 'Mất kết nối khi gửi đánh giá. Vui lòng kiểm tra mạng và thử lại.',
+    };
   }
 }
 

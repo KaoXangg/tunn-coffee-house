@@ -33,7 +33,7 @@ export const PromotionsSection: React.FC = () => {
         {/* Heading */}
         <div className="mb-14 pb-6 border-b border-coffee-beige/70 dark:border-b-0 dark:pb-0">
           <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2.5">
-            {section?.content?.eyebrow || 'ƯU ĐÃI ĐẶC BIỆT'}
+            {String(section?.content?.eyebrow || 'ƯU ĐÃI ĐẶC BIỆT')}
           </p>
           <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
             {section?.title || 'Ưu Đãi & Mùa Vị Mới'}

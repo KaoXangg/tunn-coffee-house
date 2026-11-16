@@ -23,7 +23,7 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
   refreshTrigger = 0,
 }) => {
   const { getSection } = useSiteData();
-  const contactContent = (getSection('contact')?.content || {}) as Record<string, any>;
+  const contactContent = (getSection('contact')?.content || {}) as Record<string, unknown>;
   const [liveReviews, setLiveReviews] = useState<PublicReviewRecord[]>([]);
   const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
 

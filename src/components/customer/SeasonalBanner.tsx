@@ -69,7 +69,6 @@ export const SeasonalBanner: React.FC = () => {
 
   useEffect(() => {
     if (!effectiveTheme?.banner.enabled || !effectiveTheme.banner.showCountdown) {
-      setCountdown(null);
       return;
     }
 
@@ -94,9 +93,12 @@ export const SeasonalBanner: React.FC = () => {
       setCountdown({ d, h, m, s });
     };
 
-    compute();
+    const init = setTimeout(compute, 0);
     const timer = setInterval(compute, 1000);
-    return () => clearInterval(timer);
+    return () => {
+      clearTimeout(init);
+      clearInterval(timer);
+    };
   }, [effectiveTheme]);
 
   if (!effectiveTheme || !effectiveTheme.banner.enabled) return null;

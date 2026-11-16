@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Save,
@@ -54,31 +54,35 @@ export const AdminContentPage: React.FC = () => {
   const [copyright, setCopyright] = useState(settings.copyright_text);
   const [savingNav, setSavingNav] = useState(false);
 
-  useEffect(() => {
+  const [prevSections, setPrevSections] = useState(sections);
+  if (sections !== prevSections) {
+    setPrevSections(sections);
     setOrderedSections([...sections].sort((a, b) => a.sort_order - b.sort_order));
-  }, [sections]);
+  }
 
-  useEffect(() => {
-    if (aboutSec) {
-      setAboutTitle(aboutSec.title);
-      setAboutSubtitle(aboutSec.subtitle);
-      setAboutContent({
-        ...DEFAULT_ABOUT_CONTENT,
-        ...(aboutSec.content || {}),
-        pillars: Array.isArray(aboutSec.content?.pillars)
-          ? aboutSec.content.pillars
-          : DEFAULT_ABOUT_CONTENT.pillars,
-      });
-    }
-  }, [aboutSec]);
+  const [prevAboutSec, setPrevAboutSec] = useState(aboutSec);
+  if (aboutSec && aboutSec !== prevAboutSec) {
+    setPrevAboutSec(aboutSec);
+    setAboutTitle(aboutSec.title);
+    setAboutSubtitle(aboutSec.subtitle);
+    setAboutContent({
+      ...DEFAULT_ABOUT_CONTENT,
+      ...(aboutSec.content || {}),
+      pillars: Array.isArray(aboutSec.content?.pillars)
+        ? (aboutSec.content.pillars as AboutSectionContent['pillars'])
+        : DEFAULT_ABOUT_CONTENT.pillars,
+    });
+  }
 
-  useEffect(() => {
+  const [prevSettings, setPrevSettings] = useState(settings);
+  if (settings !== prevSettings) {
+    setPrevSettings(settings);
     setNavItems(settings.nav_items || []);
     setHeaderCtaLabel(settings.header_cta_label);
     setHeaderCtaHref(settings.header_cta_href);
     setFooterDesc(settings.footer_description);
     setCopyright(settings.copyright_text);
-  }, [settings]);
+  }
 
   const moveSection = (index: number, direction: -1 | 1) => {
     const targetIndex = index + direction;
@@ -220,8 +224,8 @@ export const AdminContentPage: React.FC = () => {
         'Đã lưu cấu trúc & thứ tự các Section!',
         'Trang chủ khách hàng đã được cập nhật.'
       );
-    } catch (err: any) {
-      toast.error('Lỗi lưu thứ tự section', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi lưu thứ tự section', err instanceof Error ? err.message : undefined);
     } finally {
       setSavingOrder(false);
     }

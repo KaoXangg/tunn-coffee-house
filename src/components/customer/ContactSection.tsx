@@ -57,7 +57,7 @@ export const ContactSection: React.FC = () => {
         >
           <div>
             <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2">
-              {section?.content?.eyebrow || 'ĐỊA CHỈ & LIÊN HỆ'}
+              {String(section?.content?.eyebrow || 'ĐỊA CHỈ & LIÊN HỆ')}
             </p>
             <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
               {section?.title || 'Ghé Thăm TUNN Coffee House'}

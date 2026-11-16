@@ -37,8 +37,6 @@ import { BrandLogo } from '../common/BrandLogo';
 import {
   formatDurationVi,
   IDLE_TIMEOUT_STORAGE_KEY,
-  SESSION_ID_STORAGE_KEY,
-  SESSION_START_STORAGE_KEY,
 } from '../../lib/utils';
 
 interface NavGroupItem {
@@ -107,7 +105,7 @@ export const AdminLayout: React.FC = () => {
   }, [isOwnerAdmin]);
 
   const prevPageRef = useRef<{ path: string; label: string; enteredAt: number } | null>(null);
-  const lastInteractionRef = useRef<number>(Date.now());
+  const lastInteractionRef = useRef<number>(0);
 
   const basicNavItems = CMS_NAV_ITEMS.filter((item) => !item.ownerOnly);
   const ownerNavItems = CMS_NAV_ITEMS.filter((item) => item.ownerOnly);

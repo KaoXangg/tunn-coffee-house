@@ -57,13 +57,13 @@ export const GallerySection: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pb-6 border-b border-coffee-beige/70 dark:border-b-0 dark:pb-0">
           <div>
             <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2.5">
-              {section?.content?.eyebrow || 'NHẬT KÝ HÌNH ẢNH'}
+              {String(section?.content?.eyebrow || 'NHẬT KÝ HÌNH ẢNH')}
             </p>
             <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
               {section?.title || 'Không Gian & Khoảnh Khắc'}
             </h2>
             <p className="text-sm text-coffee-muted mt-2 max-w-lg">
-              {section?.subtitle || section?.content?.description}
+              {section?.subtitle || String(section?.content?.description || '')}
             </p>
           </div>
 

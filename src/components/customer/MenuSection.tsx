@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Search, SlidersHorizontal, X, Coffee, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
@@ -75,9 +75,12 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
     });
   }, [products, activeCategoryId, quickFilter, searchQuery, sortBy]);
 
-  useEffect(() => {
+  const filterKey = `${activeCategoryId}|${quickFilter}|${searchQuery}|${sortBy}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
     setCurrentPage(1);
-  }, [activeCategoryId, quickFilter, searchQuery, sortBy]);
+  }
 
   const totalPages = Math.max(1, Math.ceil(visibleProducts.length / ITEMS_PER_PAGE));
   const safePage = Math.min(currentPage, totalPages);
@@ -123,7 +126,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
         {/* Editorial Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
           <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-3">
-            {section?.content?.eyebrow || 'THỰC ĐƠN THỦ CÔNG'}
+            {String(section?.content?.eyebrow || 'THỰC ĐƠN THỦ CÔNG')}
           </p>
           <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
             {section?.title || 'Thực Đơn Tinh Tuyển'}
@@ -539,9 +542,9 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
         )}
 
         {/* Footnote */}
-        {section?.content?.note && (
+        {Boolean(section?.content?.note) && (
           <p className="mt-12 text-center text-xs italic text-coffee-muted">
-            * {section.content.note}
+            * {String(section?.content?.note)}
           </p>
         )}
       </div>

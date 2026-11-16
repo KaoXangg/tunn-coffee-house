@@ -149,7 +149,7 @@ export function extractDailyTimeWindow(
   text: string | null | undefined
 ): { start: string; end: string } | null {
   if (!text) return null;
-  const match = text.match(/\b([01]?\d|2[0-3]):([0-5]\d)\s*[—–\-]\s*([01]?\d|2[0-3]):([0-5]\d)\b/);
+  const match = text.match(/\b([01]?\d|2[0-3]):([0-5]\d)\s*[—–-]\s*([01]?\d|2[0-3]):([0-5]\d)\b/);
   if (!match) return null;
   const pad = (n: string) => n.padStart(2, '0');
   return {

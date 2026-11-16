@@ -44,7 +44,7 @@ interface SiteDataContextType {
     action: string,
     entityType: string,
     entityName?: string,
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   ) => Promise<void>;
 }
 
@@ -321,7 +321,10 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   useEffect(() => {
-    refreshAll();
+    const timer = window.setTimeout(() => {
+      void refreshAll();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [refreshAll]);
 
   // Realtime + Cross-Tab + Visibility + Fallback Polling sync so website updates without F5
@@ -392,7 +395,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       action: string,
       entityType: string,
       entityName?: string,
-      details: Record<string, any> = {}
+      details: Record<string, unknown> = {}
     ) => {
       broadcastLiveSync('cms');
       if (!isSupabaseConfigured) return;

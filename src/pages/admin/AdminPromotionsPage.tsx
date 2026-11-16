@@ -143,8 +143,8 @@ export const AdminPromotionsPage: React.FC = () => {
 
       await refreshAll();
       setModalOpen(false);
-    } catch (err: any) {
-      toast.error('Lỗi lưu khuyến mãi', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi lưu khuyến mãi', err instanceof Error ? err.message : undefined);
     } finally {
       setSaving(false);
     }
@@ -163,8 +163,8 @@ export const AdminPromotionsPage: React.FC = () => {
       await refreshAll();
       toast.success('Đã xóa chương trình khuyến mãi');
       setDeleteTarget(null);
-    } catch (err: any) {
-      toast.error('Lỗi xóa khuyến mãi', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi xóa khuyến mãi', err instanceof Error ? err.message : undefined);
     } finally {
       setDeleting(false);
     }

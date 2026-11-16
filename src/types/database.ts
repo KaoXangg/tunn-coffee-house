@@ -143,7 +143,7 @@ export interface GalleryItem {
   updated_at: string;
 }
 
-export interface HeroSectionContent {
+export type HeroSectionContent = {
   badge: string;
   headline: string;
   subheadline: string;
@@ -159,15 +159,15 @@ export interface HeroSectionContent {
   alignment: 'left' | 'center' | 'right';
   featured_note_title: string;
   featured_note_subtitle: string;
-}
+};
 
-export interface AboutPillar {
+export type AboutPillar = {
   number: string;
   title: string;
   description: string;
-}
+};
 
-export interface AboutSectionContent {
+export type AboutSectionContent = {
   eyebrow: string;
   headline: string;
   lead_paragraph: string;
@@ -176,7 +176,7 @@ export interface AboutSectionContent {
   secondary_image_url: string;
   quote: string;
   pillars: AboutPillar[];
-}
+};
 
 export interface PageSection {
   id: string;
@@ -185,7 +185,7 @@ export interface PageSection {
   subtitle: string;
   is_enabled: boolean;
   sort_order: number;
-  content: Record<string, any>;
+  content: Record<string, unknown>;
   updated_at: string;
 }
 
@@ -196,6 +196,6 @@ export interface AdminActivityLog {
   action: string;
   entity_type: string;
   entity_name: string | null;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   created_at: string;
 }

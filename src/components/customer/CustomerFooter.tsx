@@ -1,6 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowUpRight, Lock } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useSeasonalTheme } from '../../contexts/SeasonalThemeContext';
 import { sanitizeUrl } from '../../lib/utils';

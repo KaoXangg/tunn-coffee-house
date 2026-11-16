@@ -31,7 +31,18 @@ export const AdminBackupQrPage: React.FC = () => {
 
   // Backup & Restore state
   const [restoring, setRestoring] = useState(false);
-  const [pendingBackupData, setPendingBackupData] = useState<any | null>(null);
+  interface BackupPayload {
+    exported_at?: string;
+    data: {
+      site_settings?: Record<string, unknown>;
+      categories?: unknown[];
+      products?: Array<Record<string, unknown>>;
+      promotions?: unknown[];
+      gallery_items?: unknown[];
+      page_sections?: unknown[];
+    };
+  }
+  const [pendingBackupData, setPendingBackupData] = useState<BackupPayload | null>(null);
 
   // QR Code Generator state
   const defaultOrigin =
@@ -54,7 +65,11 @@ export const AdminBackupQrPage: React.FC = () => {
       data: {
         site_settings: settings,
         categories,
-        products: products.map(({ categories: _cat, ...rest }) => rest),
+        products: products.map((p) => {
+          const rest = { ...p };
+          delete rest.categories;
+          return rest;
+        }),
         promotions,
         gallery_items: gallery,
         page_sections: sections,
@@ -133,7 +148,11 @@ export const AdminBackupQrPage: React.FC = () => {
       }
 
       if (Array.isArray(bProducts) && bProducts.length > 0) {
-        const cleanProducts = bProducts.map(({ categories: _c, ...rest }: any) => rest);
+        const cleanProducts = bProducts.map((p) => {
+          const rest = { ...p };
+          delete rest.categories;
+          return rest;
+        });
         await supabase.from('products').upsert(cleanProducts);
       }
 
@@ -162,8 +181,8 @@ export const AdminBackupQrPage: React.FC = () => {
         'Toàn bộ Thực đơn, Danh mục và Cài đặt đã được khôi phục nguyên trạng.'
       );
       setPendingBackupData(null);
-    } catch (err: any) {
-      toast.error('Lỗi khi khôi phục dữ liệu', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi khi khôi phục dữ liệu', err instanceof Error ? err.message : undefined);
     } finally {
       setRestoring(false);
     }
@@ -283,8 +302,8 @@ export const AdminBackupQrPage: React.FC = () => {
         'Đã tải thẻ QR Menu nét cao!',
         'Bạn có thể mang file ảnh PNG này đi in dán tại bàn hoặc quầy thu ngân.'
       );
-    } catch (err: any) {
-      toast.error('Không thể xuất ảnh thẻ QR', err?.message);
+    } catch (err: unknown) {
+      toast.error('Không thể xuất ảnh thẻ QR', err instanceof Error ? err.message : undefined);
     } finally {
       setDownloadingQr(false);
     }
@@ -526,7 +545,7 @@ export const AdminBackupQrPage: React.FC = () => {
             <div className="w-72 bg-[#E9E6D8] p-4 rounded-brand border border-[#D5C6AD] shadow-lg">
               <div className="bg-[#F7F5EF] border-2 border-[#4B2E24] p-5 text-center space-y-3">
                 <img
-                  src={settings.logo_url || '/logo.png'}
+                  src={settings.logo_url || '/logo.jpg'}
                   alt={settings.brand_name}
                   className="w-12 h-12 rounded-full object-contain mx-auto border border-[#D5C6AD]"
                 />

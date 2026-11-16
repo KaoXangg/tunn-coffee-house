@@ -122,8 +122,8 @@ export const AdminGalleryPage: React.FC = () => {
 
       await refreshAll();
       setModalOpen(false);
-    } catch (err: any) {
-      toast.error('Lỗi lưu Gallery', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi lưu Gallery', err instanceof Error ? err.message : undefined);
     } finally {
       setSaving(false);
     }
@@ -151,8 +151,8 @@ export const AdminGalleryPage: React.FC = () => {
       await refreshAll();
       toast.success('Đã xóa ảnh khỏi Gallery');
       setDeleteTarget(null);
-    } catch (err: any) {
-      toast.error('Lỗi xóa ảnh', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi xóa ảnh', err instanceof Error ? err.message : undefined);
     } finally {
       setDeleting(false);
     }

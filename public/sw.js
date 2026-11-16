@@ -1,5 +1,5 @@
 const CACHE_NAME = 'tunn-storefront-v1';
-const APP_SHELL = ['/', '/index.html', '/logo.png', '/manifest.webmanifest'];
+const APP_SHELL = ['/', '/index.html', '/logo.jpg', '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

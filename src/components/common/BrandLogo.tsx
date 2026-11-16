@@ -29,7 +29,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   brandNameOverride,
 }) => {
   const { settings } = useSiteData();
-  const logoSrc = logoUrlOverride || settings.logo_url || '/logo.png';
+  const logoSrc = logoUrlOverride || settings.logo_url || '/logo.jpg';
   const brandName = brandNameOverride || settings.brand_name || 'TUNN Coffee House';
 
   return (
@@ -47,8 +47,8 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
           loading="eager"
           onError={(e) => {
             const target = e.currentTarget;
-            if (target.src !== `${window.location.origin}/logo.png`) {
-              target.src = '/logo.png';
+            if (target.src !== `${window.location.origin}/logo.jpg`) {
+              target.src = '/logo.jpg';
             }
           }}
         />

@@ -50,6 +50,7 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
   const [countdownSec, setCountdownSec] = useState(5);
   const formatCurrentTime = () => {
     const d = new Date();
@@ -66,16 +67,20 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
 
   useEffect(() => {
     if (!open) return;
-    setNowStr(formatCurrentTime());
+    const initTimer = window.setTimeout(() => {
+      setNowStr(formatCurrentTime());
+    }, 0);
     const clockTimer = window.setInterval(() => {
       setNowStr(formatCurrentTime());
     }, 15_000);
-    return () => window.clearInterval(clockTimer);
+    return () => {
+      window.clearTimeout(initTimer);
+      window.clearInterval(clockTimer);
+    };
   }, [open]);
 
   useEffect(() => {
     if (!submitted) return;
-    setCountdownSec(5);
     const interval = window.setInterval(() => {
       setCountdownSec((prev) => (prev > 1 ? prev - 1 : 1));
     }, 1000);
@@ -91,6 +96,7 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
     pendingRecordRef.current = null;
 
     setSubmitted(false);
+    setRateLimited(false);
     setCustomerName('');
     setCustomerEmail('');
     setHoneypot('');
@@ -140,7 +146,7 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const { error, record } = await submitTableFeedback({
+    const { error, record, rateLimited: isRateLimited } = await submitTableFeedback({
       tableNumber,
       customerName,
       customerEmail,
@@ -152,12 +158,19 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
     setSubmitting(false);
 
     if (error) {
-      toast.error(error);
+      toast.error('Gửi đánh giá thất bại', error);
       return;
     }
 
-    pendingRecordRef.current = record ?? null;
+    pendingRecordRef.current = isRateLimited ? null : (record ?? null);
+    setRateLimited(Boolean(isRateLimited));
+    setCountdownSec(5);
     setSubmitted(true);
+    if (isRateLimited) {
+      toast.info('Bạn vừa gửi đánh giá rồi, cảm ơn bạn!');
+    } else {
+      toast.success('Gửi đánh giá thành công!');
+    }
     closeTimerRef.current = window.setTimeout(() => {
       finishAndRevealReview();
     }, 5000);
@@ -250,11 +263,19 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
                       TUNN Coffee House
                     </p>
                     <h4 className="font-serif text-2xl font-semibold text-coffee-dark">
-                      Cảm ơn {customerName.trim() || 'bạn'} đã ghé quán!
+                      {rateLimited
+                        ? 'Bạn vừa gửi đánh giá rồi, cảm ơn bạn!'
+                        : `Cảm ơn ${customerName.trim() || 'bạn'} đã ghé quán!`}
                     </h4>
                     <p className="text-sm text-coffee-muted leading-relaxed">
-                      Tụi mình đã nhận được chia sẻ của bạn lúc{' '}
-                      <strong className="text-coffee-dark">{nowStr}</strong>. Chúc bạn có những phút giây thật thư giãn bên ly trà và cà phê tại TUNN nhé.
+                      {rateLimited ? (
+                        'Hệ thống đã ghi nhận đánh giá trước đó của bạn trong phút này. Chúc bạn có những phút giây thật thư giãn tại TUNN nhé.'
+                      ) : (
+                        <>
+                          Tụi mình đã nhận được chia sẻ của bạn lúc{' '}
+                          <strong className="text-coffee-dark">{nowStr}</strong>. Chúc bạn có những phút giây thật thư giãn bên ly trà và cà phê tại TUNN nhé.
+                        </>
+                      )}
                     </p>
                   </div>
 

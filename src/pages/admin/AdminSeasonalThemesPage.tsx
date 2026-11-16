@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import {
-  Sparkles,
   Calendar,
   Eye,
   Power,
@@ -95,7 +94,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
   const [previewModalTheme, setPreviewModalTheme] = useState<SeasonalTheme | null>(null);
   const [previewViewport, setPreviewViewport] = useState<PreviewViewport>('desktop');
 
-  const now = new Date();
+  const now = useMemo(() => new Date(), []);
 
   const upcomingThemes = useMemo(
     () => themes.filter((t) => getThemeScheduleState(t, now) === 'upcoming'),

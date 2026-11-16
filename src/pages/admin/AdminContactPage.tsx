@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Save, Loader2, MapPin, Phone, Mail, Clock, Share2 } from 'lucide-react';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -20,7 +20,9 @@ export const AdminContactPage: React.FC = () => {
   const [orderUrl, setOrderUrl] = useState(settings.order_url);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
+  const [prevSettings, setPrevSettings] = useState(settings);
+  if (settings !== prevSettings) {
+    setPrevSettings(settings);
     setStoreName(settings.store_name);
     setAddress(settings.address);
     setHotline(settings.hotline);
@@ -32,7 +34,7 @@ export const AdminContactPage: React.FC = () => {
     setInstagramUrl(settings.instagram_url);
     setTiktokUrl(settings.tiktok_url);
     setOrderUrl(settings.order_url);
-  }, [settings]);
+  }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();

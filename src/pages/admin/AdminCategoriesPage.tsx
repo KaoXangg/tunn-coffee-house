@@ -117,8 +117,8 @@ export const AdminCategoriesPage: React.FC = () => {
 
       await refreshAll();
       setModalOpen(false);
-    } catch (err: any) {
-      toast.error('Lỗi lưu danh mục', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi lưu danh mục', err instanceof Error ? err.message : undefined);
     } finally {
       setSaving(false);
     }
@@ -156,8 +156,8 @@ export const AdminCategoriesPage: React.FC = () => {
       await refreshAll();
       toast.success('Đã xóa danh mục', deleteTarget.name);
       setDeleteTarget(null);
-    } catch (err: any) {
-      toast.error('Không thể xóa danh mục', err?.message);
+    } catch (err: unknown) {
+      toast.error('Không thể xóa danh mục', err instanceof Error ? err.message : undefined);
     } finally {
       setDeleting(false);
     }

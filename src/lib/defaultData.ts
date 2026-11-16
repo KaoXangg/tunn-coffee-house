@@ -14,8 +14,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   brand_name: 'TUNN Coffee House',
   site_title: 'TUNN Coffee House — Your Daily Ritual, Made Extraordinary',
   slogan: 'Your Daily Ritual, Made Extraordinary.',
-  logo_url: '/logo.png',
-  favicon_url: '/logo.png',
+  logo_url: '/logo.jpg',
+  favicon_url: '/logo.jpg',
 
   // Appearance & Design System
   primary_color: '#4B2E24',      // Coffee Brown
@@ -67,7 +67,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     'Khám phá hương vị trà sữa nguyên lá, trà trái cây tươi, cà phê rang mộc và matcha chuẩn Nhật tại TUNN Coffee House.',
   seo_keywords:
     'TUNN Coffee House, trà sữa, cà phê, matcha, trà trái cây, quán cà phê đẹp',
-  og_image_url: '/logo.png',
+  og_image_url: '/logo.jpg',
 
   updated_at: new Date().toISOString(),
 };

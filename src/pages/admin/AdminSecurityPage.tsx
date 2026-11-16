@@ -99,12 +99,20 @@ export const AdminSecurityPage: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
+  const [nowMs, setNowMs] = useState(() => Date.now());
+
+  const [prevProfile, setPrevProfile] = useState(profile);
+  if (profile !== prevProfile) {
+    setPrevProfile(profile);
     setFullName(profile?.full_name || '');
-  }, [profile]);
+  }
 
   useEffect(() => {
-    fetchAllProfiles();
+    const timer = window.setTimeout(() => {
+      setNowMs(Date.now());
+      void fetchAllProfiles();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [fetchAllProfiles]);
 
   // Determine if the currently logged-in Admin is the Root Owner Admin (Admin gốc)
@@ -127,8 +135,6 @@ export const AdminSecurityPage: React.FC = () => {
     activityLogs.forEach((l) => {
       if (l.actor_email) emailSet.add(l.actor_email.toLowerCase());
     });
-
-    const nowMs = Date.now();
 
     return Array.from(emailSet).map((email) => {
       const matchedProfile = allProfiles.find(
@@ -200,7 +206,10 @@ export const AdminSecurityPage: React.FC = () => {
       // Latest session duration
       let latestSessionDurationSec = 0;
       if (latestLog) {
-        const latestSessId = latestLog.details?.session_id;
+        const latestSessId =
+          typeof latestLog.details?.session_id === 'string'
+            ? latestLog.details.session_id
+            : '';
         if (latestSessId && sessionDurationsMap.has(latestSessId)) {
           latestSessionDurationSec = sessionDurationsMap.get(latestSessId) || 0;
         } else {
@@ -246,7 +255,7 @@ export const AdminSecurityPage: React.FC = () => {
         pageViewCount,
       };
     });
-  }, [allProfiles, activityLogs]);
+  }, [allProfiles, activityLogs, nowMs]);
 
   // Filter detailed activity logs (hide silent heartbeats unless needed, show page views, logins, data edits)
   const filteredActivityLogs = useMemo(() => {
@@ -358,8 +367,8 @@ export const AdminSecurityPage: React.FC = () => {
         'Đã đổi mật khẩu thành công!',
         'Mật khẩu mới đã được áp dụng cho tài khoản của bạn.'
       );
-    } catch (err: any) {
-      toast.error('Không thể đổi mật khẩu', err?.message);
+    } catch (err: unknown) {
+      toast.error('Không thể đổi mật khẩu', err instanceof Error ? err.message : undefined);
     } finally {
       setUpdatingPassword(false);
     }
@@ -379,8 +388,8 @@ export const AdminSecurityPage: React.FC = () => {
       await refreshProfile();
       await fetchAllProfiles();
       toast.success('Đã cập nhật tên hiển thị');
-    } catch (err: any) {
-      toast.error('Lỗi cập nhật hồ sơ', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi cập nhật hồ sơ', err instanceof Error ? err.message : undefined);
     } finally {
       setUpdatingProfile(false);
     }
@@ -465,8 +474,8 @@ export const AdminSecurityPage: React.FC = () => {
       setNewMgrEmail('');
       setNewMgrPassword('');
       setCreateModalOpen(false);
-    } catch (err: any) {
-      toast.error('Không thể tạo tài khoản Quản lý', err?.message);
+    } catch (err: unknown) {
+      toast.error('Không thể tạo tài khoản Quản lý', err instanceof Error ? err.message : undefined);
     } finally {
       setCreatingMgr(false);
     }
@@ -559,8 +568,8 @@ export const AdminSecurityPage: React.FC = () => {
       );
       setResetTarget(null);
       setResetPasswordValue('');
-    } catch (err: any) {
-      toast.error('Không thể cấp mật khẩu mới', err?.message);
+    } catch (err: unknown) {
+      toast.error('Không thể cấp mật khẩu mới', err instanceof Error ? err.message : undefined);
     } finally {
       setResettingMgrPassword(false);
     }
@@ -600,8 +609,8 @@ export const AdminSecurityPage: React.FC = () => {
       await fetchAllProfiles();
       toast.success('Đã xóa tài khoản Quản lý con', deleteTarget.email);
       setDeleteTarget(null);
-    } catch (err: any) {
-      toast.error('Lỗi khi xóa tài khoản', err?.message);
+    } catch (err: unknown) {
+      toast.error('Lỗi khi xóa tài khoản', err instanceof Error ? err.message : undefined);
     } finally {
       setDeletingMgr(false);
     }
@@ -618,8 +627,8 @@ export const AdminSecurityPage: React.FC = () => {
       if (error) throw error;
       await refreshAll();
       toast.success('Đã dọn sạch nhật ký hoạt động');
-    } catch (err: any) {
-      toast.error('Không thể xóa nhật ký', err?.message);
+    } catch (err: unknown) {
+      toast.error('Không thể xóa nhật ký', err instanceof Error ? err.message : undefined);
     } finally {
       setClearingLogs(false);
     }
@@ -878,7 +887,7 @@ export const AdminSecurityPage: React.FC = () => {
                     >
                       <td className="py-3 px-3.5">
                         <p className="font-semibold text-[#241914]">
-                          {mgr.fullName}
+                          {String(mgr.fullName)}
                         </p>
                         <p className="text-[11px] text-[#8C7565]">{mgr.email}</p>
                       </td>
@@ -891,7 +900,7 @@ export const AdminSecurityPage: React.FC = () => {
                               <span>Đang trực tuyến (Online)</span>
                             </span>
                             <p className="text-[11px] text-[#4B2E24] font-medium">
-                              Đang ở: {mgr.currentPage}
+                              Đang ở: {String(mgr.currentPage)}
                             </p>
                           </div>
                         ) : mgr.latestLog ? (
@@ -990,7 +999,7 @@ export const AdminSecurityPage: React.FC = () => {
                 <option value="all">Tất cả Quản lý ({managerActivitySummary.length})</option>
                 {managerActivitySummary.map((m) => (
                   <option key={m.email} value={m.email}>
-                    {m.fullName} ({m.email})
+                    {String(m.fullName)} ({m.email})
                   </option>
                 ))}
               </select>
@@ -1056,7 +1065,7 @@ export const AdminSecurityPage: React.FC = () => {
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#8C7565]">
                         <span>
                           Thực hiện bởi:{' '}
-                          <strong className="text-[#241914]">{actorName}</strong> (
+                          <strong className="text-[#241914]">{String(actorName)}</strong> (
                           {log.actor_email || 'Admin'})
                         </span>
                         {durationSec > 0 && (

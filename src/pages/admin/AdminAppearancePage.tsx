@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Save, RotateCcw, Loader2, Eye } from 'lucide-react';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -23,7 +23,9 @@ export const AdminAppearancePage: React.FC = () => {
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>(settings.theme_mode);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
+  const [prevSettings, setPrevSettings] = useState(settings);
+  if (settings !== prevSettings) {
+    setPrevSettings(settings);
     setPrimaryColor(settings.primary_color);
     setSecondaryBgColor(settings.secondary_bg_color);
     setPrimaryBgColor(settings.primary_bg_color);
@@ -35,7 +37,7 @@ export const AdminAppearancePage: React.FC = () => {
     setBorderRadius(settings.border_radius);
     setButtonStyle(settings.button_style);
     setThemeMode(settings.theme_mode);
-  }, [settings]);
+  }
 
   const handleResetPalette = () => {
     setPrimaryColor(DEFAULT_SITE_SETTINGS.primary_color);
@@ -286,7 +288,7 @@ export const AdminAppearancePage: React.FC = () => {
               </label>
               <select
                 value={buttonStyle}
-                onChange={(e) => setButtonStyle(e.target.value as any)}
+                onChange={(e) => setButtonStyle(e.target.value as 'editorial' | 'rounded' | 'pill')}
                 className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
               >
                 <option value="editorial">Editorial (Bo góc tối giản)</option>
