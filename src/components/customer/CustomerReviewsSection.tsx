@@ -72,7 +72,18 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
       const rec = custom.detail;
       if (!rec || rec.rating < 4) return;
       manualPauseUntilRef.current = Date.now() + 3800;
-      setLiveReviews((prev) => [rec, ...prev.filter((r) => r.id !== rec.id)]);
+      const recTs = new Date(rec.created_at).getTime();
+      setLiveReviews((prev) => {
+        const alreadyLoadedFromDb = prev.some(
+          (r) =>
+            r.id === rec.id ||
+            (r.customer_name === rec.customer_name &&
+              r.comment === rec.comment &&
+              Math.abs(new Date(r.created_at).getTime() - recTs) < 15_000)
+        );
+        if (alreadyLoadedFromDb) return prev;
+        return [rec, ...prev];
+      });
       setNewlyAddedId(rec.id);
       if (scrollRef.current) {
         scrollRef.current.scrollLeft = 0;
@@ -168,7 +179,7 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
     isDraggingRef.current = false;
   };
 
-  const shouldLoop = displayedReviews.length >= 2;
+  const shouldLoop = displayedReviews.length >= 5;
 
   return (
     <section
