@@ -10,7 +10,7 @@ import {
 import { motion } from 'framer-motion';
 import { fetchPublicPositiveReviews, type PublicReviewRecord } from '../../lib/feedback';
 import { useSiteData } from '../../contexts/SiteDataContext';
-import { formatDateTimeVi } from '../../lib/utils';
+import { formatDateVi } from '../../lib/utils';
 
 interface CustomerReviewsSectionProps {
   onOpenFeedback?: () => void;
@@ -61,6 +61,7 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const isPausedRef = useRef(false);
+  const manualPauseUntilRef = useRef(0);
   const isDraggingRef = useRef(false);
   const dragStartXRef = useRef(0);
   const dragScrollLeftRef = useRef(0);
@@ -76,10 +77,12 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
       const custom = event as CustomEvent<PublicReviewRecord>;
       const rec = custom.detail;
       if (!rec || rec.rating < 4) return;
+      // Pause marquee for 4.5s at start so customer clearly watches their review land in the row
+      manualPauseUntilRef.current = Date.now() + 4500;
       setLiveReviews((prev) => [rec, ...prev.filter((r) => r.id !== rec.id)]);
       setNewlyAddedId(rec.id);
       if (scrollRef.current) {
-        scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        scrollRef.current.scrollLeft = 0;
       }
       window.setTimeout(() => {
         setNewlyAddedId((curr) => (curr === rec.id ? null : curr));
@@ -119,7 +122,12 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
     let carry = 0;
 
     const tick = () => {
-      if (!isPausedRef.current && !isDraggingRef.current && el) {
+      if (
+        !isPausedRef.current &&
+        !isDraggingRef.current &&
+        Date.now() >= manualPauseUntilRef.current &&
+        el
+      ) {
         carry += 0.55;
         if (carry >= 1) {
           const step = Math.floor(carry);
@@ -141,9 +149,12 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
   const handleStepScroll = (direction: -1 | 1) => {
     const el = scrollRef.current;
     if (!el) return;
+    // Pause auto-scroll briefly so smooth button scroll isn't cancelled by RAF tick
+    manualPauseUntilRef.current = Date.now() + 1800;
     const step = window.innerWidth < 640 ? 306 : 360;
-    if (direction === -1 && el.scrollLeft <= 10) {
-      el.scrollLeft = el.scrollWidth / 2;
+    const half = el.scrollWidth / 2;
+    if (direction === -1 && el.scrollLeft <= 12 && half > 0) {
+      el.scrollLeft = half;
     }
     el.scrollBy({ left: direction * step, behavior: 'smooth' });
   };
@@ -361,9 +372,19 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
                             </p>
                           </div>
                         </div>
-                        <span className="text-[10px] text-coffee-muted shrink-0 whitespace-nowrap">
-                          {formatDateTimeVi(rev.created_at)}
-                        </span>
+                        <div className="text-right shrink-0 leading-tight">
+                          <p className="text-[10px] font-medium text-coffee-dark/75">
+                            {formatDateVi(rev.created_at)}
+                          </p>
+                          <p className="text-[10px] text-coffee-muted mt-0.5">
+                            {new Intl.DateTimeFormat('vi-VN', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit',
+                              hour12: false,
+                            }).format(new Date(rev.created_at))}
+                          </p>
+                        </div>
                       </div>
                     </motion.article>
                   );

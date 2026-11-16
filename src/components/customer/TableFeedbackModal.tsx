@@ -91,7 +91,7 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
         window.dispatchEvent(
           new CustomEvent('tunn:review-submitted', { detail: rec })
         );
-      }, 280);
+      }, 650);
     }
   }, [onClose]);
 
