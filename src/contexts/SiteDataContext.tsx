@@ -203,6 +203,9 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     try {
+      const isAdminRoute =
+        typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+
       const [
         settingsRes,
         catsRes,
@@ -222,12 +225,16 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         supabase.from('promotions').select('*').order('sort_order', { ascending: true }),
         supabase.from('gallery_items').select('*').order('sort_order', { ascending: true }),
         supabase.from('page_sections').select('*').order('sort_order', { ascending: true }),
-        supabase.from('media_assets').select('*').order('created_at', { ascending: false }),
-        supabase
-          .from('admin_activity_logs')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(200),
+        isAdminRoute
+          ? supabase.from('media_assets').select('*').order('created_at', { ascending: false })
+          : Promise.resolve({ data: null, error: null }),
+        isAdminRoute
+          ? supabase
+              .from('admin_activity_logs')
+              .select('*')
+              .order('created_at', { ascending: false })
+              .limit(200)
+          : Promise.resolve({ data: null, error: null }),
       ]);
 
       if (!settingsRes.error && settingsRes.data) {
@@ -387,6 +394,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       entityName?: string,
       details: Record<string, any> = {}
     ) => {
+      broadcastLiveSync('cms');
       if (!isSupabaseConfigured) return;
       try {
         const {
@@ -457,9 +465,9 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return { error: error.message };
     }
 
-    await logAdminActivity('Cập nhật cài đặt', 'site_settings', 'Cấu hình thương hiệu & Website');
-    await refreshAll();
     broadcastLiveSync('cms');
+    void logAdminActivity('Cập nhật cài đặt', 'site_settings', 'Cấu hình thương hiệu & Website');
+    void refreshAll();
     return { error: null };
   };
 
@@ -503,8 +511,9 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return { error: error.message };
     }
 
-    await logAdminActivity('Cập nhật nội dung trang', 'page_sections', sectionKey);
-    await refreshAll();
+    broadcastLiveSync('cms');
+    void logAdminActivity('Cập nhật nội dung trang', 'page_sections', sectionKey);
+    void refreshAll();
     return { error: null };
   };
 
