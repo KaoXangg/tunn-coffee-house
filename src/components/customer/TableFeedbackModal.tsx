@@ -300,7 +300,7 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
                         onClick={() => setRating(star)}
-                        className="p-1 transition-transform hover:scale-110 active:scale-95"
+                        className="p-1 transition-transform hover:scale-110 active:scale-95 touch-manipulation select-none"
                         aria-label={`${star} sao`}
                       >
                         <Star
@@ -398,7 +398,7 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
                           key={tag}
                           type="button"
                           onClick={() => toggleTag(tag)}
-                          className={`px-3 py-1.5 text-xs rounded-brand border transition-colors ${
+                          className={`px-3 py-1.5 text-xs rounded-brand border transition-colors touch-manipulation active:scale-95 select-none ${
                             active
                               ? 'bg-coffee text-ivory-light border-coffee font-medium'
                               : 'bg-ivory/60 text-coffee-dark border-coffee-beige hover:border-coffee'

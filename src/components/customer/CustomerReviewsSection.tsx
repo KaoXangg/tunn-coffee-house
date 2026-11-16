@@ -3,7 +3,6 @@ import {
   Star,
   Quote,
   MessageSquarePlus,
-  Sparkles,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -18,39 +17,6 @@ interface CustomerReviewsSectionProps {
   onOpenFeedback?: () => void;
   refreshTrigger?: number;
 }
-
-const STARTER_POSITIVE_REVIEWS: PublicReviewRecord[] = [
-  {
-    id: 'starter-1',
-    customer_name: 'Minh Anh',
-    table_number: '04',
-    rating: 5,
-    tags: ['Đồ uống ngon', 'Không gian đẹp'],
-    comment:
-      'Ô Long nướng kem phô mai thơm béo vừa phải, quán yên tĩnh rất hợp ngồi làm việc và trò chuyện cuối tuần.',
-    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-  },
-  {
-    id: 'starter-2',
-    customer_name: 'Gia Huy',
-    table_number: '08',
-    rating: 5,
-    tags: ['Phục vụ chu đáo', 'Âm nhạc dễ chịu'],
-    comment:
-      'Cold brew cam vàng quế thanh uống rất sảng khoái, nhân viên thân thiện và lên món nhanh.',
-    created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-  },
-  {
-    id: 'starter-3',
-    customer_name: 'Thảo Vy',
-    table_number: '02',
-    rating: 5,
-    tags: ['Đồ uống ngon', 'Wi-Fi ổn định'],
-    comment:
-      'Matcha Uji đậm vị, không bị ngọt gắt. Ánh sáng và góc bàn gỗ ngồi rất thư giãn.',
-    created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
-  },
-];
 
 export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
   onOpenFeedback,
@@ -105,8 +71,7 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
       const custom = event as CustomEvent<PublicReviewRecord>;
       const rec = custom.detail;
       if (!rec || rec.rating < 4) return;
-      // Pause marquee for 4.5s at start so customer clearly watches their review land in the row
-      manualPauseUntilRef.current = Date.now() + 4500;
+      manualPauseUntilRef.current = Date.now() + 3800;
       setLiveReviews((prev) => [rec, ...prev.filter((r) => r.id !== rec.id)]);
       setNewlyAddedId(rec.id);
       if (scrollRef.current) {
@@ -114,21 +79,13 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
       }
       window.setTimeout(() => {
         setNewlyAddedId((curr) => (curr === rec.id ? null : curr));
-      }, 7500);
+      }, 6500);
     };
     window.addEventListener('tunn:review-submitted', onNewReview);
     return () => window.removeEventListener('tunn:review-submitted', onNewReview);
   }, []);
 
-  const displayedReviews = useMemo(() => {
-    if (liveReviews.length >= 3) return liveReviews.slice(0, 24);
-    const merged = [...liveReviews];
-    for (const sample of STARTER_POSITIVE_REVIEWS) {
-      if (merged.length >= 3) break;
-      merged.push(sample);
-    }
-    return merged;
-  }, [liveReviews]);
+  const displayedReviews = useMemo(() => liveReviews.slice(0, 24), [liveReviews]);
 
   const avgScore = useMemo(() => {
     if (displayedReviews.length === 0) return '5.0';
@@ -136,7 +93,7 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
     return (sum / displayedReviews.length).toFixed(1);
   }, [displayedReviews]);
 
-  // Smooth auto-glide that still supports touch swipe & mouse drag
+  // Smooth 60fps auto-glide using delta time (prevents micro-stutter on 60Hz/120Hz screens)
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || displayedReviews.length === 0) return;
@@ -147,16 +104,21 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
     if (prefersReduced) return;
 
     let rafId = 0;
+    let lastTime = performance.now();
     let carry = 0;
+    const SPEED_PX_PER_SEC = 42;
 
-    const tick = () => {
+    const tick = (now: number) => {
+      const dt = Math.min(0.05, Math.max(0, (now - lastTime) / 1000));
+      lastTime = now;
+
       if (
         !isPausedRef.current &&
         !isDraggingRef.current &&
         Date.now() >= manualPauseUntilRef.current &&
         el
       ) {
-        carry += 0.55;
+        carry += SPEED_PX_PER_SEC * dt;
         if (carry >= 1) {
           const step = Math.floor(carry);
           carry -= step;
@@ -177,7 +139,6 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
   const handleStepScroll = (direction: -1 | 1) => {
     const el = scrollRef.current;
     if (!el) return;
-    // Pause auto-scroll briefly so smooth button scroll isn't cancelled by RAF tick
     manualPauseUntilRef.current = Date.now() + 1800;
     const step = window.innerWidth < 640 ? 306 : 360;
     const half = el.scrollWidth / 2;
@@ -207,6 +168,8 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
     isDraggingRef.current = false;
   };
 
+  const shouldLoop = displayedReviews.length >= 2;
+
   return (
     <section
       id="reviews"
@@ -218,7 +181,7 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-40px' }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10 sm:mb-12"
         >
           <div>
@@ -258,85 +221,96 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
               <button
                 type="button"
                 onClick={onOpenFeedback}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs uppercase tracking-wider font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark hover:-translate-y-0.5 active:scale-[0.98] transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs uppercase tracking-wider font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark hover:-translate-y-0.5 active:scale-[0.98] transition-all touch-manipulation"
               >
                 <MessageSquarePlus className="w-3.5 h-3.5" />
                 <span>{String(contactContent.reviews_cta_label || 'Viết đánh giá')}</span>
               </button>
             )}
 
-            <div className="hidden sm:flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => handleStepScroll(-1)}
-                aria-label="Xem đánh giá trước"
-                className="w-9 h-9 rounded-full border border-coffee-beige/80 dark:border-white/[0.1] bg-ivory dark:bg-white/[0.04] text-coffee-dark hover:border-coffee hover:bg-coffee hover:text-ivory-light inline-flex items-center justify-center transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleStepScroll(1)}
-                aria-label="Xem đánh giá tiếp theo"
-                className="w-9 h-9 rounded-full border border-coffee-beige/80 dark:border-white/[0.1] bg-ivory dark:bg-white/[0.04] text-coffee-dark hover:border-coffee hover:bg-coffee hover:text-ivory-light inline-flex items-center justify-center transition-colors"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+            {shouldLoop && (
+              <div className="hidden sm:flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => handleStepScroll(-1)}
+                  aria-label="Xem đánh giá trước"
+                  className="w-9 h-9 rounded-full border border-coffee-beige/80 dark:border-white/[0.1] bg-ivory dark:bg-white/[0.04] text-coffee-dark hover:border-coffee hover:bg-coffee hover:text-ivory-light inline-flex items-center justify-center transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStepScroll(1)}
+                  aria-label="Xem đánh giá tiếp theo"
+                  className="w-9 h-9 rounded-full border border-coffee-beige/80 dark:border-white/[0.1] bg-ivory dark:bg-white/[0.04] text-coffee-dark hover:border-coffee hover:bg-coffee hover:text-ivory-light inline-flex items-center justify-center transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         </motion.div>
 
-        {/* Interactive Auto-Gliding Reviews Track (Supports Touch Swipe + Mouse Drag) */}
-        <div
-          ref={scrollRef}
-          onMouseEnter={() => {
-            isPausedRef.current = true;
-          }}
-          onMouseLeave={() => {
-            isPausedRef.current = false;
-            stopDragging();
-          }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={stopDragging}
-          onTouchStart={() => {
-            isPausedRef.current = true;
-          }}
-          onTouchEnd={() => {
-            window.setTimeout(() => {
+        {displayedReviews.length === 0 ? (
+          <div className="p-10 text-center rounded-2xl bg-ivory/50 dark:bg-white/[0.03] border border-dashed border-coffee-beige/70 dark:border-white/[0.1]">
+            <p className="font-serif text-xl text-coffee-dark">
+              Hãy là vị khách đầu tiên chia sẻ cảm nhận về TUNN Coffee House
+            </p>
+            <p className="text-xs text-coffee-muted mt-1.5">
+              Mỗi góp ý của bạn giúp tụi mình phục vụ tốt hơn mỗi ngày.
+            </p>
+          </div>
+        ) : (
+          /* Interactive Auto-Gliding Reviews Track (Supports Touch Swipe + Mouse Drag) */
+          <div
+            ref={scrollRef}
+            onMouseEnter={() => {
+              isPausedRef.current = true;
+            }}
+            onMouseLeave={() => {
               isPausedRef.current = false;
-            }, 1200);
-          }}
-          className="-mx-4 px-4 sm:mx-0 sm:px-0 py-3 overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing select-none"
-        >
-          <div className="flex items-stretch w-max">
-            {[0, 1].map((dupIndex) => (
-              <div
-                key={dupIndex}
-                aria-hidden={dupIndex === 1}
-                className="flex items-stretch gap-4 sm:gap-5 pr-4 sm:pr-5 shrink-0"
-              >
-                {displayedReviews.map((rev) => {
-                  const isJustAdded = rev.id === newlyAddedId;
-                  return (
-                    <motion.article
-                      key={`${dupIndex}-${rev.id}`}
-                      initial={
-                        isJustAdded
-                          ? { opacity: 0, scale: 0.72, y: -28, rotate: -2 }
-                          : false
-                      }
-                      animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
-                      transition={{ type: 'spring', stiffness: 280, damping: 20 }}
-                      className={`w-[290px] sm:w-[340px] shrink-0 p-6 rounded-2xl border shadow-sm hover:shadow-editorial hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-4 ${
-                        isJustAdded
-                          ? 'bg-ivory dark:bg-white/[0.08] border-amber-400/70 ring-2 ring-amber-400/45 shadow-[0_0_28px_rgba(245,158,11,0.28)]'
-                          : 'bg-ivory/65 dark:bg-white/[0.03] border-coffee-beige/60 dark:border-white/[0.08]'
-                      }`}
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-1.5">
+              stopDragging();
+            }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={stopDragging}
+            onTouchStart={() => {
+              isPausedRef.current = true;
+            }}
+            onTouchEnd={() => {
+              window.setTimeout(() => {
+                isPausedRef.current = false;
+              }, 1200);
+            }}
+            className="-mx-4 px-4 sm:mx-0 sm:px-0 py-3 overflow-x-auto no-scrollbar cursor-grab active:cursor-grabbing select-none"
+          >
+            <div className="flex items-stretch w-max">
+              {(shouldLoop ? [0, 1] : [0]).map((dupIndex) => (
+                <div
+                  key={dupIndex}
+                  aria-hidden={dupIndex === 1}
+                  className="flex items-stretch gap-4 sm:gap-5 pr-4 sm:pr-5 shrink-0"
+                >
+                  {displayedReviews.map((rev) => {
+                    const isJustAdded = rev.id === newlyAddedId;
+                    return (
+                      <motion.article
+                        key={`${dupIndex}-${rev.id}`}
+                        initial={
+                          isJustAdded
+                            ? { opacity: 0, scale: 0.8, y: -22 }
+                            : false
+                        }
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                        className={`w-[290px] sm:w-[340px] shrink-0 p-6 rounded-2xl border shadow-sm hover:-translate-y-1 transition-transform duration-300 flex flex-col justify-between gap-4 ${
+                          isJustAdded
+                            ? 'bg-ivory dark:bg-white/[0.07] border-coffee/70 shadow-editorial'
+                            : 'bg-ivory/65 dark:bg-white/[0.03] border-coffee-beige/60 dark:border-white/[0.08]'
+                        }`}
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-0.5">
                               {[1, 2, 3, 4, 5].map((s) => (
                                 <Star
@@ -349,78 +323,71 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
                                 />
                               ))}
                             </div>
-                            {isJustAdded && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] uppercase tracking-wider font-bold rounded-full bg-emerald-600 text-white shadow-sm animate-pulse">
-                                <Sparkles className="w-2.5 h-2.5" />
-                                <span>Đánh giá của bạn</span>
-                              </span>
-                            )}
+                            <Quote className="w-5 h-5 text-coffee/30" />
                           </div>
-                          <Quote className="w-5 h-5 text-coffee/30" />
-                        </div>
 
-                        {rev.comment ? (
-                          <p className="text-sm text-coffee-dark/90 leading-relaxed line-clamp-3 min-h-[3.75rem]">
-                            &ldquo;{rev.comment}&rdquo;
-                          </p>
-                        ) : (
-                          <p className="text-sm italic text-coffee-muted min-h-[3.75rem]">
-                            Trải nghiệm tuyệt vời tại TUNN Coffee House.
-                          </p>
-                        )}
-
-                        {rev.tags && rev.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 pt-1">
-                            {rev.tags.slice(0, 3).map((tag) => (
-                              <span
-                                key={tag}
-                                className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-coffee/10 text-coffee"
-                              >
-                                <Sparkles className="w-2.5 h-2.5" />
-                                <span>{tag}</span>
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="pt-3 border-t border-coffee-beige/50 dark:border-white/[0.07] flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-8 h-8 rounded-full bg-coffee text-ivory-light flex items-center justify-center font-serif text-xs font-bold shrink-0">
-                            {(rev.customer_name || 'K').charAt(0).toUpperCase()}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs font-semibold text-coffee-dark truncate">
-                              {rev.customer_name || 'Khách TUNN'}
+                          {rev.comment ? (
+                            <p className="text-sm text-coffee-dark/90 leading-relaxed line-clamp-3 min-h-[3.75rem]">
+                              &ldquo;{rev.comment}&rdquo;
                             </p>
-                            <p className="text-[10px] text-coffee-muted">
-                              {rev.table_number
-                                ? `Bàn ${rev.table_number}`
-                                : 'Khách ghé quán'}
+                          ) : (
+                            <p className="text-sm italic text-coffee-muted min-h-[3.75rem]">
+                              Trải nghiệm tuyệt vời tại TUNN Coffee House.
+                            </p>
+                          )}
+
+                          {rev.tags && rev.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                              {rev.tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="px-2.5 py-0.5 text-[10px] font-medium rounded-full bg-coffee/10 text-coffee"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="pt-3 border-t border-coffee-beige/50 dark:border-white/[0.07] flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-8 h-8 rounded-full bg-coffee text-ivory-light flex items-center justify-center font-serif text-xs font-bold shrink-0">
+                              {(rev.customer_name || 'K').charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-semibold text-coffee-dark truncate">
+                                {rev.customer_name || 'Khách TUNN'}
+                              </p>
+                              <p className="text-[10px] text-coffee-muted">
+                                {rev.table_number
+                                  ? `Bàn ${rev.table_number}`
+                                  : 'Khách ghé quán'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0 leading-tight">
+                            <p className="text-[10px] font-medium text-coffee-dark/75">
+                              {formatDateVi(rev.created_at)}
+                            </p>
+                            <p className="text-[10px] text-coffee-muted mt-0.5">
+                              {new Intl.DateTimeFormat('vi-VN', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: false,
+                              }).format(new Date(rev.created_at))}
                             </p>
                           </div>
                         </div>
-                        <div className="text-right shrink-0 leading-tight">
-                          <p className="text-[10px] font-medium text-coffee-dark/75">
-                            {formatDateVi(rev.created_at)}
-                          </p>
-                          <p className="text-[10px] text-coffee-muted mt-0.5">
-                            {new Intl.DateTimeFormat('vi-VN', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                              second: '2-digit',
-                              hour12: false,
-                            }).format(new Date(rev.created_at))}
-                          </p>
-                        </div>
-                      </div>
-                    </motion.article>
-                  );
-                })}
-              </div>
-            ))}
+                      </motion.article>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );
