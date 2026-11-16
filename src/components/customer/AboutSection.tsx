@@ -37,7 +37,7 @@ export const AboutSection: React.FC = () => {
               {content.eyebrow || 'NGHỆ THUẬT THƯỞNG THỨC'}
             </p>
             <h2 className="font-serif text-[clamp(2rem,3.6vw,3.1rem)] font-normal text-coffee-dark leading-[1.15]">
-              {content.headline}
+              {content.headline || section?.title}
             </h2>
           </motion.div>
 
@@ -49,7 +49,7 @@ export const AboutSection: React.FC = () => {
             className="lg:col-span-5"
           >
             <p className="text-base text-coffee-dark/90 leading-relaxed font-medium">
-              {content.lead_paragraph}
+              {content.lead_paragraph || section?.subtitle}
             </p>
           </motion.div>
         </div>

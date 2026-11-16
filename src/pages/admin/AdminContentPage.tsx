@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Save,
   ArrowUp,
   ArrowDown,
+  ArrowUpRight,
   Eye,
   EyeOff,
   Image as ImageIcon,
@@ -107,6 +109,18 @@ export const AdminContentPage: React.FC = () => {
     contact: 'Địa điểm & Liên hệ (Contact)',
   };
 
+  const SECTION_EDIT_LINKS: Partial<
+    Record<PageSection['section_key'], { label: string; to?: string; tab?: 'about' }>
+  > = {
+    hero: { label: 'Chỉnh ảnh & nút Hero', to: '/admin/sections/hero' },
+    about: { label: 'Chỉnh bài viết, ảnh & 3 trụ cột', tab: 'about' },
+    featured: { label: 'Quản lý món nổi bật', to: '/admin/products' },
+    menu: { label: 'Quản lý món & danh mục', to: '/admin/products' },
+    promotions: { label: 'Quản lý khuyến mãi', to: '/admin/promotions' },
+    gallery: { label: 'Quản lý thư viện ảnh', to: '/admin/gallery' },
+    contact: { label: 'Chỉnh địa chỉ, SĐT & bản đồ', to: '/admin/settings/contact' },
+  };
+
   const updateSectionHeaderField = (
     key: PageSection['section_key'],
     field: 'title' | 'subtitle',
@@ -123,8 +137,30 @@ export const AdminContentPage: React.FC = () => {
             content: { ...(sec.content || {}), [contentField]: value },
           };
         }
+        if (key === 'about') {
+          const contentField = field === 'title' ? 'headline' : 'lead_paragraph';
+          return {
+            ...sec,
+            [field]: value,
+            content: { ...(sec.content || {}), [contentField]: value },
+          };
+        }
         return { ...sec, [field]: value };
       })
+    );
+  };
+
+  const updateSectionContentValue = (
+    key: PageSection['section_key'],
+    field: string,
+    value: string
+  ) => {
+    setOrderedSections((prev) =>
+      prev.map((sec) =>
+        sec.section_key === key
+          ? { ...sec, content: { ...(sec.content || {}), [field]: value } }
+          : sec
+      )
     );
   };
 
@@ -191,8 +227,8 @@ export const AdminContentPage: React.FC = () => {
     setSavingAbout(true);
     try {
       const { error } = await updatePageSection('about', {
-        title: aboutTitle,
-        subtitle: aboutSubtitle,
+        title: aboutContent.headline || aboutTitle,
+        subtitle: aboutContent.lead_paragraph || aboutSubtitle,
         content: aboutContent,
       });
       if (error) {
@@ -334,10 +370,28 @@ export const AdminContentPage: React.FC = () => {
                   </div>
 
                   <div className="flex-1 space-y-2.5">
-                    <div className="flex items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="text-[11px] uppercase tracking-widest font-semibold text-[#4B2E24]">
                         #{sec.sort_order} · {SECTION_LABELS[sec.section_key] || sec.section_key.toUpperCase()}
                       </span>
+                      {SECTION_EDIT_LINKS[sec.section_key]?.to ? (
+                        <Link
+                          to={SECTION_EDIT_LINKS[sec.section_key]!.to!}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#4B2E24] hover:underline"
+                        >
+                          <span>{SECTION_EDIT_LINKS[sec.section_key]!.label}</span>
+                          <ArrowUpRight className="w-3 h-3" />
+                        </Link>
+                      ) : SECTION_EDIT_LINKS[sec.section_key]?.tab ? (
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('about')}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#4B2E24] hover:underline"
+                        >
+                          <span>{SECTION_EDIT_LINKS[sec.section_key]!.label}</span>
+                          <ArrowUpRight className="w-3 h-3" />
+                        </button>
+                      ) : null}
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                       <div>
@@ -365,7 +419,7 @@ export const AdminContentPage: React.FC = () => {
                         <input
                           type="text"
                           value={
-                            sec.section_key === 'hero'
+                            sec.section_key === 'hero' || sec.section_key === 'about'
                               ? String(sec.content?.headline ?? sec.title ?? '')
                               : sec.title
                           }
@@ -388,6 +442,8 @@ export const AdminContentPage: React.FC = () => {
                           value={
                             sec.section_key === 'hero'
                               ? String(sec.content?.subheadline ?? sec.subtitle ?? '')
+                              : sec.section_key === 'about'
+                              ? String(sec.content?.lead_paragraph ?? sec.subtitle ?? '')
                               : sec.subtitle
                           }
                           onChange={(e) =>
@@ -401,6 +457,22 @@ export const AdminContentPage: React.FC = () => {
                         />
                       </div>
                     </div>
+                    {sec.section_key === 'menu' && (
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest font-semibold text-[#8C7565]">
+                          Ghi chú cuối mục Thực đơn
+                        </label>
+                        <input
+                          type="text"
+                          value={String(sec.content?.note ?? '')}
+                          onChange={(e) =>
+                            updateSectionContentValue('menu', 'note', e.target.value)
+                          }
+                          placeholder="VD: Tất cả đồ uống có thể tùy chỉnh mức đường và đá..."
+                          className="mt-1 w-full px-3 py-1.5 text-xs bg-white border border-[#D5C6AD] rounded-brand"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 
