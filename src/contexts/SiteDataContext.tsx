@@ -134,22 +134,28 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Sync CSS variables, document title, SEO meta tags, and favicon whenever settings or theme change
   useEffect(() => {
     const root = document.documentElement;
+    const hasSeasonalTheme = root.dataset.seasonalActive === '1';
+
     if (themeMode === 'dark') {
-      root.style.setProperty('--color-primary', '#D4A574');
-      root.style.setProperty('--color-bg-secondary', '#1D1511');
-      root.style.setProperty('--color-bg-primary', '#140F0C');
-      root.style.setProperty('--color-text-primary', '#F5EFE6');
-      root.style.setProperty('--color-text-muted', '#A9988A');
-      root.style.setProperty('--color-accent', '#2A201B');
       root.classList.add('dark');
+      if (!hasSeasonalTheme) {
+        root.style.setProperty('--color-primary', '#D4A574');
+        root.style.setProperty('--color-bg-secondary', '#1D1511');
+        root.style.setProperty('--color-bg-primary', '#140F0C');
+        root.style.setProperty('--color-text-primary', '#F5EFE6');
+        root.style.setProperty('--color-text-muted', '#A9988A');
+        root.style.setProperty('--color-accent', '#2A201B');
+      }
     } else {
-      root.style.setProperty('--color-primary', settings.primary_color || '#4B2E24');
-      root.style.setProperty('--color-bg-secondary', settings.secondary_bg_color || '#E9E6D8');
-      root.style.setProperty('--color-bg-primary', settings.primary_bg_color || '#F7F5EF');
-      root.style.setProperty('--color-text-primary', settings.text_primary_color || '#241914');
-      root.style.setProperty('--color-text-muted', settings.text_muted_color || '#8C7565');
-      root.style.setProperty('--color-accent', settings.accent_color || '#D5C6AD');
       root.classList.remove('dark');
+      if (!hasSeasonalTheme) {
+        root.style.setProperty('--color-primary', settings.primary_color || '#4B2E24');
+        root.style.setProperty('--color-bg-secondary', settings.secondary_bg_color || '#E9E6D8');
+        root.style.setProperty('--color-bg-primary', settings.primary_bg_color || '#F7F5EF');
+        root.style.setProperty('--color-text-primary', settings.text_primary_color || '#241914');
+        root.style.setProperty('--color-text-muted', settings.text_muted_color || '#8C7565');
+        root.style.setProperty('--color-accent', settings.accent_color || '#D5C6AD');
+      }
     }
 
     // Upgrade legacy 'Cormorant Garamond' or 'Georgia' to 'Lora' to prevent Vietnamese diacritic shifting on Windows

@@ -51,7 +51,7 @@ const StorefrontSkeleton: React.FC = () => (
 );
 
 export const CustomerHomePage: React.FC = () => {
-  const { sections, loading } = useSiteData();
+  const { sections, loading, settings, themeMode } = useSiteData();
   const { effectiveTheme } = useSeasonalTheme();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -73,6 +73,7 @@ export const CustomerHomePage: React.FC = () => {
       accent: root.style.getPropertyValue('--color-accent'),
     };
 
+    root.dataset.seasonalActive = '1';
     root.style.setProperty('--color-primary', tokens.primary);
     root.style.setProperty('--color-bg-secondary', tokens.surface || tokens.secondary);
     root.style.setProperty('--color-bg-primary', tokens.background);
@@ -93,6 +94,7 @@ export const CustomerHomePage: React.FC = () => {
     root.style.setProperty('--theme-glow', tokens.glow);
 
     return () => {
+      delete root.dataset.seasonalActive;
       if (prev.primary) root.style.setProperty('--color-primary', prev.primary);
       if (prev.bgSecondary) root.style.setProperty('--color-bg-secondary', prev.bgSecondary);
       if (prev.bgPrimary) root.style.setProperty('--color-bg-primary', prev.bgPrimary);
@@ -100,7 +102,7 @@ export const CustomerHomePage: React.FC = () => {
       if (prev.textMuted) root.style.setProperty('--color-text-muted', prev.textMuted);
       if (prev.accent) root.style.setProperty('--color-accent', prev.accent);
     };
-  }, [effectiveTheme]);
+  }, [effectiveTheme, settings, themeMode]);
 
   useEffect(() => {
     if (tableNumber) {

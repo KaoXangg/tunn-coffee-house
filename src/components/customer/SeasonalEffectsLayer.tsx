@@ -400,7 +400,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
         <img
           src={decorations.cornerLeftAssetUrl}
           alt=""
-          className="hidden md:block absolute bottom-4 left-4 w-24 h-24 object-contain opacity-90 drop-shadow-md"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-3 left-2 sm:bottom-4 sm:left-4 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain opacity-90 drop-shadow-md`}
         />
       )}
 
@@ -408,14 +408,14 @@ export const SeasonalEffectsLayer: React.FC = () => {
         <img
           src={decorations.cornerRightAssetUrl}
           alt=""
-          className="hidden md:block absolute bottom-4 right-16 w-24 h-24 object-contain opacity-90 drop-shadow-md"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-16 right-2 sm:bottom-4 sm:right-16 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain opacity-90 drop-shadow-md`}
         />
       )}
 
       {!showCustomLeft && key === 'christmas' && (
         <svg
           viewBox="0 0 120 140"
-          className="hidden md:block absolute bottom-4 left-4 w-20 h-24 opacity-90 drop-shadow"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-3 left-2 sm:bottom-4 sm:left-4 w-14 h-16 sm:w-20 sm:h-24 opacity-90 drop-shadow`}
           fill="none"
         >
           <polygon points="60,10 25,60 95,60" fill="#1B4332" />
@@ -433,7 +433,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
       {!showCustomRight && key === 'christmas' && (
         <svg
           viewBox="0 0 100 100"
-          className="hidden md:block absolute bottom-4 right-16 w-16 h-16 opacity-90 drop-shadow"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-16 right-2.5 sm:bottom-4 sm:right-16 w-12 h-12 sm:w-16 sm:h-16 opacity-90 drop-shadow`}
           fill="none"
         >
           <rect x="18" y="36" width="64" height="50" rx="4" fill="#8B1E24" />
@@ -449,7 +449,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
       {!showCustomLeft && key === 'tet' && (
         <svg
           viewBox="0 0 130 130"
-          className="hidden md:block absolute bottom-4 left-4 w-24 h-24 opacity-95 drop-shadow-md"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-3 left-2 sm:bottom-4 sm:left-4 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 opacity-95 drop-shadow-md`}
           fill="none"
         >
           {/* Lông viền vàng */}
@@ -482,7 +482,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
       {!showCustomRight && key === 'tet' && (
         <svg
           viewBox="0 0 110 110"
-          className="hidden md:block absolute bottom-4 right-16 w-20 h-20 opacity-90 drop-shadow"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-16 right-2 sm:bottom-4 sm:right-16 w-14 h-14 sm:w-20 sm:h-20 opacity-90 drop-shadow`}
           fill="none"
         >
           <path d="M95 98 Q68 72 42 58 Q25 48 16 28" stroke="#78350F" strokeWidth="4" strokeLinecap="round" />
@@ -509,7 +509,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
       {!showCustomLeft && key === 'halloween' && (
         <svg
           viewBox="0 0 110 100"
-          className="hidden md:block absolute bottom-4 left-4 w-20 h-20 opacity-90 drop-shadow"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-3 left-2 sm:bottom-4 sm:left-4 w-14 h-14 sm:w-20 sm:h-20 opacity-90 drop-shadow`}
           fill="none"
         >
           <path d="M52 14 C54 6, 62 6, 64 14" stroke="#4D7C0F" strokeWidth="5" strokeLinecap="round" />
@@ -524,7 +524,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
       {!showCustomRight && key === 'halloween' && (
         <svg
           viewBox="0 0 100 100"
-          className="hidden md:block absolute top-32 right-6 w-16 h-16 opacity-80"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute top-28 right-3 sm:top-32 sm:right-6 w-12 h-12 sm:w-16 sm:h-16 opacity-80`}
           fill="none"
         >
           <path d="M62 18 A28 28 0 1 0 84 68 A22 22 0 1 1 62 18 Z" fill="#FDE68A" />
@@ -535,7 +535,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
       {!showCustomLeft && key === 'mid_autumn' && (
         <svg
           viewBox="0 0 90 130"
-          className="hidden md:block absolute bottom-4 left-4 w-16 h-24 opacity-95 drop-shadow"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-3 left-2 sm:bottom-4 sm:left-4 w-12 h-16 sm:w-16 sm:h-24 opacity-95 drop-shadow`}
           fill="none"
         >
           <line x1="45" y1="2" x2="45" y2="20" stroke="#FBBF24" strokeWidth="2.5" />
@@ -552,7 +552,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
       {!showCustomRight && key === 'mid_autumn' && (
         <svg
           viewBox="0 0 110 110"
-          className="hidden md:block absolute top-32 right-6 w-20 h-20 opacity-85"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute top-28 right-3 sm:top-32 sm:right-6 w-14 h-14 sm:w-20 sm:h-20 opacity-85`}
           fill="none"
         >
           <circle cx="55" cy="55" r="34" fill="#FDE68A" opacity="0.2" />
@@ -566,7 +566,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
       {!showCustomLeft && key === 'valentine' && (
         <svg
           viewBox="0 0 110 100"
-          className="hidden md:block absolute bottom-4 left-4 w-20 h-20 opacity-90 drop-shadow"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-3 left-2 sm:bottom-4 sm:left-4 w-14 h-14 sm:w-20 sm:h-20 opacity-90 drop-shadow`}
           fill="none"
         >
           <path
@@ -584,7 +584,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
       {!showCustomLeft && key === 'black_friday' && (
         <svg
           viewBox="0 0 110 100"
-          className="hidden md:block absolute bottom-4 left-4 w-20 h-20 opacity-90 drop-shadow"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-3 left-2 sm:bottom-4 sm:left-4 w-14 h-14 sm:w-20 sm:h-20 opacity-90 drop-shadow`}
           fill="none"
         >
           <path d="M18 46 L52 14 L92 14 L92 54 L58 88 Z" fill="#18181B" stroke="#EAB308" strokeWidth="3" />
@@ -599,7 +599,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
       {!showCustomRight && key === 'summer' && (
         <svg
           viewBox="0 0 100 100"
-          className="hidden md:block absolute top-32 right-6 w-16 h-16 opacity-85"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute top-28 right-3 sm:top-32 sm:right-6 w-12 h-12 sm:w-16 sm:h-16 opacity-85`}
           fill="none"
         >
           <circle cx="50" cy="50" r="20" fill="#FACC15" />
@@ -622,7 +622,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
       {!showCustomLeft && key === 'summer' && (
         <svg
           viewBox="0 0 120 70"
-          className="hidden md:block absolute bottom-4 left-4 w-24 h-14 opacity-85"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-3 left-2 sm:bottom-4 sm:left-4 w-16 h-10 sm:w-24 sm:h-14 opacity-85`}
           fill="none"
         >
           <path d="M6 40 Q24 22 42 40 T78 40 T114 40" stroke="#0284C7" strokeWidth="5" strokeLinecap="round" />
