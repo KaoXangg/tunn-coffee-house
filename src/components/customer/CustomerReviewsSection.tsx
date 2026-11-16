@@ -25,7 +25,13 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
   const { getSection } = useSiteData();
   const contactContent = (getSection('contact')?.content || {}) as Record<string, unknown>;
   const [liveReviews, setLiveReviews] = useState<PublicReviewRecord[]>([]);
+  const liveReviewsRef = useRef<PublicReviewRecord[]>([]);
   const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
+  const [highlightSeq, setHighlightSeq] = useState(0);
+
+  useEffect(() => {
+    liveReviewsRef.current = liveReviews;
+  }, [liveReviews]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const isPausedRef = useRef(false);
@@ -71,25 +77,27 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
       const custom = event as CustomEvent<PublicReviewRecord>;
       const rec = custom.detail;
       if (!rec || rec.rating < 4) return;
-      manualPauseUntilRef.current = Date.now() + 3800;
+      manualPauseUntilRef.current = Date.now() + 1800;
       const recTs = new Date(rec.created_at).getTime();
-      setLiveReviews((prev) => {
-        const alreadyLoadedFromDb = prev.some(
-          (r) =>
-            r.id === rec.id ||
-            (r.customer_name === rec.customer_name &&
-              r.comment === rec.comment &&
-              Math.abs(new Date(r.created_at).getTime() - recTs) < 15_000)
-        );
-        if (alreadyLoadedFromDb) return prev;
-        return [rec, ...prev];
-      });
-      setNewlyAddedId(rec.id);
+      const matched = liveReviewsRef.current.find(
+        (r) =>
+          r.id === rec.id ||
+          (r.customer_name === rec.customer_name &&
+            r.comment === rec.comment &&
+            Math.abs(new Date(r.created_at).getTime() - recTs) < 15_000)
+      );
+      const targetId = matched ? matched.id : rec.id;
+
+      if (!matched) {
+        setLiveReviews((prev) => [rec, ...prev]);
+      }
+      setNewlyAddedId(targetId);
+      setHighlightSeq((s) => s + 1);
       if (scrollRef.current) {
         scrollRef.current.scrollLeft = 0;
       }
       window.setTimeout(() => {
-        setNewlyAddedId((curr) => (curr === rec.id ? null : curr));
+        setNewlyAddedId((curr) => (curr === targetId ? null : curr));
       }, 6500);
     };
     window.addEventListener('tunn:review-submitted', onNewReview);
@@ -306,14 +314,14 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
                     const isJustAdded = rev.id === newlyAddedId;
                     return (
                       <m.article
-                        key={`${dupIndex}-${rev.id}`}
+                        key={`${dupIndex}-${rev.id}-${isJustAdded ? highlightSeq : 0}`}
                         initial={
                           isJustAdded
-                            ? { opacity: 0, scale: 0.8, y: -22 }
+                            ? { opacity: 0, scale: 0.82, y: -32 }
                             : false
                         }
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                        transition={{ type: 'spring', stiffness: 240, damping: 20 }}
                         className={`w-[290px] sm:w-[340px] shrink-0 p-6 rounded-2xl border shadow-sm hover:-translate-y-1 transition-transform duration-300 flex flex-col justify-between gap-4 ${
                           isJustAdded
                             ? 'bg-ivory dark:bg-white/[0.07] border-coffee/70 shadow-editorial'
