@@ -254,6 +254,7 @@ export async function submitTableFeedback(input: {
   rating: number;
   tags: string[];
   comment: string;
+  turnstileToken?: string;
 }): Promise<{ error: string | null; record?: PublicReviewRecord; rateLimited?: boolean }> {
   if (input.honeypot && input.honeypot.trim().length > 0) {
     return { error: 'Yêu cầu không hợp lệ.' };
@@ -329,41 +330,62 @@ export async function submitTableFeedback(input: {
   }
 
   try {
-    const { error } = await supabase.from('table_feedback').insert({
-      table_number: cleanTable,
-      customer_name: cleanName,
-      customer_email: gmailCheck.normalizedEmail,
-      email_verified_status: gmailCheck.status,
-      rating: cleanRating,
-      tags: cleanTags,
-      comment: cleanComment,
+    const { data, error } = await supabase.functions.invoke<{
+      ok?: boolean;
+      rateLimited?: boolean;
+      error?: string;
+    }>('submit-feedback', {
+      body: {
+        turnstileToken: input.turnstileToken || '',
+        tableNumber: cleanTable,
+        customerName: cleanName,
+        customerEmail: gmailCheck.normalizedEmail,
+        honeypot: input.honeypot || '',
+        rating: cleanRating,
+        tags: cleanTags,
+        comment: cleanComment,
+      },
     });
 
     if (error) {
-      if (error.code === '23505') {
-        markSubmittedLocally();
-        broadcastLiveSync('feedback');
-        return { error: null, record: publicRecord, rateLimited: true };
+      let serverMessage = '';
+      try {
+        const ctx = (error as { context?: Response }).context;
+        if (ctx && typeof ctx.json === 'function') {
+          const parsed = (await ctx.json()) as { error?: string };
+          if (parsed?.error) serverMessage = parsed.error;
+        }
+      } catch {
+        // ignore JSON parse failure on non-JSON error responses
       }
 
-      if (error.code === 'P0001' || error.message?.includes('EMAIL_RATE_LIMIT')) {
+      if (serverMessage.includes('24 giờ')) {
         recordEmailSubmission(gmailCheck.canonicalEmail);
-        return {
-          error: 'Gmail này vừa gửi đánh giá trong 24 giờ qua. Cảm ơn bạn đã góp ý!',
-        };
       }
 
-      console.error('Supabase table_feedback insert error:', error);
+      console.error('Supabase submit-feedback function error:', error);
       return {
-        error: 'Không thể gửi đánh giá lúc này. Vui lòng thử lại sau ít phút.',
+        error:
+          serverMessage ||
+          'Không thể gửi đánh giá lúc này. Vui lòng thử lại sau ít phút.',
       };
+    }
+
+    if (data?.error) {
+      return { error: data.error };
+    }
+
+    if (data?.rateLimited) {
+      markSubmittedLocally();
+      broadcastLiveSync('feedback');
+      return { error: null, record: publicRecord, rateLimited: true };
     }
 
     markSubmittedLocally();
     broadcastLiveSync('feedback');
     return { error: null, record: publicRecord };
   } catch (err) {
-    console.error('Supabase table_feedback insert exception:', err);
+    console.error('Supabase submit-feedback exception:', err);
     return {
       error: 'Mất kết nối khi gửi đánh giá. Vui lòng kiểm tra mạng và thử lại.',
     };

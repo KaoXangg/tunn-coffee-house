@@ -6,7 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { fetchPublicPositiveReviews, type PublicReviewRecord } from '../../lib/feedback';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { subscribeLiveSync } from '../../lib/liveSync';
@@ -177,7 +177,7 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Section Header */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-40px' }}
@@ -249,7 +249,7 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
               </div>
             )}
           </div>
-        </motion.div>
+        </m.div>
 
         {displayedReviews.length === 0 ? (
           <div className="p-10 text-center rounded-2xl bg-ivory/50 dark:bg-white/[0.03] border border-dashed border-coffee-beige/70 dark:border-white/[0.1]">
@@ -294,7 +294,7 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
                   {displayedReviews.map((rev) => {
                     const isJustAdded = rev.id === newlyAddedId;
                     return (
-                      <motion.article
+                      <m.article
                         key={`${dupIndex}-${rev.id}`}
                         initial={
                           isJustAdded
@@ -380,7 +380,7 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
                             </p>
                           </div>
                         </div>
-                      </motion.article>
+                      </m.article>
                     );
                   })}
                 </div>

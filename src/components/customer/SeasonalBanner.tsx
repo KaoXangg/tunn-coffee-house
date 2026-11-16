@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowUpRight, Clock, Eye, Check, X } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useSeasonalTheme } from '../../contexts/SeasonalThemeContext';
 import { useToast } from '../../contexts/ToastContext';
 import { sanitizeUrl } from '../../lib/utils';
@@ -25,7 +24,7 @@ export const SeasonalPreviewBar: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[95] w-[94vw] max-w-2xl bg-[#1C1410]/95 backdrop-blur-md text-[#F7F5EF] border border-[#D4A574]/50 rounded-brand shadow-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[95] w-[94vw] max-w-2xl bg-[#1C1410] text-[#F7F5EF] border border-[#D4A574]/50 rounded-brand shadow-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3">
       <div className="flex items-center gap-2.5 text-xs">
         <span className="p-1.5 rounded-brand bg-[#D4A574]/20 text-[#D4A574]">
           <Eye className="w-4 h-4" />
@@ -35,7 +34,7 @@ export const SeasonalPreviewBar: React.FC = () => {
             Chế độ Xem trước: <span className="text-[#D4A574]">{previewTheme.name}</span>
           </p>
           <p className="text-[11px] text-[#D5C6AD]/80">
-            Chỉ hiển thị trong phiên của bạn — khách hàng chưa bị ảnh hưởng.
+            Chỉ hiển thị trong phiên của bạn - khách hàng chưa bị ảnh hưởng.
           </p>
         </div>
       </div>
@@ -107,10 +106,7 @@ export const SeasonalBanner: React.FC = () => {
   const pad = (n: number) => String(n).padStart(2, '0');
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+    <section
       style={{
         background: banner.imageUrl
           ? `linear-gradient(to right, rgba(15, 10, 8, 0.78), rgba(15, 10, 8, 0.55)), url(${banner.imageUrl}) center/cover`
@@ -165,6 +161,6 @@ export const SeasonalBanner: React.FC = () => {
           )}
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 };

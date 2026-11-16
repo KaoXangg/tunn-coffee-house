@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowUpRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { formatVND } from '../../lib/utils';
 import type { Product } from '../../types/database';
@@ -145,7 +145,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
               <div className="relative w-full max-w-[440px] aspect-[4/3] sm:aspect-[5/4]">
                 {/* Background Peek Card 2 */}
                 {thirdProduct && (
-                  <motion.div
+                  <m.div
                     key={`peek2-${thirdProduct.id}`}
                     aria-hidden="true"
                     initial={false}
@@ -158,12 +158,12 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                       alt=""
                       className="w-full h-full object-cover blur-[1px]"
                     />
-                  </motion.div>
+                  </m.div>
                 )}
 
                 {/* Background Peek Card 1 */}
                 {nextProduct && (
-                  <motion.div
+                  <m.div
                     key={`peek1-${nextProduct.id}`}
                     aria-hidden="true"
                     initial={false}
@@ -176,12 +176,12 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                       alt=""
                       className="w-full h-full object-cover"
                     />
-                  </motion.div>
+                  </m.div>
                 )}
 
                 {/* Active Foreground Card */}
                 <AnimatePresence mode="wait" custom={direction}>
-                  <motion.div
+                  <m.div
                     key={activeProduct.id}
                     custom={direction}
                     drag={featuredProducts.length > 1 ? 'x' : false}
@@ -217,7 +217,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                     onClick={() => onSelectProduct?.(activeProduct)}
                     className="relative z-10 w-full h-full rounded-2xl overflow-hidden border border-coffee-beige bg-ivory shadow-editorial-lg cursor-pointer group"
                   >
-                    <motion.img
+                    <m.img
                       src={activeProduct.image_url}
                       alt={activeProduct.name}
                       initial={{ scale: 1.06 }}
@@ -244,12 +244,12 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                           )}
                       </div>
 
-                      <span className="px-2.5 py-1 text-[11px] font-semibold rounded-full backdrop-blur-md bg-black/40 border border-white/20 text-[#F7F5EF]">
+                      <span className="px-2.5 py-1 text-[11px] font-semibold rounded-full bg-[#1C1410]/80 border border-white/20 text-[#F7F5EF]">
                         {String(safeIndex + 1).padStart(2, '0')} /{' '}
                         {String(featuredProducts.length).padStart(2, '0')}
                       </span>
                     </div>
-                  </motion.div>
+                  </m.div>
                 </AnimatePresence>
               </div>
             </div>
@@ -257,7 +257,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
             {/* Right: Synchronized Editorial Story & Uniform Footer */}
             <div className="lg:col-span-6 flex flex-col justify-between min-h-[220px] sm:min-h-[260px]">
               <AnimatePresence mode="wait">
-                <motion.div
+                <m.div
                   key={`info-${activeProduct.id}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -285,7 +285,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                   <p className="text-sm sm:text-base text-coffee-muted mt-3 line-clamp-2 sm:line-clamp-3 leading-relaxed">
                     {activeProduct.description}
                   </p>
-                </motion.div>
+                </m.div>
               </AnimatePresence>
 
               {/* Uniform Footer (Same single-row height whether discounted or not) */}
@@ -341,7 +341,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
             {featuredProducts.length > 1 && (
               <div className="absolute inset-x-0 bottom-0 h-[3px] bg-coffee-beige/35">
                 {!isPaused && (
-                  <motion.div
+                  <m.div
                     key={`progress-${activeProduct.id}-${safeIndex}`}
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}

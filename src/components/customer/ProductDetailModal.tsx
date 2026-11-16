@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { X, CheckCircle2 } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { formatVND } from '../../lib/utils';
 import { trackProductView } from '../../lib/analytics';
 import { useSiteData } from '../../contexts/SiteDataContext';
@@ -47,14 +47,14 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           aria-modal="true"
           aria-labelledby="product-modal-title"
         >
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-[#241914]/70 backdrop-blur-[2px]"
+            className="fixed inset-0 bg-[#241914]/75"
           />
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
@@ -132,7 +132,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 </a>
               </div>
             </div>
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>

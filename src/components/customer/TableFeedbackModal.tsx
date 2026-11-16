@@ -8,9 +8,30 @@ import {
   AlertCircle,
   Clock,
 } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { submitTableFeedback, validateGmailFormat, type PublicReviewRecord } from '../../lib/feedback';
 import { useToast } from '../../contexts/ToastContext';
+
+const TURNSTILE_SITE_KEY = (import.meta.env.VITE_TURNSTILE_SITE_KEY || '').trim();
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        container: HTMLElement,
+        options: {
+          sitekey: string;
+          theme?: 'light' | 'dark' | 'auto';
+          callback: (token: string) => void;
+          'expired-callback'?: () => void;
+          'error-callback'?: () => void;
+        }
+      ) => string;
+      reset: (widgetId?: string) => void;
+      remove: (widgetId?: string) => void;
+    };
+  }
+}
 
 interface TableFeedbackModalProps {
   open: boolean;
@@ -52,6 +73,9 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
   const [submitted, setSubmitted] = useState(false);
   const [rateLimited, setRateLimited] = useState(false);
   const [countdownSec, setCountdownSec] = useState(5);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileContainerRef = useRef<HTMLDivElement | null>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
   const formatCurrentTime = () => {
     const d = new Date();
     const hh = String(d.getHours()).padStart(2, '0');
@@ -97,6 +121,7 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
 
     setSubmitted(false);
     setRateLimited(false);
+    setTurnstileToken('');
     setCustomerName('');
     setCustomerEmail('');
     setHoneypot('');
@@ -143,8 +168,67 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
     );
   };
 
+  useEffect(() => {
+    if (!open || submitted || !TURNSTILE_SITE_KEY) return;
+
+    let cancelled = false;
+    const renderWidget = () => {
+      if (cancelled || !turnstileContainerRef.current || !window.turnstile) return;
+      if (turnstileWidgetIdRef.current) {
+        try {
+          window.turnstile.remove(turnstileWidgetIdRef.current);
+        } catch {
+          // ignore
+        }
+        turnstileWidgetIdRef.current = null;
+      }
+      turnstileWidgetIdRef.current = window.turnstile.render(turnstileContainerRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: 'light',
+        callback: (token: string) => setTurnstileToken(token),
+        'expired-callback': () => setTurnstileToken(''),
+        'error-callback': () => setTurnstileToken(''),
+      });
+    };
+
+    if (window.turnstile) {
+      renderWidget();
+    } else {
+      const existingScript = document.querySelector<HTMLScriptElement>(
+        'script[src^="https://challenges.cloudflare.com/turnstile/v0/api.js"]'
+      );
+      if (existingScript) {
+        existingScript.addEventListener('load', renderWidget, { once: true });
+      } else {
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.defer = true;
+        script.onload = renderWidget;
+        document.head.appendChild(script);
+      }
+    }
+
+    return () => {
+      cancelled = true;
+      if (turnstileWidgetIdRef.current && window.turnstile) {
+        try {
+          window.turnstile.remove(turnstileWidgetIdRef.current);
+        } catch {
+          // ignore
+        }
+        turnstileWidgetIdRef.current = null;
+      }
+    };
+  }, [open, submitted]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (TURNSTILE_SITE_KEY && !turnstileToken) {
+      toast.error('Vui lòng hoàn tất xác minh bảo mật trước khi gửi.');
+      return;
+    }
+
     setSubmitting(true);
     const { error, record, rateLimited: isRateLimited } = await submitTableFeedback({
       tableNumber,
@@ -154,10 +238,19 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
       rating,
       tags: selectedTags,
       comment,
+      turnstileToken,
     });
     setSubmitting(false);
 
     if (error) {
+      if (turnstileWidgetIdRef.current && window.turnstile) {
+        try {
+          window.turnstile.reset(turnstileWidgetIdRef.current);
+        } catch {
+          // ignore
+        }
+      }
+      setTurnstileToken('');
       toast.error('Gửi đánh giá thất bại', error);
       return;
     }
@@ -187,15 +280,15 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
           aria-modal="true"
           aria-labelledby="table-feedback-title"
         >
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-[#140F0C]/75 backdrop-blur-xs"
+            className="fixed inset-0 bg-[#140F0C]/80"
           />
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
@@ -235,7 +328,7 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
 
             <AnimatePresence mode="wait">
               {submitted ? (
-                <motion.div
+                <m.div
                   key="thank-you"
                   initial={{ opacity: 0, scale: 0.92, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -243,20 +336,20 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
                   transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                   className="p-8 text-center space-y-4 relative overflow-hidden"
                 >
-                  <motion.div
+                  <m.div
                     initial={{ scale: 0, rotate: -25 }}
                     animate={{ scale: 1, rotate: 0 }}
                     transition={{ type: 'spring', stiffness: 280, damping: 18, delay: 0.08 }}
                     className="relative w-16 h-16 mx-auto rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center"
                   >
                     <CheckCircle2 className="w-9 h-9 text-emerald-600" />
-                    <motion.span
+                    <m.span
                       initial={{ opacity: 0, scale: 0.5 }}
                       animate={{ opacity: [0, 1, 0], scale: [0.6, 1.35, 1.6] }}
                       transition={{ duration: 1.6, repeat: Infinity }}
                       className="absolute inset-0 rounded-full border border-emerald-500/40"
                     />
-                  </motion.div>
+                  </m.div>
 
                   <div className="space-y-2">
                     <p className="text-[11px] uppercase tracking-[0.22em] font-semibold text-coffee/80">
@@ -282,7 +375,7 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
                   {/* 5-second smooth progress bar */}
                   <div className="pt-2 space-y-2.5">
                     <div className="w-full h-1.5 bg-coffee-beige/50 rounded-full overflow-hidden">
-                      <motion.div
+                      <m.div
                         initial={{ scaleX: 1 }}
                         animate={{ scaleX: 0 }}
                         transition={{ duration: 5, ease: 'linear' }}
@@ -301,9 +394,9 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
                       </button>
                     </div>
                   </div>
-                </motion.div>
+                </m.div>
               ) : (
-                <motion.form
+                <m.form
                   key="feedback-form"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -456,18 +549,24 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
                   />
                 </div>
 
+                {TURNSTILE_SITE_KEY && (
+                  <div className="flex justify-center">
+                    <div ref={turnstileContainerRef} />
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || (Boolean(TURNSTILE_SITE_KEY) && !turnstileToken)}
                   className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-xs uppercase tracking-[0.18em] font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand transition-colors disabled:opacity-60"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>{submitting ? 'Đang gửi...' : 'Gửi Đánh Giá'}</span>
                 </button>
-              </motion.form>
+              </m.form>
             )}
             </AnimatePresence>
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>

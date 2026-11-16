@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X, ArrowUpRight, ShieldCheck, Clock, Phone, Sun, Moon } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { BrandLogo } from '../common/BrandLogo';
@@ -92,8 +92,8 @@ export const CustomerHeader: React.FC = () => {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'bg-ivory-light/95 backdrop-blur-md border-b border-coffee-beige/80 dark:border-white/[0.07] shadow-editorial'
-            : 'bg-ivory-light/95 backdrop-blur-sm border-b border-coffee-beige/50 dark:border-white/[0.06]'
+            ? 'bg-ivory-light border-b border-coffee-beige/80 dark:border-white/[0.07] shadow-editorial'
+            : 'bg-ivory-light border-b border-coffee-beige/50 dark:border-white/[0.06]'
         }`}
       >
       {/* Top Editorial Utility Strip (collapses on scroll) */}
@@ -120,7 +120,7 @@ export const CustomerHeader: React.FC = () => {
           <div className="flex items-center gap-6 text-[#D5C6AD]">
             <span className="inline-flex items-center gap-1.5">
               <Clock className="w-3 h-3 text-[#D5C6AD]/80" />
-              <span>{settings.opening_hours || '07:30 — 22:30 (Mỗi ngày)'}</span>
+              <span>{settings.opening_hours || '07:30 - 22:30 (Mỗi ngày)'}</span>
             </span>
             {settings.hotline && (
               <a
@@ -173,7 +173,7 @@ export const CustomerHeader: React.FC = () => {
               >
                 {item.label}
                 {isActive && (
-                  <motion.span
+                  <m.span
                     layoutId="activeNavUnderline"
                     className="absolute left-0 right-0 bottom-0 h-[1.5px] bg-coffee"
                   />
@@ -193,7 +193,7 @@ export const CustomerHeader: React.FC = () => {
             className="w-9 h-9 inline-flex items-center justify-center rounded-full border-0 bg-coffee/[0.06] hover:bg-coffee/[0.13] dark:bg-white/[0.08] dark:hover:bg-white/[0.15] text-coffee-dark hover:text-coffee transition-all duration-300 outline-none focus:outline-none focus-visible:ring-1 focus-visible:ring-coffee/35 active:scale-95"
           >
             <AnimatePresence mode="wait" initial={false}>
-              <motion.span
+              <m.span
                 key={themeMode}
                 initial={{ opacity: 0, rotate: -25, scale: 0.8 }}
                 animate={{ opacity: 1, rotate: 0, scale: 1 }}
@@ -206,7 +206,7 @@ export const CustomerHeader: React.FC = () => {
                 ) : (
                   <Moon className="w-4 h-4" />
                 )}
-              </motion.span>
+              </m.span>
             </AnimatePresence>
           </button>
           {isAdmin && (
@@ -252,7 +252,7 @@ export const CustomerHeader: React.FC = () => {
       {/* Mobile Drawer */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -310,7 +310,7 @@ export const CustomerHeader: React.FC = () => {
                 )}
               </div>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
       </header>

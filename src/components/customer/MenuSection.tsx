@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { Search, SlidersHorizontal, X, Coffee, ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { formatVND } from '../../lib/utils';
 import type { Product } from '../../types/database';
@@ -198,7 +198,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
 
                         {/* Top Row: Count Pill & Active Indicator */}
                         <div className="relative z-10 flex items-center justify-between p-2.5 sm:p-3">
-                          <span className="px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded-full backdrop-blur-md bg-white/15 border border-white/20 text-[#F7F5EF]">
+                          <span className="px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase rounded-full bg-[#1C1410]/75 border border-white/20 text-[#F7F5EF]">
                             {count} món
                           </span>
                           {isActive && (
@@ -222,7 +222,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
         )}
 
         {/* Sticky Category Jump Bar (Wraps cleanly on desktop, horizontal swipe on mobile) */}
-        <div className="sticky top-[62px] lg:top-[70px] z-30 bg-ivory-light/95 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0 pt-2.5 pb-3 mb-4 border-b border-coffee-beige/60 dark:border-white/[0.07] overflow-x-auto sm:overflow-visible no-scrollbar">
+        <div className="sticky top-[62px] lg:top-[70px] z-30 bg-ivory-light -mx-4 px-4 sm:mx-0 sm:px-0 pt-2.5 pb-3 mb-4 border-b border-coffee-beige/60 dark:border-white/[0.07] overflow-x-auto sm:overflow-visible no-scrollbar">
           <div className="flex flex-nowrap sm:flex-wrap items-center sm:justify-center gap-2 w-max sm:w-full mx-auto px-1">
             <button
               type="button"
@@ -234,7 +234,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
               }`}
             >
               {activeCategoryId === 'all' && (
-                <motion.span
+                <m.span
                   layoutId="menuCategoryPill"
                   transition={{ type: 'spring', stiffness: 360, damping: 30 }}
                   className="absolute inset-0 bg-coffee rounded-full shadow-xs -z-0"
@@ -262,7 +262,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                   }`}
                 >
                   {isActive && (
-                    <motion.span
+                    <m.span
                       layoutId="menuCategoryPill"
                       transition={{ type: 'spring', stiffness: 360, damping: 30 }}
                       className="absolute inset-0 bg-coffee rounded-full shadow-xs -z-0"
@@ -390,7 +390,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                   Number(item.sale_price) < Number(item.price);
 
                 return (
-                  <motion.div
+                  <m.div
                     layout
                     key={item.id}
                     role="button"
@@ -465,7 +465,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                         {item.description}
                       </p>
                     </div>
-                  </motion.div>
+                  </m.div>
                 );
               })}
               </AnimatePresence>

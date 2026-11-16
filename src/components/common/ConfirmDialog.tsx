@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertTriangle, X } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -29,14 +29,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onCancel}
             className="fixed inset-0 bg-[#241914]/60 backdrop-blur-[2px]"
           />
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.96, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 10 }}
@@ -96,7 +96,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 {loading ? 'Đang xử lý...' : confirmLabel}
               </button>
             </div>
-          </motion.div>
+          </m.div>
         </div>
       )}
     </AnimatePresence>

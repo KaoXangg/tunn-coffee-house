@@ -1,6 +1,6 @@
 import React from 'react';
 import { Calendar, ArrowUpRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { formatDateVi, getPromotionScheduleStatus, sanitizeUrl } from '../../lib/utils';
 
@@ -50,7 +50,7 @@ export const PromotionsSection: React.FC = () => {
           {activePromos.map((promo, index) => {
             const isEven = index % 2 === 0;
             return (
-              <motion.div
+              <m.div
                 key={promo.id}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -71,7 +71,7 @@ export const PromotionsSection: React.FC = () => {
                     loading="lazy"
                   />
                   {promo.tag && (
-                    <span className="absolute top-4 left-4 inline-flex items-center gap-2 px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] font-semibold bg-coffee-dark/90 text-ivory-light rounded-brand backdrop-blur-xs">
+                    <span className="absolute top-4 left-4 inline-flex items-center gap-2 px-3.5 py-1.5 text-[10px] uppercase tracking-[0.2em] font-semibold bg-coffee-dark text-ivory-light rounded-brand">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                       <span>{promo.tag}</span>
                     </span>
@@ -101,7 +101,7 @@ export const PromotionsSection: React.FC = () => {
                       <Calendar className="w-3.5 h-3.5 text-coffee" />
                       <span>
                         Thời gian áp dụng:{' '}
-                        {promo.start_date ? formatDateVi(promo.start_date) : 'Hôm nay'} —{' '}
+                        {promo.start_date ? formatDateVi(promo.start_date) : 'Hôm nay'} -{' '}
                         {promo.end_date ? formatDateVi(promo.end_date) : 'Khi có thông báo mới'}
                       </span>
                     </div>
@@ -117,7 +117,7 @@ export const PromotionsSection: React.FC = () => {
                     </a>
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             );
           })}
         </div>

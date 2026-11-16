@@ -90,6 +90,20 @@ export const AdminLoginPage: React.FC = () => {
           return;
         }
 
+        // Server-side Auth Hook lockout message (from handle_password_verification_attempt)
+        if (error.toLowerCase().includes('khóa tạm thời')) {
+          const secMatch = error.match(/(\d+)\s*giây/);
+          if (secMatch) {
+            const sec = Number(secMatch[1]);
+            if (Number.isFinite(sec) && sec > 0) {
+              localStorage.setItem(LOCKOUT_KEY, String(Date.now() + sec * 1000));
+              localStorage.setItem(ATTEMPTS_KEY, '0');
+            }
+          }
+          toast.error('Tài khoản đang bị khóa tạm thời', error);
+          return;
+        }
+
         const currentAttempts = Number(localStorage.getItem(ATTEMPTS_KEY) || 0) + 1;
         localStorage.setItem(ATTEMPTS_KEY, String(currentAttempts));
 

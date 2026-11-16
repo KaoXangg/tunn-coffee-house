@@ -1,14 +1,18 @@
 import React, { Suspense, lazy, type ComponentType } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { MotionConfig } from 'framer-motion';
+import { LazyMotion, MotionConfig, domAnimation } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { SiteDataProvider } from './contexts/SiteDataContext';
 import { SeasonalThemeProvider } from './contexts/SeasonalThemeContext';
 import { CustomerHomePage } from './pages/CustomerHomePage';
-import { ProtectedRoute } from './components/admin/ProtectedRoute';
-import { AdminLayout } from './components/admin/AdminLayout';
+const ProtectedRoute = lazy(() =>
+  import('./components/admin/ProtectedRoute').then((m) => ({ default: m.ProtectedRoute }))
+);
+const AdminLayout = lazy(() =>
+  import('./components/admin/AdminLayout').then((m) => ({ default: m.AdminLayout }))
+);
 
 function lazyWithRetry<T extends ComponentType<Record<string, unknown>>>(
   importer: () => Promise<{ default: T }>
@@ -125,7 +129,8 @@ const PageLoader: React.FC = () => (
 
 export function App() {
   return (
-    <MotionConfig reducedMotion="user">
+    <LazyMotion features={domAnimation}>
+      <MotionConfig reducedMotion="user">
       <ToastProvider>
         <AuthProvider>
           <SiteDataProvider>
@@ -177,6 +182,7 @@ export function App() {
         </AuthProvider>
       </ToastProvider>
     </MotionConfig>
+    </LazyMotion>
   );
 }
 

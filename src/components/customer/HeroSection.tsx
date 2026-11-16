@@ -1,10 +1,9 @@
 import React, { useRef } from 'react';
 import { ArrowDownRight } from 'lucide-react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { m, useScroll, useTransform } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useSeasonalTheme } from '../../contexts/SeasonalThemeContext';
 import { DEFAULT_HERO_CONTENT } from '../../lib/defaultData';
-import { TUNN_EASE } from '../common/MotionPrimitives';
 import { sanitizeUrl } from '../../lib/utils';
 import type { HeroSectionContent } from '../../types/database';
 
@@ -58,10 +57,7 @@ export const HeroSection: React.FC = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-12 items-center">
           {/* Left Column: Editorial Masthead & Craft Narrative */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          <div
             className={`lg:col-span-7 flex flex-col ${alignmentClass}`}
           >
             {/* Editorial Masthead Stamp */}
@@ -128,13 +124,10 @@ export const HeroSection: React.FC = () => {
                 </p>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Right Column: Asymmetric Archival Framing with Subtle Parallax */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.75, delay: 0.12, ease: TUNN_EASE }}
+          <m.div
             style={{ y: imageParallaxY }}
             className="lg:col-span-5 relative will-change-transform"
           >
@@ -153,7 +146,7 @@ export const HeroSection: React.FC = () => {
                 />
 
                 {/* Editorial Tasting Note Label */}
-                <div className="absolute bottom-3.5 left-3.5 right-3.5 sm:right-auto sm:max-w-xs bg-ivory-light/95 backdrop-blur-sm border border-coffee-beige px-4 py-3.5 rounded-brand shadow-md">
+                <div className="absolute bottom-3.5 left-3.5 right-3.5 sm:right-auto sm:max-w-xs bg-ivory-light border border-coffee-beige px-4 py-3.5 rounded-brand shadow-md">
                   <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.2em] text-coffee font-semibold border-b border-coffee-beige/60 pb-1.5">
                     <span>Gợi ý từ Barista</span>
                     <span className="font-serif italic normal-case tracking-normal">
@@ -181,7 +174,7 @@ export const HeroSection: React.FC = () => {
                 />
               </div>
             )}
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </section>

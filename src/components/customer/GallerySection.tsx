@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import type { GalleryItem } from '../../types/database';
 
@@ -82,7 +82,7 @@ export const GallerySection: React.FC = () => {
                   }`}
                 >
                   {isSelected && (
-                    <motion.span
+                    <m.span
                       layoutId="galleryCategoryPill"
                       transition={{ type: 'spring', stiffness: 360, damping: 30 }}
                       className="absolute inset-0 bg-coffee rounded-brand"
@@ -106,7 +106,7 @@ export const GallerySection: React.FC = () => {
                 : 'aspect-square';
 
             return (
-              <motion.figure
+              <m.figure
                 key={item.id}
                 role="button"
                 tabIndex={0}
@@ -150,7 +150,7 @@ export const GallerySection: React.FC = () => {
                   </div>
                   <Maximize2 className="w-4 h-4 text-coffee-muted group-hover:text-coffee shrink-0 mt-1 transition-colors" />
                 </figcaption>
-              </motion.figure>
+              </m.figure>
             );
           })}
         </div>
@@ -160,14 +160,14 @@ export const GallerySection: React.FC = () => {
       <AnimatePresence>
         {lightboxItem && (
           <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setLightboxItem(null)}
-              className="fixed inset-0 bg-[#241914]/85 backdrop-blur-xs"
+              className="fixed inset-0 bg-[#241914]/90"
             />
-            <motion.div
+            <m.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
@@ -205,7 +205,7 @@ export const GallerySection: React.FC = () => {
 
               <div className="max-h-[72vh] bg-[#140F0C] flex items-center justify-center overflow-hidden">
                 <AnimatePresence mode="wait">
-                  <motion.img
+                  <m.img
                     key={lightboxItem.id}
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -236,7 +236,7 @@ export const GallerySection: React.FC = () => {
                   {filteredItems.length}
                 </span>
               </div>
-            </motion.div>
+            </m.div>
           </div>
         )}
       </AnimatePresence>

@@ -12,7 +12,7 @@ import type {
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   id: 1,
   brand_name: 'TUNN Coffee House',
-  site_title: 'TUNN Coffee House — Your Daily Ritual, Made Extraordinary',
+  site_title: 'TUNN Coffee House - Your Daily Ritual, Made Extraordinary',
   slogan: 'Your Daily Ritual, Made Extraordinary.',
   logo_url: '/logo.jpg',
   favicon_url: '/logo.jpg',
@@ -48,7 +48,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   address: '',
   hotline: '',
   email: '',
-  opening_hours: '07:30 — 22:30 (Mỗi ngày)',
+  opening_hours: '07:30 - 22:30 (Mỗi ngày)',
   google_maps_url: '',
   google_maps_embed: '',
   facebook_url: '',
@@ -62,7 +62,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   copyright_text: '© 2026 TUNN Coffee House. Bản quyền thuộc về TUNN Coffee House.',
 
   // SEO
-  seo_title: 'TUNN Coffee House — Trà Sữa, Cà Phê Đặc Sản & Matcha Thủ Công',
+  seo_title: 'TUNN Coffee House - Trà Sữa, Cà Phê Đặc Sản & Matcha Thủ Công',
   seo_description:
     'Khám phá hương vị trà sữa nguyên lá, trà trái cây tươi, cà phê rang mộc và matcha chuẩn Nhật tại TUNN Coffee House.',
   seo_keywords:
@@ -159,7 +159,7 @@ export const DEFAULT_PAGE_SECTIONS: PageSection[] = [
     content: {
       eyebrow: 'TUYỂN CHỌN ĐẶC SẮC',
       description:
-        'Những sáng tạo mang đậm dấu ấn riêng của TUNN — cân bằng hoàn hảo giữa hương thơm nguyên bản và cấu trúc vị giác tinh tế.',
+        'Những sáng tạo mang đậm dấu ấn riêng của TUNN, cân bằng hoàn hảo giữa hương thơm nguyên bản và cấu trúc vị giác tinh tế.',
     },
     updated_at: new Date().toISOString(),
   },
@@ -500,7 +500,7 @@ export const DEFAULT_PRODUCTS: Product[] = [
 export const DEFAULT_PROMOTIONS: Promotion[] = [
   {
     id: 'promo-1',
-    title: 'Bộ Sưu Tập Thu Đông — Hương Trà Nướng & Hạt Dẻ',
+    title: 'Bộ Sưu Tập Thu Đông - Hương Trà Nướng & Hạt Dẻ',
     subtitle: 'AUTUMN / WINTER COLLECTION',
     description:
       'Thưởng thức trọn vẹn sự ấm áp từ trà Ô Long nướng than hồng, Houjicha rang trầm và kem hạt dẻ thủ công mới ra mắt tại TUNN Coffee House.',
@@ -518,8 +518,8 @@ export const DEFAULT_PROMOTIONS: Promotion[] = [
   },
   {
     id: 'promo-2',
-    title: 'Morning Ritual — Ưu Đãi 15% Khung Giờ Sáng',
-    subtitle: 'EVERYDAY 07:30 — 10:30',
+    title: 'Morning Ritual - Ưu Đãi 15% Khung Giờ Sáng',
+    subtitle: 'EVERYDAY 07:30 - 10:30',
     description:
       'Khởi đầu ngày mới tràn đầy cảm hứng với ưu đãi 15% cho toàn bộ dòng Cà Phê Thủ Công và Matcha Uji khi ghé quán mỗi buổi sáng.',
     banner_image_url:

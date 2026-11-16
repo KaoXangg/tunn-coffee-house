@@ -75,7 +75,7 @@ export const CustomerFooter: React.FC = () => {
               Thời gian & Kết nối
             </h4>
             <p className="text-sm text-[#E9E6D8]/85">
-              Giờ mở cửa: {settings.opening_hours || '07:30 — 22:30'}
+              Giờ mở cửa: {settings.opening_hours || '07:30 - 22:30'}
             </p>
             {settings.address && (
               <p className="text-sm text-[#E9E6D8]/80">{settings.address}</p>

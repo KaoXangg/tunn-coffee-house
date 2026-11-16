@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { DEFAULT_ABOUT_CONTENT } from '../../lib/defaultData';
 import type { AboutSectionContent } from '../../types/database';
@@ -26,7 +26,7 @@ export const AboutSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Section Header */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end mb-16">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
@@ -39,9 +39,9 @@ export const AboutSection: React.FC = () => {
             <h2 className="font-serif text-[clamp(2rem,3.6vw,3.1rem)] font-normal text-coffee-dark leading-[1.15]">
               {content.headline || section?.title}
             </h2>
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-80px' }}
@@ -51,13 +51,13 @@ export const AboutSection: React.FC = () => {
             <p className="text-base text-coffee-dark/90 leading-relaxed font-medium">
               {content.lead_paragraph || section?.subtitle}
             </p>
-          </motion.div>
+          </m.div>
         </div>
 
         {/* Asymmetric Editorial Story Spread */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Left Visual Column */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-80px' }}
@@ -65,7 +65,7 @@ export const AboutSection: React.FC = () => {
             className="lg:col-span-6 relative"
           >
             <div className="group aspect-[16/11] overflow-hidden rounded-brand border border-coffee-beige bg-ivory shadow-editorial">
-              <motion.img
+              <m.img
                 initial={{ scale: 1.06 }}
                 whileInView={{ scale: 1 }}
                 viewport={{ once: true, margin: '-80px' }}
@@ -78,7 +78,7 @@ export const AboutSection: React.FC = () => {
             </div>
 
             {content.secondary_image_url && (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-60px' }}
@@ -91,12 +91,12 @@ export const AboutSection: React.FC = () => {
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
-              </motion.div>
+              </m.div>
             )}
-          </motion.div>
+          </m.div>
 
           {/* Right Narrative Column */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-80px' }}
@@ -112,14 +112,14 @@ export const AboutSection: React.FC = () => {
                 {content.quote}
               </blockquote>
             )}
-          </motion.div>
+          </m.div>
         </div>
 
         {/* 3 Architectural Pillars */}
         {content.pillars && content.pillars.length > 0 && (
           <div className="mt-20 pt-14 border-t border-coffee-beige dark:border-t-0 grid grid-cols-1 md:grid-cols-3 gap-10">
             {content.pillars.map((pillar, index) => (
-              <motion.div
+              <m.div
                 key={index}
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -139,7 +139,7 @@ export const AboutSection: React.FC = () => {
                 <p className="text-sm text-coffee-muted mt-2.5 leading-relaxed">
                   {pillar.description}
                 </p>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         )}

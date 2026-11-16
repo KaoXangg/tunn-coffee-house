@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowUp } from 'lucide-react';
 import {
-  motion,
+  m,
   AnimatePresence,
   useScroll,
   useSpring,
@@ -20,7 +20,7 @@ export const ScrollProgressBar: React.FC = () => {
   });
 
   return (
-    <motion.div
+    <m.div
       aria-hidden="true"
       style={{ scaleX }}
       className="fixed top-0 left-0 right-0 h-[2.5px] bg-coffee origin-left z-[60] pointer-events-none"
@@ -44,7 +44,7 @@ export const BackToTopButton: React.FC = () => {
   return (
     <AnimatePresence>
       {visible && (
-        <motion.button
+        <m.button
           type="button"
           onClick={scrollToTop}
           initial={{ opacity: 0, y: 14, scale: 0.9 }}
@@ -57,7 +57,7 @@ export const BackToTopButton: React.FC = () => {
           className="fixed bottom-5 right-5 z-40 w-11 h-11 rounded-full bg-coffee text-ivory-light border border-coffee-beige/40 shadow-editorial-lg flex items-center justify-center hover:bg-coffee-dark transition-colors"
         >
           <ArrowUp className="w-4 h-4" />
-        </motion.button>
+        </m.button>
       )}
     </AnimatePresence>
   );

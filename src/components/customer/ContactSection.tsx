@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import {
   MapPin,
   Phone,
-  Mail,
-  Clock,
   Navigation,
   ShoppingBag,
   ArrowUpRight,
@@ -11,7 +9,7 @@ import {
   Check,
   ExternalLink,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { sanitizeUrl, sanitizeMapEmbedUrl } from '../../lib/utils';
 import { FacebookIcon, InstagramIcon, TikTokIcon } from '../common/SocialIcons';
@@ -48,7 +46,7 @@ export const ContactSection: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Top Editorial Heading */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-40px' }}
@@ -67,12 +65,12 @@ export const ContactSection: React.FC = () => {
             {section?.subtitle ||
               'Chúng tôi luôn sẵn sàng đón tiếp bạn với một tách trà ấm'}
           </p>
-        </motion.div>
+        </m.div>
 
         {/* Equal-Height 2-Column Bento Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
           {/* Left Column: Store Details & CTAs */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 22 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
@@ -93,134 +91,114 @@ export const ContactSection: React.FC = () => {
 
                 <div className="space-y-4 text-sm">
                   {/* Address */}
-                  <div className="flex items-start gap-3.5 group">
-                    <div className="w-9 h-9 rounded-xl bg-coffee/10 text-coffee flex items-center justify-center shrink-0 mt-0.5 transition-transform duration-300 group-hover:scale-105">
-                      <MapPin className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[11px] uppercase tracking-wider text-coffee-muted font-semibold">
-                        Địa chỉ
+                  <div className="border-l-2 border-coffee/25 pl-3.5">
+                    <p className="text-[11px] uppercase tracking-wider text-coffee-muted font-semibold">
+                      Địa chỉ
+                    </p>
+                    <div className="flex items-start justify-between gap-2 mt-0.5">
+                      <p className="text-coffee-dark leading-relaxed">
+                        {settings.address
+                          ? settings.address
+                          : 'Đang cập nhật địa chỉ (Cập nhật tại Admin CMS → Liên hệ)'}
                       </p>
-                      <div className="flex items-start justify-between gap-2 mt-0.5">
-                        <p className="text-coffee-dark leading-relaxed">
-                          {settings.address
-                            ? settings.address
-                            : 'Đang cập nhật địa chỉ (Cập nhật tại Admin CMS → Liên hệ)'}
-                        </p>
-                        {settings.address && (
-                          <button
-                            type="button"
-                            onClick={() => handleCopy('address', settings.address)}
-                            className="shrink-0 p-1.5 rounded-lg text-coffee-muted hover:text-coffee hover:bg-coffee/10 transition-colors"
-                            aria-label="Sao chép địa chỉ"
-                            title="Sao chép địa chỉ"
-                          >
-                            {copiedField === 'address' ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-500" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                        )}
-                      </div>
+                      {settings.address && (
+                        <button
+                          type="button"
+                          onClick={() => handleCopy('address', settings.address)}
+                          className="shrink-0 p-1.5 rounded-lg text-coffee-muted hover:text-coffee hover:bg-coffee/10 transition-colors"
+                          aria-label="Sao chép địa chỉ"
+                          title="Sao chép địa chỉ"
+                        >
+                          {copiedField === 'address' ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-500" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
 
                   {/* Hotline */}
-                  <div className="flex items-start gap-3.5 group">
-                    <div className="w-9 h-9 rounded-xl bg-coffee/10 text-coffee flex items-center justify-center shrink-0 mt-0.5 transition-transform duration-300 group-hover:scale-105">
-                      <Phone className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[11px] uppercase tracking-wider text-coffee-muted font-semibold">
-                        Hotline
-                      </p>
-                      <div className="flex items-center justify-between gap-2 mt-0.5">
-                        <p className="text-coffee-dark">
-                          {settings.hotline ? (
-                            <a
-                              href={`tel:${settings.hotline}`}
-                              className="hover:text-coffee transition-colors font-medium"
-                            >
-                              {settings.hotline}
-                            </a>
-                          ) : (
-                            'Đang cập nhật hotline (Cập nhật tại Admin CMS → Liên hệ)'
-                          )}
-                        </p>
-                        {settings.hotline && (
-                          <button
-                            type="button"
-                            onClick={() => handleCopy('hotline', settings.hotline)}
-                            className="shrink-0 p-1.5 rounded-lg text-coffee-muted hover:text-coffee hover:bg-coffee/10 transition-colors"
-                            aria-label="Sao chép số hotline"
-                            title="Sao chép số hotline"
+                  <div className="border-l-2 border-coffee/25 pl-3.5">
+                    <p className="text-[11px] uppercase tracking-wider text-coffee-muted font-semibold">
+                      Hotline
+                    </p>
+                    <div className="flex items-center justify-between gap-2 mt-0.5">
+                      <p className="text-coffee-dark">
+                        {settings.hotline ? (
+                          <a
+                            href={`tel:${settings.hotline}`}
+                            className="hover:text-coffee transition-colors font-medium"
                           >
-                            {copiedField === 'hotline' ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-500" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                          </button>
+                            {settings.hotline}
+                          </a>
+                        ) : (
+                          'Đang cập nhật hotline (Cập nhật tại Admin CMS → Liên hệ)'
                         )}
-                      </div>
+                      </p>
+                      {settings.hotline && (
+                        <button
+                          type="button"
+                          onClick={() => handleCopy('hotline', settings.hotline)}
+                          className="shrink-0 p-1.5 rounded-lg text-coffee-muted hover:text-coffee hover:bg-coffee/10 transition-colors"
+                          aria-label="Sao chép số hotline"
+                          title="Sao chép số hotline"
+                        >
+                          {copiedField === 'hotline' ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-500" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
 
                   {/* Email (with Copy Button) */}
-                  <div className="flex items-start gap-3.5 group">
-                    <div className="w-9 h-9 rounded-xl bg-coffee/10 text-coffee flex items-center justify-center shrink-0 mt-0.5 transition-transform duration-300 group-hover:scale-105">
-                      <Mail className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[11px] uppercase tracking-wider text-coffee-muted font-semibold">
-                        Email
-                      </p>
-                      <div className="flex items-center justify-between gap-2 mt-0.5">
-                        <p className="text-coffee-dark min-w-0 truncate">
-                          {settings.email ? (
-                            <a
-                              href={`mailto:${settings.email}`}
-                              className="hover:text-coffee transition-colors"
-                            >
-                              {settings.email}
-                            </a>
-                          ) : (
-                            'Đang cập nhật email (Cập nhật tại Admin CMS → Liên hệ)'
-                          )}
-                        </p>
-                        {settings.email && (
-                          <button
-                            type="button"
-                            onClick={() => handleCopy('email', settings.email)}
-                            className="shrink-0 p-1.5 rounded-lg text-coffee-muted hover:text-coffee hover:bg-coffee/10 transition-colors"
-                            aria-label="Sao chép email"
-                            title="Sao chép email"
+                  <div className="border-l-2 border-coffee/25 pl-3.5">
+                    <p className="text-[11px] uppercase tracking-wider text-coffee-muted font-semibold">
+                      Email
+                    </p>
+                    <div className="flex items-center justify-between gap-2 mt-0.5">
+                      <p className="text-coffee-dark min-w-0 truncate">
+                        {settings.email ? (
+                          <a
+                            href={`mailto:${settings.email}`}
+                            className="hover:text-coffee transition-colors"
                           >
-                            {copiedField === 'email' ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-500" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                          </button>
+                            {settings.email}
+                          </a>
+                        ) : (
+                          'Đang cập nhật email (Cập nhật tại Admin CMS → Liên hệ)'
                         )}
-                      </div>
+                      </p>
+                      {settings.email && (
+                        <button
+                          type="button"
+                          onClick={() => handleCopy('email', settings.email)}
+                          className="shrink-0 p-1.5 rounded-lg text-coffee-muted hover:text-coffee hover:bg-coffee/10 transition-colors"
+                          aria-label="Sao chép email"
+                          title="Sao chép email"
+                        >
+                          {copiedField === 'email' ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-500" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
 
                   {/* Opening Hours */}
-                  <div className="flex items-start gap-3.5 group">
-                    <div className="w-9 h-9 rounded-xl bg-coffee/10 text-coffee flex items-center justify-center shrink-0 mt-0.5 transition-transform duration-300 group-hover:scale-105">
-                      <Clock className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-[11px] uppercase tracking-wider text-coffee-muted font-semibold">
-                        Giờ mở cửa
-                      </p>
-                      <p className="text-coffee-dark mt-0.5">
-                        {settings.opening_hours || '07:30 — 22:30 (Mỗi ngày)'}
-                      </p>
-                    </div>
+                  <div className="border-l-2 border-coffee/25 pl-3.5">
+                    <p className="text-[11px] uppercase tracking-wider text-coffee-muted font-semibold">
+                      Giờ mở cửa
+                    </p>
+                    <p className="text-coffee-dark mt-0.5">
+                      {settings.opening_hours || '07:30 - 22:30 (Mỗi ngày)'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -302,10 +280,10 @@ export const ContactSection: React.FC = () => {
                 )}
               </div>
             </div>
-          </motion.div>
+          </m.div>
 
           {/* Right Column: Equal-Height Interactive Google Maps Card */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 22 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
@@ -327,7 +305,7 @@ export const ContactSection: React.FC = () => {
                       href={sanitizeUrl(settings.google_maps_url)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="absolute bottom-4 left-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold backdrop-blur-md bg-[#140F0C]/80 text-[#F7F5EF] border border-white/15 hover:bg-coffee transition-all shadow-lg"
+                      className="absolute bottom-4 left-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold bg-[#140F0C]/90 text-[#F7F5EF] border border-white/15 hover:bg-coffee transition-all shadow-lg"
                     >
                       <MapPin className="w-3.5 h-3.5 text-amber-300" />
                       <span>Mở Google Maps</span>
@@ -343,7 +321,7 @@ export const ContactSection: React.FC = () => {
                     className="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:scale-105 transition-transform duration-700"
                     loading="lazy"
                   />
-                  <div className="relative z-10 max-w-md bg-ivory-light/95 backdrop-blur-sm p-6 border border-coffee-beige/70 dark:border-white/[0.1] rounded-2xl">
+                  <div className="relative z-10 max-w-md bg-ivory-light p-6 border border-coffee-beige/70 dark:border-white/[0.1] rounded-2xl">
                     <MapPin className="w-7 h-7 text-coffee mx-auto mb-2 stroke-1" />
                     <p className="font-serif text-xl font-semibold text-coffee-dark">
                       Không Gian Thưởng Trà &amp; Cà Phê
@@ -355,7 +333,7 @@ export const ContactSection: React.FC = () => {
                 </div>
               )}
             </div>
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </section>
