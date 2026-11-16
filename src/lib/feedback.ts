@@ -12,6 +12,16 @@ export interface TableFeedbackRecord {
   created_at: string;
 }
 
+export interface PublicReviewRecord {
+  id: string;
+  customer_name: string;
+  table_number: string | null;
+  rating: number;
+  tags: string[];
+  comment: string;
+  created_at: string;
+}
+
 const LOCAL_FEEDBACK_KEY = 'tunn_table_feedback_v1';
 const FEEDBACK_COOLDOWN_KEY = 'tunn_table_feedback_last_ts';
 const FEEDBACK_EMAIL_HISTORY_KEY = 'tunn_table_feedback_emails_v1';
@@ -345,6 +355,40 @@ export async function fetchTableFeedback(): Promise<{
     return { items: data as TableFeedbackRecord[], source: 'supabase' };
   } catch {
     return { items: local, source: 'local' };
+  }
+}
+
+export async function fetchPublicPositiveReviews(): Promise<PublicReviewRecord[]> {
+  const localPositive: PublicReviewRecord[] = readLocalFeedback()
+    .filter((item) => item.rating >= 4 && (item.comment?.trim() || (item.tags && item.tags.length > 0)))
+    .map((item) => ({
+      id: item.id,
+      customer_name: item.customer_name?.trim() || 'Khách TUNN',
+      table_number: item.table_number ?? null,
+      rating: item.rating,
+      tags: item.tags || [],
+      comment: item.comment || '',
+      created_at: item.created_at,
+    }));
+
+  if (!isSupabaseConfigured) {
+    return localPositive;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('public_positive_reviews')
+      .select('id, customer_name, table_number, rating, tags, comment, created_at')
+      .order('created_at', { ascending: false })
+      .limit(12);
+
+    if (error || !data) {
+      return localPositive;
+    }
+
+    return data as PublicReviewRecord[];
+  } catch {
+    return localPositive;
   }
 }
 

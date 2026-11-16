@@ -10,6 +10,7 @@ import { FeaturedSection } from '../components/customer/FeaturedSection';
 import { MenuSection } from '../components/customer/MenuSection';
 import { PromotionsSection } from '../components/customer/PromotionsSection';
 import { GallerySection } from '../components/customer/GallerySection';
+import { CustomerReviewsSection } from '../components/customer/CustomerReviewsSection';
 import { ContactSection } from '../components/customer/ContactSection';
 import { CustomerFooter } from '../components/customer/CustomerFooter';
 import { ProductDetailModal } from '../components/customer/ProductDetailModal';
@@ -241,7 +242,12 @@ export const CustomerHomePage: React.FC = () => {
       case 'gallery':
         return <GallerySection key="gallery" />;
       case 'contact':
-        return <ContactSection key="contact" />;
+        return (
+          <React.Fragment key="contact-group">
+            <CustomerReviewsSection onOpenFeedback={() => setFeedbackOpen(true)} />
+            <ContactSection />
+          </React.Fragment>
+        );
       default:
         return null;
     }
