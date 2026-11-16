@@ -1,5 +1,13 @@
-const CACHE_NAME = 'tunn-storefront-v1';
-const APP_SHELL = ['/', '/index.html', '/logo.jpg', '/manifest.webmanifest'];
+const CACHE_NAME = 'tunn-storefront-v2';
+const APP_SHELL = [
+  '/',
+  '/index.html',
+  '/logo.jpg',
+  '/apple-touch-icon.png',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/manifest.webmanifest',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
