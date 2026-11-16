@@ -148,7 +148,7 @@ export const CustomerHomePage: React.FC = () => {
       <SeasonalEffectsLayer />
       <CustomerHeader />
       <SeasonalBanner />
-      <main className="flex-1">
+      <main className="flex-1 relative">
         <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 max-w-[calc(100vw-2rem)]">
           {tableNumber && (
             <div className="px-3.5 py-2 bg-[#241914]/95 backdrop-blur-sm text-[#F7F5EF] border border-[#4B2E24] rounded-full shadow-lg text-xs font-medium whitespace-nowrap">

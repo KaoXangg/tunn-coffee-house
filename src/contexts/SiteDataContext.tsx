@@ -104,7 +104,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   );
   const [mediaAssets, setMediaAssets] = useState<MediaAsset[]>([]);
   const [activityLogs, setActivityLogs] = useState<AdminActivityLog[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [isLiveDatabase, setIsLiveDatabase] = useState<boolean>(false);
   const [themeOverride, setThemeOverride] = useState<'light' | 'dark' | null>(() => {
     try {

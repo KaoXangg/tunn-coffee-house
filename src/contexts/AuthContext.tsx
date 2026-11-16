@@ -100,26 +100,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     let mounted = true;
 
-    supabase.auth.getSession().then(async ({ data: { session: currentSession } }) => {
-      if (!mounted) return;
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      await fetchProfile(currentSession?.user ?? null);
+    // Safety timeout so Admin never hangs indefinitely on slow network or lock contention
+    const authTimeout = window.setTimeout(() => {
       if (mounted) setLoading(false);
-    });
+    }, 5000);
+
+    supabase.auth
+      .getSession()
+      .then(async ({ data: { session: currentSession } }) => {
+        if (!mounted) return;
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        await fetchProfile(currentSession?.user ?? null);
+      })
+      .catch((err) => {
+        console.warn('Auth getSession warning:', err);
+      })
+      .finally(() => {
+        window.clearTimeout(authTimeout);
+        if (mounted) setLoading(false);
+      });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
       if (!mounted) return;
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-      await fetchProfile(newSession?.user ?? null);
-      if (mounted) setLoading(false);
+      try {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        await fetchProfile(newSession?.user ?? null);
+      } catch (err) {
+        console.warn('Auth state change warning:', err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     });
 
     return () => {
       mounted = false;
+      window.clearTimeout(authTimeout);
       subscription.unsubscribe();
     };
   }, [fetchProfile]);
