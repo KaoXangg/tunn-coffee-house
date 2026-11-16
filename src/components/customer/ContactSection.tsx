@@ -14,6 +14,7 @@ import {
 import { motion } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { sanitizeUrl, sanitizeMapEmbedUrl } from '../../lib/utils';
+import { FacebookIcon, InstagramIcon, TikTokIcon } from '../common/SocialIcons';
 
 export const ContactSection: React.FC = () => {
   const { settings, getSection } = useSiteData();
@@ -266,8 +267,9 @@ export const ContactSection: React.FC = () => {
                         href={sanitizeUrl(settings.facebook_url)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-semibold bg-coffee/[0.07] dark:bg-white/[0.05] text-coffee hover:bg-coffee hover:text-ivory-light transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-semibold bg-coffee/[0.07] dark:bg-white/[0.05] text-coffee hover:bg-coffee hover:text-ivory-light transition-colors"
                       >
+                        <FacebookIcon className="w-3.5 h-3.5" />
                         <span>Facebook</span>
                         <ArrowUpRight className="w-3 h-3" />
                       </a>
@@ -277,8 +279,9 @@ export const ContactSection: React.FC = () => {
                         href={sanitizeUrl(settings.instagram_url)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-semibold bg-coffee/[0.07] dark:bg-white/[0.05] text-coffee hover:bg-coffee hover:text-ivory-light transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-semibold bg-coffee/[0.07] dark:bg-white/[0.05] text-coffee hover:bg-coffee hover:text-ivory-light transition-colors"
                       >
+                        <InstagramIcon className="w-3.5 h-3.5" />
                         <span>Instagram</span>
                         <ArrowUpRight className="w-3 h-3" />
                       </a>
@@ -288,8 +291,9 @@ export const ContactSection: React.FC = () => {
                         href={sanitizeUrl(settings.tiktok_url)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-semibold bg-coffee/[0.07] dark:bg-white/[0.05] text-coffee hover:bg-coffee hover:text-ivory-light transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-semibold bg-coffee/[0.07] dark:bg-white/[0.05] text-coffee hover:bg-coffee hover:text-ivory-light transition-colors"
                       >
+                        <TikTokIcon className="w-3.5 h-3.5" />
                         <span>TikTok</span>
                         <ArrowUpRight className="w-3 h-3" />
                       </a>

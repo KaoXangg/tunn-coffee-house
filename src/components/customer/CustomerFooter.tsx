@@ -5,6 +5,7 @@ import { useSiteData } from '../../contexts/SiteDataContext';
 import { useSeasonalTheme } from '../../contexts/SeasonalThemeContext';
 import { sanitizeUrl } from '../../lib/utils';
 import { BrandLogo } from '../common/BrandLogo';
+import { FacebookIcon, InstagramIcon, TikTokIcon } from '../common/SocialIcons';
 
 export const CustomerFooter: React.FC = () => {
   const { settings } = useSiteData();
@@ -84,14 +85,15 @@ export const CustomerFooter: React.FC = () => {
               <p className="text-sm text-[#E9E6D8]/80">Hotline: {settings.hotline}</p>
             )}
 
-            <div className="pt-3 flex flex-wrap gap-4 text-xs uppercase tracking-widest">
+            <div className="pt-3 flex flex-wrap gap-3 text-xs uppercase tracking-widest">
               {settings.facebook_url && (
                 <a
                   href={sanitizeUrl(settings.facebook_url)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[#D5C6AD] hover:text-white"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] text-[#D5C6AD] hover:bg-white/[0.14] hover:text-white transition-colors"
                 >
+                  <FacebookIcon className="w-3.5 h-3.5" />
                   <span>Facebook</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
@@ -101,8 +103,9 @@ export const CustomerFooter: React.FC = () => {
                   href={sanitizeUrl(settings.instagram_url)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[#D5C6AD] hover:text-white"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] text-[#D5C6AD] hover:bg-white/[0.14] hover:text-white transition-colors"
                 >
+                  <InstagramIcon className="w-3.5 h-3.5" />
                   <span>Instagram</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
@@ -112,8 +115,9 @@ export const CustomerFooter: React.FC = () => {
                   href={sanitizeUrl(settings.tiktok_url)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[#D5C6AD] hover:text-white"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.06] text-[#D5C6AD] hover:bg-white/[0.14] hover:text-white transition-colors"
                 >
+                  <TikTokIcon className="w-3.5 h-3.5" />
                   <span>TikTok</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
