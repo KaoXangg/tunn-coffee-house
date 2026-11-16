@@ -253,7 +253,7 @@ export async function submitTableFeedback(input: {
   rating: number;
   tags: string[];
   comment: string;
-}): Promise<{ error: string | null }> {
+}): Promise<{ error: string | null; record?: PublicReviewRecord }> {
   if (input.honeypot && input.honeypot.trim().length > 0) {
     return { error: 'Yêu cầu không hợp lệ.' };
   }
@@ -309,8 +309,18 @@ export async function submitTableFeedback(input: {
     // ignore
   }
 
+  const publicRecord: PublicReviewRecord = {
+    id: localRecord.id,
+    customer_name: cleanName,
+    table_number: cleanTable,
+    rating: cleanRating,
+    tags: cleanTags,
+    comment: cleanComment,
+    created_at: localRecord.created_at,
+  };
+
   if (!isSupabaseConfigured) {
-    return { error: null };
+    return { error: null, record: publicRecord };
   }
 
   try {
@@ -326,9 +336,9 @@ export async function submitTableFeedback(input: {
     if (error) {
       console.warn('Supabase table_feedback insert warning:', error.message);
     }
-    return { error: null };
+    return { error: null, record: publicRecord };
   } catch {
-    return { error: null };
+    return { error: null, record: publicRecord };
   }
 }
 

@@ -13,6 +13,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { broadcastLiveSync } from '../../lib/liveSync';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
 import { DEFAULT_ABOUT_CONTENT } from '../../lib/defaultData';
@@ -187,29 +188,33 @@ export const AdminContentPage: React.FC = () => {
   const handleSaveSectionsOrder = async () => {
     setSavingOrder(true);
     try {
-      for (const sec of orderedSections) {
-        if (isSupabaseConfigured) {
-          await supabase.from('page_sections').upsert(
-            {
-              section_key: sec.section_key,
+      if (isSupabaseConfigured) {
+        const payload = orderedSections.map((sec) => ({
+          section_key: sec.section_key,
+          title: sec.title,
+          subtitle: sec.subtitle,
+          is_enabled: sec.is_enabled,
+          sort_order: sec.sort_order,
+          content: sec.content,
+        }));
+        const { error } = await supabase
+          .from('page_sections')
+          .upsert(payload, { onConflict: 'section_key' });
+        if (error) throw error;
+      } else {
+        await Promise.all(
+          orderedSections.map((sec) =>
+            updatePageSection(sec.section_key, {
               title: sec.title,
               subtitle: sec.subtitle,
               is_enabled: sec.is_enabled,
               sort_order: sec.sort_order,
               content: sec.content,
-            },
-            { onConflict: 'section_key' }
-          );
-        } else {
-          await updatePageSection(sec.section_key, {
-            title: sec.title,
-            subtitle: sec.subtitle,
-            is_enabled: sec.is_enabled,
-            sort_order: sec.sort_order,
-            content: sec.content,
-          });
-        }
+            })
+          )
+        );
       }
+      broadcastLiveSync('cms');
       await refreshAll();
       toast.success(
         'Đã lưu cấu trúc & thứ tự các Section!',

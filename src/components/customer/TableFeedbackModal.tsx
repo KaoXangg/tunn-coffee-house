@@ -65,7 +65,7 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const { error } = await submitTableFeedback({
+    const { error, record } = await submitTableFeedback({
       tableNumber,
       customerName,
       customerEmail,
@@ -79,6 +79,12 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
     if (error) {
       toast.error(error);
       return;
+    }
+
+    if (record && record.rating >= 4) {
+      window.dispatchEvent(
+        new CustomEvent('tunn:review-submitted', { detail: record })
+      );
     }
 
     setSubmitted(true);

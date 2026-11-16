@@ -50,12 +50,28 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
   const { getSection } = useSiteData();
   const contactContent = (getSection('contact')?.content || {}) as Record<string, any>;
   const [liveReviews, setLiveReviews] = useState<PublicReviewRecord[]>([]);
+  const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPublicPositiveReviews().then((items) => {
       setLiveReviews(items);
     });
   }, [refreshTrigger]);
+
+  useEffect(() => {
+    const onNewReview = (event: Event) => {
+      const custom = event as CustomEvent<PublicReviewRecord>;
+      const rec = custom.detail;
+      if (!rec || rec.rating < 4) return;
+      setLiveReviews((prev) => [rec, ...prev.filter((r) => r.id !== rec.id)]);
+      setNewlyAddedId(rec.id);
+      window.setTimeout(() => {
+        setNewlyAddedId((curr) => (curr === rec.id ? null : curr));
+      }, 6500);
+    };
+    window.addEventListener('tunn:review-submitted', onNewReview);
+    return () => window.removeEventListener('tunn:review-submitted', onNewReview);
+  }, []);
 
   const displayedReviews = useMemo(() => {
     if (liveReviews.length >= 3) return liveReviews.slice(0, 24);
@@ -147,24 +163,40 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
                 aria-hidden={dupIndex === 1}
                 className="flex items-stretch gap-4 sm:gap-5 pr-4 sm:pr-5 shrink-0"
               >
-                {displayedReviews.map((rev) => (
-                  <article
+                {displayedReviews.map((rev) => {
+                  const isJustAdded = rev.id === newlyAddedId;
+                  return (
+                  <motion.article
                     key={`${dupIndex}-${rev.id}`}
-                    className="w-[290px] sm:w-[340px] shrink-0 p-6 rounded-2xl bg-ivory/65 dark:bg-white/[0.03] border border-coffee-beige/60 dark:border-white/[0.08] shadow-sm hover:shadow-editorial hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-4"
+                    initial={isJustAdded ? { opacity: 0, scale: 0.88, y: -14 } : false}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+                    className={`w-[290px] sm:w-[340px] shrink-0 p-6 rounded-2xl border shadow-sm hover:shadow-editorial hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-4 ${
+                      isJustAdded
+                        ? 'bg-ivory dark:bg-white/[0.07] border-coffee ring-2 ring-coffee/30 shadow-editorial'
+                        : 'bg-ivory/65 dark:bg-white/[0.03] border-coffee-beige/60 dark:border-white/[0.08]'
+                    }`}
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-0.5">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star
-                              key={s}
-                              className={`w-4 h-4 ${
-                                s <= rev.rating
-                                  ? 'fill-amber-400 text-amber-500'
-                                  : 'text-coffee-beige'
-                              }`}
-                            />
-                          ))}
+                        <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-0.5">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star
+                                key={s}
+                                className={`w-4 h-4 ${
+                                  s <= rev.rating
+                                    ? 'fill-amber-400 text-amber-500'
+                                    : 'text-coffee-beige'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          {isJustAdded && (
+                            <span className="px-2 py-0.5 text-[9px] uppercase tracking-wider font-bold rounded-full bg-emerald-600 text-white animate-pulse">
+                              Vừa gửi
+                            </span>
+                          )}
                         </div>
                         <Quote className="w-5 h-5 text-coffee/30" />
                       </div>
@@ -210,12 +242,13 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
                           </p>
                         </div>
                       </div>
-                      <span className="text-[10px] text-coffee-muted shrink-0">
-                        {formatDateVi(rev.created_at).split(' ')[0]}
+                      <span className="text-[10px] text-coffee-muted shrink-0 whitespace-nowrap">
+                        {formatDateVi(rev.created_at)}
                       </span>
                     </div>
-                  </article>
-                ))}
+                  </motion.article>
+                  );
+                })}
               </div>
             ))}
           </div>
