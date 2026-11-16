@@ -200,7 +200,7 @@ export const AdminLoginPage: React.FC = () => {
         {/* Mobile/Tablet Top Coffee Band (< 1024px) */}
         <div className="lg:hidden bg-coffee-dark text-ivory-light px-6 py-5 flex items-center gap-3.5">
           <div className="shrink-0">
-            <BrandLogo size="md" showText={false} />
+            <BrandLogo size="lg" showText={false} />
           </div>
           <div>
             <h1 className="font-serif text-xl font-medium leading-tight text-ivory-light">
@@ -221,7 +221,7 @@ export const AdminLoginPage: React.FC = () => {
           }}
         >
           <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center py-4">
-            <BrandLogo size="xl" showText={false} />
+            <BrandLogo size="2xl" showText={false} />
 
             <h1 className="font-serif text-[26px] font-medium leading-tight tracking-tight text-ivory-light mt-6 whitespace-nowrap">
               TUNN Coffee House

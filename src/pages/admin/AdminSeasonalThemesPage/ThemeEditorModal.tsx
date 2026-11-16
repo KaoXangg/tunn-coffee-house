@@ -80,20 +80,20 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
 }) => {
   return (
         <div className="!mt-0 fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs">
-          <div className="bg-white border border-[#D5C6AD] rounded-brand shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
-            <div className="px-6 py-4 border-b border-[#E9E6D8] flex items-center justify-between gap-4">
+          <div className="bg-white border border-coffee-beige rounded-brand shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="px-6 py-4 border-b border-ivory flex items-center justify-between gap-4">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[#8C7565] font-semibold">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-coffee-muted font-semibold">
                   THEME STUDIO EDITOR
                 </p>
-                <h3 className="font-serif text-xl font-semibold text-[#241914]">
+                <h3 className="font-serif text-xl font-semibold text-coffee-dark">
                   {editingTheme.name}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => onClose()}
-                className="p-2 text-[#8C7565] hover:text-[#241914]"
+                className="p-2 text-coffee-muted hover:text-coffee-dark"
                 aria-label="Đóng"
               >
                 <X className="w-5 h-5" />
@@ -101,7 +101,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
             </div>
 
             {/* Editor Tabs */}
-            <div className="px-6 pt-3 border-b border-[#E9E6D8] flex gap-2 overflow-x-auto">
+            <div className="px-6 pt-3 border-b border-ivory flex gap-2 overflow-x-auto">
               {(
                 [
                   { id: 'colors', label: 'Màu sắc & Giao diện' },
@@ -116,8 +116,8 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                   onClick={() => setEditorTab(tab.id)}
                   className={`px-4 py-2.5 text-xs uppercase tracking-wider font-semibold border-b-2 whitespace-nowrap transition-colors ${
                     editorTab === tab.id
-                      ? 'border-[#4B2E24] text-[#4B2E24]'
-                      : 'border-transparent text-[#8C7565] hover:text-[#241914]'
+                      ? 'border-coffee text-coffee'
+                      : 'border-transparent text-coffee-muted hover:text-coffee-dark'
                   }`}
                 >
                   {tab.label}
@@ -131,7 +131,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                 <div className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1.5">
                         Tên Chủ Đề
                       </label>
                       <input
@@ -140,11 +140,11 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                         onChange={(e) =>
                           setEditingTheme({ ...editingTheme, name: e.target.value })
                         }
-                        className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand"
+                        className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1.5">
                         Phân loại
                       </label>
                       <select
@@ -155,7 +155,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                             category: e.target.value as SeasonalCategory,
                           })
                         }
-                        className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand bg-white"
+                        className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand bg-white"
                       >
                         {(Object.keys(CATEGORY_LABELS) as SeasonalCategory[]).map((c) => (
                           <option key={c} value={c}>
@@ -167,7 +167,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1.5">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1.5">
                       Mô tả chủ đề
                     </label>
                     <input
@@ -176,7 +176,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                       onChange={(e) =>
                         setEditingTheme({ ...editingTheme, description: e.target.value })
                       }
-                      className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand"
+                      className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand"
                     />
                   </div>
 
@@ -198,10 +198,10 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                       ] as const
                     ).map(([key, label]) => (
                       <div key={key} className="space-y-1">
-                        <label className="block text-[11px] font-medium text-[#4B2E24]">
+                        <label className="block text-[11px] font-medium text-coffee">
                           {label}
                         </label>
-                        <div className="flex items-center gap-2 border border-[#D5C6AD] rounded-brand p-1.5">
+                        <div className="flex items-center gap-2 border border-coffee-beige rounded-brand p-1.5">
                           <input
                             type="color"
                             value={editingTheme.tokens[key]}
@@ -213,7 +213,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                             }
                             className="w-7 h-7 rounded cursor-pointer border-0 p-0"
                           />
-                          <span className="text-xs font-mono text-[#8C7565]">
+                          <span className="text-xs font-mono text-coffee-muted">
                             {editingTheme.tokens[key]}
                           </span>
                         </div>
@@ -225,7 +225,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
 
               {editorTab === 'banner' && (
                 <div className="space-y-5">
-                  <label className="flex items-center gap-2.5 text-sm font-medium text-[#241914] cursor-pointer">
+                  <label className="flex items-center gap-2.5 text-sm font-medium text-coffee-dark cursor-pointer">
                     <input
                       type="checkbox"
                       checked={editingTheme.banner.enabled}
@@ -235,14 +235,14 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                           banner: { ...editingTheme.banner, enabled: e.target.checked },
                         })
                       }
-                      className="rounded border-[#D5C6AD]"
+                      className="rounded border-coffee-beige"
                     />
                     <span>Hiển thị Banner Chiến Dịch ở đầu website</span>
                   </label>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1">
                         Nhãn nhỏ (Eyebrow)
                       </label>
                       <input
@@ -254,11 +254,11 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                             banner: { ...editingTheme.banner, eyebrow: e.target.value },
                           })
                         }
-                        className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand"
+                        className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1">
                         Tiêu đề Banner
                       </label>
                       <input
@@ -270,13 +270,13 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                             banner: { ...editingTheme.banner, title: e.target.value },
                           })
                         }
-                        className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand"
+                        className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1">
                       Mô tả ngắn Banner
                     </label>
                     <input
@@ -288,13 +288,13 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                           banner: { ...editingTheme.banner, subtitle: e.target.value },
                         })
                       }
-                      className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand"
+                      className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1">
                         Chữ Nút CTA
                       </label>
                       <input
@@ -306,11 +306,11 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                             banner: { ...editingTheme.banner, ctaLabel: e.target.value },
                           })
                         }
-                        className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand"
+                        className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1">
                         Đường dẫn CTA
                       </label>
                       <input
@@ -322,12 +322,12 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                             banner: { ...editingTheme.banner, ctaUrl: e.target.value },
                           })
                         }
-                        className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand"
+                        className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand"
                       />
                     </div>
                   </div>
 
-                  <label className="flex items-center gap-2.5 text-sm font-medium text-[#241914] cursor-pointer">
+                  <label className="flex items-center gap-2.5 text-sm font-medium text-coffee-dark cursor-pointer">
                     <input
                       type="checkbox"
                       checked={editingTheme.banner.showCountdown}
@@ -337,19 +337,19 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                           banner: { ...editingTheme.banner, showCountdown: e.target.checked },
                         })
                       }
-                      className="rounded border-[#D5C6AD]"
+                      className="rounded border-coffee-beige"
                     />
                     <span>Hiển thị đồng hồ đếm ngược (Countdown) trên Banner</span>
                   </label>
 
                   {/* Upload Custom Banner & Corner Decorations */}
-                  <div className="pt-4 border-t border-[#E9E6D8] space-y-3">
-                    <label className="inline-flex items-center gap-2 text-xs font-medium text-[#4B2E24] cursor-pointer">
+                  <div className="pt-4 border-t border-ivory space-y-3">
+                    <label className="inline-flex items-center gap-2 text-xs font-medium text-coffee cursor-pointer">
                       <input
                         type="checkbox"
                         checked={autoRemoveBg}
                         onChange={(e) => setAutoRemoveBg(e.target.checked)}
-                        className="rounded border-[#D5C6AD]"
+                        className="rounded border-coffee-beige"
                       />
                       <span>Tự động tách nền trắng/đồng màu khi tải ảnh trang trí góc</span>
                     </label>
@@ -396,12 +396,12 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                     ).map((item) => (
                       <div
                         key={item.key}
-                        className="p-3 border border-[#D5C6AD] rounded-brand bg-[#F7F5EF] space-y-2"
+                        className="p-3 border border-coffee-beige rounded-brand bg-ivory-light space-y-2"
                       >
-                        <p className="text-xs font-semibold text-[#4B2E24]">{item.label}</p>
+                        <p className="text-xs font-semibold text-coffee">{item.label}</p>
                         {item.url && (
                           <div
-                            className="relative h-20 rounded overflow-hidden border border-[#E9E6D8]"
+                            className="relative h-20 rounded overflow-hidden border border-ivory"
                             style={
                               item.key !== 'banner'
                                 ? {
@@ -429,7 +429,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                             </button>
                           </div>
                         )}
-                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white border border-[#D5C6AD] rounded-brand cursor-pointer hover:bg-[#E9E6D8]">
+                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white border border-coffee-beige rounded-brand cursor-pointer hover:bg-ivory">
                           <Upload className="w-3.5 h-3.5" />
                           <span>
                             {uploadingField === item.key ? 'Đang tải...' : 'Tải ảnh lên'}
@@ -454,7 +454,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
               {editorTab === 'effects' && (
                 <div className="space-y-5">
                   <div className="flex flex-wrap gap-6">
-                    <label className="flex items-center gap-2 text-sm font-medium text-[#241914] cursor-pointer">
+                    <label className="flex items-center gap-2 text-sm font-medium text-coffee-dark cursor-pointer">
                       <input
                         type="checkbox"
                         checked={editingTheme.decorations.enabled}
@@ -470,7 +470,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                       />
                       <span>Bật lớp trang trí lễ hội</span>
                     </label>
-                    <label className="flex items-center gap-2 text-sm font-medium text-[#241914] cursor-pointer">
+                    <label className="flex items-center gap-2 text-sm font-medium text-coffee-dark cursor-pointer">
                       <input
                         type="checkbox"
                         checked={editingTheme.decorations.particlesEnabled}
@@ -490,7 +490,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1.5">
                         Kiểu hiệu ứng đặc trưng
                       </label>
                       <select
@@ -504,7 +504,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                             },
                           })
                         }
-                        className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand bg-white"
+                        className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand bg-white"
                       >
                         {PARTICLE_OPTIONS.map((opt) => (
                           <option key={opt.value} value={opt.value}>
@@ -515,7 +515,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1.5">
                         Mức độ Animation (Intensity)
                       </label>
                       <select
@@ -529,7 +529,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                             },
                           })
                         }
-                        className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand bg-white"
+                        className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand bg-white"
                       >
                         {INTENSITY_OPTIONS.map((opt) => (
                           <option key={opt.value} value={opt.value}>
@@ -542,7 +542,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold text-[#4B2E24] mb-1">
+                      <label className="block text-xs font-semibold text-coffee mb-1">
                         Mật độ hạt ({editingTheme.decorations.particleDensity}%)
                       </label>
                       <input
@@ -559,11 +559,11 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                             },
                           })
                         }
-                        className="w-full accent-[#4B2E24]"
+                        className="w-full accent-coffee"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-[#4B2E24] mb-1">
+                      <label className="block text-xs font-semibold text-coffee mb-1">
                         Tốc độ chuyển động ({editingTheme.decorations.speed}x)
                       </label>
                       <input
@@ -581,11 +581,11 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                             },
                           })
                         }
-                        className="w-full accent-[#4B2E24]"
+                        className="w-full accent-coffee"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-[#4B2E24] mb-1">
+                      <label className="block text-xs font-semibold text-coffee mb-1">
                         Độ phát sáng nền ({editingTheme.decorations.glowIntensity}%)
                       </label>
                       <input
@@ -602,13 +602,13 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                             },
                           })
                         }
-                        className="w-full accent-[#4B2E24]"
+                        className="w-full accent-coffee"
                       />
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-[#E9E6D8] flex flex-wrap gap-6">
-                    <label className="flex items-center gap-2 text-sm text-[#241914] cursor-pointer">
+                  <div className="pt-3 border-t border-ivory flex flex-wrap gap-6">
+                    <label className="flex items-center gap-2 text-sm text-coffee-dark cursor-pointer">
                       <input
                         type="checkbox"
                         checked={editingTheme.decorations.enableDesktop}
@@ -624,7 +624,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                       />
                       <span>Bật hiệu ứng trên Desktop</span>
                     </label>
-                    <label className="flex items-center gap-2 text-sm text-[#241914] cursor-pointer">
+                    <label className="flex items-center gap-2 text-sm text-coffee-dark cursor-pointer">
                       <input
                         type="checkbox"
                         checked={editingTheme.decorations.enableMobile}
@@ -646,13 +646,13 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
 
               {editorTab === 'schedule' && (
                 <div className="space-y-5">
-                  <p className="text-xs text-[#8C7565] leading-relaxed bg-[#F7F5EF] p-3.5 rounded-brand border border-[#E9E6D8]">
+                  <p className="text-xs text-coffee-muted leading-relaxed bg-ivory-light p-3.5 rounded-brand border border-ivory">
                     Khi cấu hình ngày giờ bắt đầu và kết thúc, hệ thống sẽ tự động kích hoạt chủ đề đúng thời điểm và tự động khôi phục về giao diện mặc định khi hết hạn mà không cần mở trình duyệt Admin.
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1.5">
                         Ngày &amp; Giờ Bắt đầu
                       </label>
                       <input
@@ -666,11 +666,11 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                               : null,
                           })
                         }
-                        className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand"
+                        className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1.5">
                         Ngày &amp; Giờ Kết thúc
                       </label>
                       <input
@@ -684,14 +684,14 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                               : null,
                           })
                         }
-                        className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand"
+                        className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1.5">
                         Múi giờ (Timezone)
                       </label>
                       <select
@@ -699,7 +699,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                         onChange={(e) =>
                           setEditingTheme({ ...editingTheme, timezone: e.target.value })
                         }
-                        className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand bg-white"
+                        className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand bg-white"
                       >
                         {TIMEZONE_OPTIONS.map((tz) => (
                           <option key={tz} value={tz}>
@@ -709,7 +709,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-[#4B2E24] mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-coffee mb-1.5">
                         Độ ưu tiên (Số lớn ưu tiên hơn khi trùng lịch)
                       </label>
                       <input
@@ -723,7 +723,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                             priority: Number(e.target.value) || 10,
                           })
                         }
-                        className="w-full px-3.5 py-2 text-sm border border-[#D5C6AD] rounded-brand"
+                        className="w-full px-3.5 py-2 text-sm border border-coffee-beige rounded-brand"
                       />
                     </div>
                   </div>
@@ -748,11 +748,11 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
             </div>
 
             {/* Editor Footer */}
-            <div className="px-6 py-4 border-t border-[#E9E6D8] bg-[#F7F5EF] flex items-center justify-between gap-3">
+            <div className="px-6 py-4 border-t border-ivory bg-ivory-light flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => openFullSitePreview(editingTheme)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold border border-[#D5C6AD] bg-white text-[#4B2E24] hover:bg-[#E9E6D8] rounded-brand"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold border border-coffee-beige bg-white text-coffee hover:bg-ivory rounded-brand"
               >
                 <Eye className="w-3.5 h-3.5" />
                 <span>Xem Preview</span>
@@ -762,7 +762,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                 <button
                   type="button"
                   onClick={() => onClose()}
-                  className="px-4 py-2 text-xs font-medium text-[#8C7565] hover:text-[#241914]"
+                  className="px-4 py-2 text-xs font-medium text-coffee-muted hover:text-coffee-dark"
                 >
                   Hủy
                 </button>
@@ -770,7 +770,7 @@ export const ThemeEditorModal: React.FC<ThemeEditorModalProps> = ({
                   type="button"
                   disabled={saving}
                   onClick={handleSaveEdit}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 text-xs uppercase tracking-wider font-semibold bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand disabled:opacity-60"
+                  className="inline-flex items-center gap-1.5 px-5 py-2 text-xs uppercase tracking-wider font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand disabled:opacity-60"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>{saving ? 'Đang lưu...' : 'Lưu Chủ Đề'}</span>

@@ -215,27 +215,27 @@ export const AdminMediaPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-semibold text-[#241914]">
+          <h1 className="font-serif text-3xl font-semibold text-coffee-dark">
             Thư Viện Hình Ảnh (Supabase Storage Media Library)
           </h1>
-          <p className="text-sm text-[#8C7565] mt-1">
+          <p className="text-sm text-coffee-muted mt-1">
             Tải nhiều ảnh từ máy tính, kiểm tra kích thước, sao chép URL và gắn trực tiếp vào Sản phẩm, Hero, Banner hoặc Gallery.
           </p>
         </div>
       </div>
 
       {/* Upload Dropzone Panel */}
-      <div className="bg-white border border-[#D5C6AD] rounded-brand p-6">
+      <div className="bg-white border border-coffee-beige rounded-brand p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
           <div className="flex flex-wrap items-center gap-4">
             <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[#8C7565] mb-1">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-coffee-muted mb-1">
                 Thư mục lưu trữ
               </label>
               <select
                 value={uploadFolder}
                 onChange={(e) => setUploadFolder(e.target.value)}
-                className="px-3 py-1.5 text-xs font-medium bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="px-3 py-1.5 text-xs font-medium bg-ivory-light border border-coffee-beige rounded-brand"
               >
                 <option value="products">Sản phẩm (products)</option>
                 <option value="hero">Hero Banner (hero)</option>
@@ -246,12 +246,12 @@ export const AdminMediaPage: React.FC = () => {
               </select>
             </div>
 
-            <label className="flex items-center gap-2 text-xs font-medium text-[#241914] mt-5 cursor-pointer">
+            <label className="flex items-center gap-2 text-xs font-medium text-coffee-dark mt-5 cursor-pointer">
               <input
                 type="checkbox"
                 checked={allowSvgUpload}
                 onChange={(e) => setAllowSvgUpload(e.target.checked)}
-                className="rounded border-[#D5C6AD]"
+                className="rounded border-coffee-beige"
               />
               <span>Cho phép SVG (Chỉ dành cho Logo & Favicon, có kiểm tra bảo mật)</span>
             </label>
@@ -273,22 +273,22 @@ export const AdminMediaPage: React.FC = () => {
 
         <div
           onClick={() => !uploading && fileInputRef.current?.click()}
-          className="cursor-pointer border-2 border-dashed border-[#D5C6AD] hover:border-[#4B2E24] bg-[#F7F5EF]/70 rounded-brand p-8 text-center transition-colors"
+          className="cursor-pointer border-2 border-dashed border-coffee-beige hover:border-coffee bg-ivory-light/70 rounded-brand p-8 text-center transition-colors"
         >
           {uploading ? (
             <div className="flex flex-col items-center">
-              <Loader2 className="w-9 h-9 text-[#4B2E24] animate-spin mb-2.5" />
-              <p className="text-sm font-semibold text-[#241914]">
+              <Loader2 className="w-9 h-9 text-coffee animate-spin mb-2.5" />
+              <p className="text-sm font-semibold text-coffee-dark">
                 {uploadProgressText || 'Đang tải hình ảnh lên Supabase Storage...'}
               </p>
             </div>
           ) : (
             <>
-              <Upload className="w-9 h-9 text-[#4B2E24] mx-auto mb-2.5 stroke-1" />
-              <p className="font-serif text-xl font-semibold text-[#241914]">
+              <Upload className="w-9 h-9 text-coffee mx-auto mb-2.5 stroke-1" />
+              <p className="font-serif text-xl font-semibold text-coffee-dark">
                 Nhấn để chọn một hoặc nhiều hình ảnh từ máy tính
               </p>
-              <p className="text-xs text-[#8C7565] mt-1">
+              <p className="text-xs text-coffee-muted mt-1">
                 Định dạng hỗ trợ: JPG, JPEG, PNG, WebP {allowSvgUpload ? ', SVG' : ''} · Tối đa 5MB/ảnh · Lưu trữ trực tiếp tại bucket <code className="font-mono">tunn-media</code>
               </p>
             </>
@@ -297,7 +297,7 @@ export const AdminMediaPage: React.FC = () => {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-white border border-[#D5C6AD] rounded-brand p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="bg-white border border-coffee-beige rounded-brand p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="flex flex-wrap gap-1.5">
           {FOLDERS.map((f) => (
             <button
@@ -306,8 +306,8 @@ export const AdminMediaPage: React.FC = () => {
               onClick={() => setSelectedFolder(f.id)}
               className={`px-3 py-1.5 text-xs font-semibold rounded-brand transition-colors ${
                 selectedFolder === f.id
-                  ? 'bg-[#4B2E24] text-[#F7F5EF]'
-                  : 'bg-[#F7F5EF] text-[#241914] hover:bg-[#E9E6D8]'
+                  ? 'bg-coffee text-ivory-light'
+                  : 'bg-ivory-light text-coffee-dark hover:bg-ivory'
               }`}
             >
               {f.label}
@@ -316,13 +316,13 @@ export const AdminMediaPage: React.FC = () => {
         </div>
 
         <div className="relative min-w-[240px]">
-          <Search className="w-4 h-4 text-[#8C7565] absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-coffee-muted absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Tìm tên file ảnh..."
-            className="w-full pl-9 pr-3 py-1.5 text-xs bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+            className="w-full pl-9 pr-3 py-1.5 text-xs bg-ivory-light border border-coffee-beige rounded-brand"
           />
         </div>
       </div>
@@ -331,12 +331,12 @@ export const AdminMediaPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className={selectedAsset ? 'lg:col-span-8' : 'lg:col-span-12'}>
           {filteredAssets.length === 0 ? (
-            <div className="bg-white border border-[#D5C6AD] rounded-brand py-16 px-4 text-center">
-              <FolderOpen className="w-12 h-12 text-[#8C7565] mx-auto mb-3 stroke-1" />
-              <h3 className="font-serif text-xl font-semibold text-[#241914]">
+            <div className="bg-white border border-coffee-beige rounded-brand py-16 px-4 text-center">
+              <FolderOpen className="w-12 h-12 text-coffee-muted mx-auto mb-3 stroke-1" />
+              <h3 className="font-serif text-xl font-semibold text-coffee-dark">
                 Thư viện Media hiện đang trống
               </h3>
-              <p className="text-xs text-[#8C7565] mt-1 max-w-md mx-auto">
+              <p className="text-xs text-coffee-muted mt-1 max-w-md mx-auto">
                 Hãy nhấn vào khung tải ảnh phía trên để upload hình ảnh đồ uống, logo hoặc không gian quán lên Supabase Storage.
               </p>
             </div>
@@ -350,27 +350,27 @@ export const AdminMediaPage: React.FC = () => {
                     onClick={() => setSelectedAsset(asset)}
                     className={`group cursor-pointer bg-white border rounded-brand overflow-hidden transition-all ${
                       isSelected
-                        ? 'border-[#4B2E24] ring-2 ring-[#4B2E24]/30'
-                        : 'border-[#D5C6AD] hover:border-[#4B2E24]'
+                        ? 'border-coffee ring-2 ring-coffee/30'
+                        : 'border-coffee-beige hover:border-coffee'
                     }`}
                   >
-                    <div className="aspect-square bg-[#E9E6D8]/40 relative overflow-hidden">
+                    <div className="aspect-square bg-ivory/40 relative overflow-hidden">
                       <img
                         src={asset.public_url}
                         alt={asset.alt_text || asset.file_name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
                       />
-                      <span className="absolute top-2 left-2 px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-[#241914]/80 text-[#F7F5EF] rounded">
+                      <span className="absolute top-2 left-2 px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-coffee-dark/80 text-ivory-light rounded">
                         {asset.folder}
                       </span>
                     </div>
 
                     <div className="p-3">
-                      <p className="text-xs font-semibold text-[#241914] truncate">
+                      <p className="text-xs font-semibold text-coffee-dark truncate">
                         {asset.file_name}
                       </p>
-                      <div className="flex items-center justify-between text-[10px] text-[#8C7565] mt-1">
+                      <div className="flex items-center justify-between text-[10px] text-coffee-muted mt-1">
                         <span>{formatBytes(asset.file_size)}</span>
                         {asset.width && asset.height && (
                           <span>
@@ -379,14 +379,14 @@ export const AdminMediaPage: React.FC = () => {
                         )}
                       </div>
 
-                      <div className="mt-2.5 pt-2 border-t border-[#E9E6D8] flex items-center justify-between">
+                      <div className="mt-2.5 pt-2 border-t border-ivory flex items-center justify-between">
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleCopyUrl(asset.public_url);
                           }}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#4B2E24] hover:underline"
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-coffee hover:underline"
                         >
                           <Copy className="w-3 h-3" />
                           <span>Copy URL</span>
@@ -414,21 +414,21 @@ export const AdminMediaPage: React.FC = () => {
 
         {/* Inspector & Quick-Assign Panel */}
         {selectedAsset && (
-          <div className="lg:col-span-4 bg-white border border-[#D5C6AD] rounded-brand p-5 sticky top-20 space-y-5">
-            <div className="flex items-center justify-between border-b border-[#D5C6AD] pb-3">
-              <h3 className="font-serif text-lg font-semibold text-[#241914]">
+          <div className="lg:col-span-4 bg-white border border-coffee-beige rounded-brand p-5 sticky top-20 space-y-5">
+            <div className="flex items-center justify-between border-b border-coffee-beige pb-3">
+              <h3 className="font-serif text-lg font-semibold text-coffee-dark">
                 Chi Tiết Hình Ảnh
               </h3>
               <button
                 type="button"
                 onClick={() => setSelectedAsset(null)}
-                className="p-1 text-[#8C7565] hover:text-[#241914]"
+                className="p-1 text-coffee-muted hover:text-coffee-dark"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="aspect-video bg-[#E9E6D8]/40 rounded-brand overflow-hidden border border-[#D5C6AD] flex items-center justify-center">
+            <div className="aspect-video bg-ivory/40 rounded-brand overflow-hidden border border-coffee-beige flex items-center justify-center">
               <img
                 src={selectedAsset.public_url}
                 alt={selectedAsset.file_name}
@@ -437,21 +437,21 @@ export const AdminMediaPage: React.FC = () => {
             </div>
 
             <div className="space-y-1.5 text-xs">
-              <p className="font-semibold text-[#241914] break-all">
+              <p className="font-semibold text-coffee-dark break-all">
                 {selectedAsset.file_name}
               </p>
-              <p className="text-[#8C7565]">
+              <p className="text-coffee-muted">
                 Dung lượng: <strong>{formatBytes(selectedAsset.file_size)}</strong>
               </p>
               {selectedAsset.width && selectedAsset.height && (
-                <p className="text-[#8C7565]">
+                <p className="text-coffee-muted">
                   Kích thước: <strong>{selectedAsset.width} × {selectedAsset.height} px</strong>
                 </p>
               )}
-              <p className="text-[#8C7565]">
+              <p className="text-coffee-muted">
                 Định dạng: <strong>{selectedAsset.mime_type}</strong>
               </p>
-              <p className="text-[#8C7565]">
+              <p className="text-coffee-muted">
                 Ngày tải lên: <strong>{formatDateVi(selectedAsset.created_at)}</strong>
               </p>
             </div>
@@ -460,7 +460,7 @@ export const AdminMediaPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleCopyUrl(selectedAsset.public_url)}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold bg-[#E9E6D8] text-[#241914] hover:bg-[#D5C6AD] rounded-brand"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold bg-ivory text-coffee-dark hover:bg-coffee-beige rounded-brand"
               >
                 <Copy className="w-3.5 h-3.5" />
                 <span>Copy URL</span>
@@ -469,7 +469,7 @@ export const AdminMediaPage: React.FC = () => {
                 href={selectedAsset.public_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold border border-[#D5C6AD] text-[#241914] rounded-brand"
+                className="inline-flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-semibold border border-coffee-beige text-coffee-dark rounded-brand"
               >
                 <Eye className="w-3.5 h-3.5" />
                 <span>Mở ảnh</span>
@@ -477,8 +477,8 @@ export const AdminMediaPage: React.FC = () => {
             </div>
 
             {/* Quick Assign Feature */}
-            <div className="pt-4 border-t border-[#D5C6AD] space-y-3">
-              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#4B2E24]">
+            <div className="pt-4 border-t border-coffee-beige space-y-3">
+              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-coffee">
                 <Link2 className="w-3.5 h-3.5" />
                 <span>Gắn nhanh ảnh này vào Website</span>
               </div>
@@ -486,7 +486,7 @@ export const AdminMediaPage: React.FC = () => {
               <select
                 value={assignTargetType}
                 onChange={(e) => setAssignTargetType(e.target.value as 'product' | 'hero' | 'about' | 'promotion' | 'gallery')}
-                className="w-full px-3 py-2 text-xs bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand font-medium"
+                className="w-full px-3 py-2 text-xs bg-ivory-light border border-coffee-beige rounded-brand font-medium"
               >
                 <option value="product">Gắn vào Sản phẩm (Product)</option>
                 <option value="hero">Làm ảnh chính Hero Section</option>
@@ -500,7 +500,7 @@ export const AdminMediaPage: React.FC = () => {
                 <select
                   value={assignProductId}
                   onChange={(e) => setAssignProductId(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-white border border-[#D5C6AD] rounded-brand"
+                  className="w-full px-3 py-2 text-xs bg-white border border-coffee-beige rounded-brand"
                 >
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -514,7 +514,7 @@ export const AdminMediaPage: React.FC = () => {
                 <select
                   value={assignPromoId}
                   onChange={(e) => setAssignPromoId(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-white border border-[#D5C6AD] rounded-brand"
+                  className="w-full px-3 py-2 text-xs bg-white border border-coffee-beige rounded-brand"
                 >
                   {promotions.map((pr) => (
                     <option key={pr.id} value={pr.id}>
@@ -528,7 +528,7 @@ export const AdminMediaPage: React.FC = () => {
                 type="button"
                 disabled={assigning}
                 onClick={handleQuickAssign}
-                className="w-full py-2.5 px-4 bg-[#4B2E24] hover:bg-[#241914] text-[#F7F5EF] text-xs font-semibold uppercase tracking-wider rounded-brand transition-colors flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 px-4 bg-coffee hover:bg-coffee-dark text-ivory-light text-xs font-semibold uppercase tracking-wider rounded-brand transition-colors flex items-center justify-center gap-1.5"
               >
                 {assigning ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

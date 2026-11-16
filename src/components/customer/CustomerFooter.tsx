@@ -52,7 +52,7 @@ export const CustomerFooter: React.FC = () => {
 
           {/* Navigation Column */}
           <div className="md:col-span-3 space-y-3">
-            <h4 className="text-xs uppercase tracking-[0.22em] text-[#D5C6AD] font-semibold">
+            <h4 className="text-sm text-[#D5C6AD] font-semibold">
               Khám phá
             </h4>
             <ul className="space-y-2.5 text-sm">
@@ -71,7 +71,7 @@ export const CustomerFooter: React.FC = () => {
 
           {/* Hours & Socials */}
           <div className="md:col-span-4 space-y-3">
-            <h4 className="text-xs uppercase tracking-[0.22em] text-[#D5C6AD] font-semibold">
+            <h4 className="text-sm text-[#D5C6AD] font-semibold">
               Thời gian & Kết nối
             </h4>
             <p className="text-sm text-[#E9E6D8]/85">
@@ -84,7 +84,7 @@ export const CustomerFooter: React.FC = () => {
               <p className="text-sm text-[#E9E6D8]/80">Hotline: {settings.hotline}</p>
             )}
 
-            <div className="pt-3 flex flex-wrap gap-3 text-xs uppercase tracking-widest">
+            <div className="pt-3 flex flex-wrap gap-3 text-xs font-medium">
               {settings.facebook_url && (
                 <a
                   href={sanitizeUrl(settings.facebook_url)}

@@ -3,6 +3,7 @@ import { Search, SlidersHorizontal, X, Coffee, ChevronLeft, ChevronRight } from 
 import { m, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { formatVND } from '../../lib/utils';
+import { Skeleton } from '../common/Skeleton';
 import type { Product } from '../../types/database';
 
 interface MenuSectionProps {
@@ -15,7 +16,8 @@ type QuickTagFilter = 'all' | 'bestseller' | 'promo';
 const ITEMS_PER_PAGE = 8;
 
 export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => {
-  const { categories, products, getSection } = useSiteData();
+  const { categories, products, getSection, loading, isLiveDatabase } = useSiteData();
+  const showSkeleton = loading && !isLiveDatabase;
   const section = getSection('menu');
   const menuGridRef = useRef<HTMLDivElement>(null);
 
@@ -125,8 +127,8 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Editorial Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-3">
-            {String(section?.content?.eyebrow || 'THỰC ĐƠN THỦ CÔNG')}
+          <p className="text-sm text-coffee font-medium mb-2">
+            {String(section?.content?.eyebrow || 'Thực đơn thủ công')}
           </p>
           <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
             {section?.title || 'Thực Đơn Tinh Tuyển'}
@@ -135,6 +137,29 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
             {section?.subtitle || 'Khám phá trọn vẹn hương vị trà và cà phê thủ công'}
           </p>
         </div>
+
+        {showSkeleton ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="flex items-start gap-4 sm:gap-5 p-3.5 sm:p-4 rounded-xl bg-ivory/40 border border-coffee-beige/50"
+              >
+                <Skeleton className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg shrink-0" />
+                <div className="flex-1 min-w-0 space-y-2.5 py-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <Skeleton className="h-6 w-2/3" />
+                    <Skeleton className="h-6 w-20 shrink-0" />
+                  </div>
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-3.5 w-full" />
+                  <Skeleton className="h-3.5 w-4/5" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
 
         {/* Editorial Category Visual Marquee (Slow leftward glide, pauses on hover) */}
         {activeCategories.length > 0 && (
@@ -538,6 +563,8 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                 </nav>
               </div>
             )}
+          </>
+        )}
           </>
         )}
 

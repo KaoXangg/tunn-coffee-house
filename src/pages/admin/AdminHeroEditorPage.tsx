@@ -64,10 +64,10 @@ export const AdminHeroEditorPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-semibold text-[#241914]">
+          <h1 className="font-serif text-3xl font-semibold text-coffee-dark">
             Trình Chỉnh Sửa Hero Section
           </h1>
-          <p className="text-sm text-[#8C7565] mt-1">
+          <p className="text-sm text-coffee-muted mt-1">
             Tùy chỉnh Headline, Subtitle, hình ảnh, màu nền, độ phủ Overlay và bố cục Hero ngay lập tức.
           </p>
         </div>
@@ -76,7 +76,7 @@ export const AdminHeroEditorPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setFormState(DEFAULT_HERO_CONTENT)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold uppercase tracking-wider border border-[#D5C6AD] bg-white text-[#241914] hover:bg-[#E9E6D8] rounded-brand"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold uppercase tracking-wider border border-coffee-beige bg-white text-coffee-dark hover:bg-ivory rounded-brand"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Khôi phục mặc định</span>
@@ -85,7 +85,7 @@ export const AdminHeroEditorPage: React.FC = () => {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand disabled:opacity-50"
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -101,37 +101,37 @@ export const AdminHeroEditorPage: React.FC = () => {
         {/* Form Controls */}
         <form
           onSubmit={handleSave}
-          className="lg:col-span-7 bg-white border border-[#D5C6AD] rounded-brand p-6 space-y-5"
+          className="lg:col-span-7 bg-white border border-coffee-beige rounded-brand p-6 space-y-5"
         >
-          <div className="flex items-center justify-between pb-3 border-b border-[#D5C6AD]">
-            <h2 className="font-serif text-xl font-semibold text-[#241914]">
+          <div className="flex items-center justify-between pb-3 border-b border-coffee-beige">
+            <h2 className="font-serif text-xl font-semibold text-coffee-dark">
               Nội Dung & Bố Cục Hero
             </h2>
-            <label className="flex items-center gap-2 text-xs font-semibold text-[#241914] cursor-pointer">
+            <label className="flex items-center gap-2 text-xs font-semibold text-coffee-dark cursor-pointer">
               <input
                 type="checkbox"
                 checked={isEnabled}
                 onChange={(e) => setIsEnabled(e.target.checked)}
-                className="rounded border-[#D5C6AD]"
+                className="rounded border-coffee-beige"
               />
               <span>Hiển thị Hero Section</span>
             </label>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
               Dòng nhãn phía trên (Eyebrow Badge)
             </label>
             <input
               type="text"
               value={formState.badge}
               onChange={(e) => setFormState({ ...formState, badge: e.target.value })}
-              className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+              className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
               Tiêu đề chính (Headline - Hỗ trợ xuống dòng)
             </label>
             <textarea
@@ -140,12 +140,12 @@ export const AdminHeroEditorPage: React.FC = () => {
               onChange={(e) =>
                 setFormState({ ...formState, headline: e.target.value })
               }
-              className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand font-serif text-lg"
+              className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand font-serif text-lg"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
               Mô tả phụ (Subtitle)
             </label>
             <textarea
@@ -154,14 +154,14 @@ export const AdminHeroEditorPage: React.FC = () => {
               onChange={(e) =>
                 setFormState({ ...formState, subheadline: e.target.value })
               }
-              className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+              className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
             />
           </div>
 
           {/* CTAs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Nút CTA Chính (Nhãn)
               </label>
               <input
@@ -170,11 +170,11 @@ export const AdminHeroEditorPage: React.FC = () => {
                 onChange={(e) =>
                   setFormState({ ...formState, primary_cta_label: e.target.value })
                 }
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Liên kết CTA Chính (Href)
               </label>
               <input
@@ -183,14 +183,14 @@ export const AdminHeroEditorPage: React.FC = () => {
                 onChange={(e) =>
                   setFormState({ ...formState, primary_cta_href: e.target.value })
                 }
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand font-mono"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand font-mono"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Nút CTA Phụ (Nhãn)
               </label>
               <input
@@ -199,11 +199,11 @@ export const AdminHeroEditorPage: React.FC = () => {
                 onChange={(e) =>
                   setFormState({ ...formState, secondary_cta_label: e.target.value })
                 }
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Liên kết CTA Phụ
               </label>
               <input
@@ -212,22 +212,22 @@ export const AdminHeroEditorPage: React.FC = () => {
                 onChange={(e) =>
                   setFormState({ ...formState, secondary_cta_href: e.target.value })
                 }
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand font-mono"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand font-mono"
               />
             </div>
           </div>
 
           {/* Images */}
-          <div className="space-y-4 pt-3 border-t border-[#D5C6AD]">
+          <div className="space-y-4 pt-3 border-t border-coffee-beige">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Hình ảnh sản phẩm lớn (Main Hero Image)
               </label>
               <div className="flex gap-3 items-center">
                 <img
                   src={formState.hero_image_url}
                   alt="Hero Main"
-                  className="w-16 h-20 object-cover rounded-brand border border-[#D5C6AD]"
+                  className="w-16 h-20 object-cover rounded-brand border border-coffee-beige"
                 />
                 <div className="flex-1 space-y-2">
                   <input
@@ -236,12 +236,12 @@ export const AdminHeroEditorPage: React.FC = () => {
                     onChange={(e) =>
                       setFormState({ ...formState, hero_image_url: e.target.value })
                     }
-                    className="w-full px-3 py-1.5 text-xs bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                    className="w-full px-3 py-1.5 text-xs bg-ivory-light border border-coffee-beige rounded-brand"
                   />
                   <button
                     type="button"
                     onClick={() => setPickerTarget('main')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#E9E6D8] text-[#241914] rounded-brand"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-ivory text-coffee-dark rounded-brand"
                   >
                     <ImageIcon className="w-3.5 h-3.5" />
                     <span>Chọn / Upload ảnh chính</span>
@@ -251,7 +251,7 @@ export const AdminHeroEditorPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Hình ảnh phụ bất đối xứng (Secondary Image)
               </label>
               <div className="flex gap-3 items-center">
@@ -259,7 +259,7 @@ export const AdminHeroEditorPage: React.FC = () => {
                   <img
                     src={formState.secondary_image_url}
                     alt="Hero Secondary"
-                    className="w-16 h-20 object-cover rounded-brand border border-[#D5C6AD]"
+                    className="w-16 h-20 object-cover rounded-brand border border-coffee-beige"
                   />
                 )}
                 <div className="flex-1 space-y-2">
@@ -272,12 +272,12 @@ export const AdminHeroEditorPage: React.FC = () => {
                         secondary_image_url: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-1.5 text-xs bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                    className="w-full px-3 py-1.5 text-xs bg-ivory-light border border-coffee-beige rounded-brand"
                   />
                   <button
                     type="button"
                     onClick={() => setPickerTarget('secondary')}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#E9E6D8] text-[#241914] rounded-brand"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-ivory text-coffee-dark rounded-brand"
                   >
                     <ImageIcon className="w-3.5 h-3.5" />
                     <span>Chọn / Upload ảnh phụ</span>
@@ -288,9 +288,9 @@ export const AdminHeroEditorPage: React.FC = () => {
           </div>
 
           {/* Colors, Overlay & Alignment */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-3 border-t border-[#D5C6AD]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-3 border-t border-coffee-beige">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Màu nền
               </label>
               <input
@@ -299,12 +299,12 @@ export const AdminHeroEditorPage: React.FC = () => {
                 onChange={(e) =>
                   setFormState({ ...formState, background_color: e.target.value })
                 }
-                className="w-full h-9 rounded border border-[#D5C6AD] cursor-pointer"
+                className="w-full h-9 rounded border border-coffee-beige cursor-pointer"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Màu chữ
               </label>
               <input
@@ -313,12 +313,12 @@ export const AdminHeroEditorPage: React.FC = () => {
                 onChange={(e) =>
                   setFormState({ ...formState, text_color: e.target.value })
                 }
-                className="w-full h-9 rounded border border-[#D5C6AD] cursor-pointer"
+                className="w-full h-9 rounded border border-coffee-beige cursor-pointer"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Độ tối Overlay ({Math.round(formState.overlay_opacity * 100)}%)
               </label>
               <input
@@ -333,12 +333,12 @@ export const AdminHeroEditorPage: React.FC = () => {
                     overlay_opacity: parseFloat(e.target.value),
                   })
                 }
-                className="w-full mt-2 accent-[#4B2E24]"
+                className="w-full mt-2 accent-coffee"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Căn lề chữ
               </label>
               <select
@@ -349,7 +349,7 @@ export const AdminHeroEditorPage: React.FC = () => {
                     alignment: e.target.value as 'left' | 'center' | 'right',
                   })
                 }
-                className="w-full px-2.5 py-2 text-xs bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-2.5 py-2 text-xs bg-ivory-light border border-coffee-beige rounded-brand"
               >
                 <option value="left">Trái (Editorial)</option>
                 <option value="center">Giữa (Centered)</option>
@@ -359,9 +359,9 @@ export const AdminHeroEditorPage: React.FC = () => {
           </div>
 
           {/* Tasting Note Card */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-[#D5C6AD]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-coffee-beige">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Tiêu đề Tasting Note trên ảnh
               </label>
               <input
@@ -373,11 +373,11 @@ export const AdminHeroEditorPage: React.FC = () => {
                     featured_note_title: e.target.value,
                   })
                 }
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Mô tả Tasting Note
               </label>
               <input
@@ -389,7 +389,7 @@ export const AdminHeroEditorPage: React.FC = () => {
                     featured_note_subtitle: e.target.value,
                   })
                 }
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
           </div>
@@ -397,7 +397,7 @@ export const AdminHeroEditorPage: React.FC = () => {
 
         {/* Live Interactive Preview */}
         <div className="lg:col-span-5 sticky top-20 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#4B2E24]">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-coffee">
             <Eye className="w-4 h-4" />
             <span>Xem Trước Trực Tiếp (Live Preview)</span>
           </div>
@@ -407,9 +407,9 @@ export const AdminHeroEditorPage: React.FC = () => {
               backgroundColor: formState.background_color,
               color: formState.text_color,
             }}
-            className="border border-[#D5C6AD] rounded-brand p-6 shadow-md space-y-5 overflow-hidden"
+            className="border border-coffee-beige rounded-brand p-6 shadow-md space-y-5 overflow-hidden"
           >
-            <span className="inline-block px-2.5 py-1 text-[10px] uppercase tracking-widest font-semibold border border-[#D5C6AD] bg-white/70 rounded">
+            <span className="inline-block px-2.5 py-1 text-[10px] uppercase tracking-widest font-semibold border border-coffee-beige bg-white/70 rounded">
               {formState.badge}
             </span>
 
@@ -422,7 +422,7 @@ export const AdminHeroEditorPage: React.FC = () => {
             </p>
 
             <div className="flex flex-wrap gap-2">
-              <span className="px-4 py-2 text-[10px] uppercase tracking-wider font-semibold bg-[#4B2E24] text-[#F7F5EF] rounded-brand">
+              <span className="px-4 py-2 text-[10px] uppercase tracking-wider font-semibold bg-coffee text-ivory-light rounded-brand">
                 {formState.primary_cta_label}
               </span>
               {formState.secondary_cta_label && (
@@ -432,21 +432,21 @@ export const AdminHeroEditorPage: React.FC = () => {
               )}
             </div>
 
-            <div className="relative aspect-[4/3] rounded-brand overflow-hidden border border-[#D5C6AD]">
+            <div className="relative aspect-[4/3] rounded-brand overflow-hidden border border-coffee-beige">
               <img
                 src={formState.hero_image_url}
                 alt="Hero Preview"
                 className="w-full h-full object-cover"
               />
               <div
-                className="absolute inset-0 bg-[#241914]"
+                className="absolute inset-0 bg-coffee-dark"
                 style={{ opacity: formState.overlay_opacity }}
               />
-              <div className="absolute bottom-3 left-3 right-3 bg-[#F7F5EF]/95 p-3 rounded-brand border border-[#D5C6AD] text-[#241914]">
+              <div className="absolute bottom-3 left-3 right-3 bg-ivory-light/95 p-3 rounded-brand border border-coffee-beige text-coffee-dark">
                 <p className="font-serif text-sm font-semibold">
                   {formState.featured_note_title}
                 </p>
-                <p className="text-[11px] text-[#8C7565]">
+                <p className="text-[11px] text-coffee-muted">
                   {formState.featured_note_subtitle}
                 </p>
               </div>

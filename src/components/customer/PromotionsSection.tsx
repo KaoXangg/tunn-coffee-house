@@ -3,12 +3,50 @@ import { Calendar, ArrowUpRight } from 'lucide-react';
 import { m } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { formatDateVi, getPromotionScheduleStatus, sanitizeUrl } from '../../lib/utils';
+import { Skeleton } from '../common/Skeleton';
 
 export const PromotionsSection: React.FC = () => {
-  const { promotions, settings, getSection } = useSiteData();
+  const { promotions, settings, getSection, loading, isLiveDatabase } = useSiteData();
   const section = getSection('promotions');
+  const showSkeleton = loading && !isLiveDatabase;
 
   if (section && !section.is_enabled) return null;
+
+  if (showSkeleton) {
+    return (
+      <section
+        id="promotions"
+        className="py-20 sm:py-28 bg-ivory border-b border-coffee-beige/60 dark:border-b-0"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
+          <div className="mb-14 pb-6 border-b border-coffee-beige/70">
+            <Skeleton className="h-4 w-32 mb-2.5" />
+            <Skeleton className="h-10 sm:h-12 w-72" />
+          </div>
+          <div className="space-y-10">
+            {[0, 1].map((idx) => (
+              <div
+                key={idx}
+                className="grid grid-cols-1 lg:grid-cols-12 bg-ivory-light border border-coffee-beige rounded-brand overflow-hidden shadow-editorial"
+              >
+                <div className="lg:col-span-6 aspect-[16/10] lg:aspect-auto lg:min-h-[300px]">
+                  <Skeleton className="w-full h-full rounded-none" />
+                </div>
+                <div className="lg:col-span-6 p-7 sm:p-10 lg:p-12 flex flex-col justify-center space-y-4">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-9 w-4/5" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-11 w-40 mt-2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const now = new Date();
   const activePromos = promotions
@@ -32,8 +70,8 @@ export const PromotionsSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Heading */}
         <div className="mb-14 pb-6 border-b border-coffee-beige/70 dark:border-b-0 dark:pb-0">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2.5">
-            {String(section?.content?.eyebrow || 'ƯU ĐÃI ĐẶC BIỆT')}
+          <p className="text-sm text-coffee font-medium mb-2">
+            {String(section?.content?.eyebrow || 'Ưu đãi đặc biệt')}
           </p>
           <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
             {section?.title || 'Ưu Đãi & Mùa Vị Mới'}
@@ -85,7 +123,7 @@ export const PromotionsSection: React.FC = () => {
                   }`}
                 >
                   {promo.subtitle && (
-                    <p className="text-[11px] uppercase tracking-[0.22em] text-coffee font-semibold">
+                    <p className="text-sm text-coffee font-medium">
                       {promo.subtitle}
                     </p>
                   )}

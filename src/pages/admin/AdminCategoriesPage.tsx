@@ -17,6 +17,7 @@ import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
 import { slugify } from '../../lib/utils';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { Skeleton } from '../../components/common/Skeleton';
 import { MediaPickerModal } from '../../components/common/MediaPickerModal';
 import type { Category } from '../../types/database';
 
@@ -32,7 +33,9 @@ const categorySchema = z.object({
 type CategoryFormValues = z.infer<typeof categorySchema>;
 
 export const AdminCategoriesPage: React.FC = () => {
-  const { categories, products, refreshAll, logAdminActivity } = useSiteData();
+  const { categories, products, loading, isLiveDatabase, refreshAll, logAdminActivity } =
+    useSiteData();
+  const showSkeleton = loading && !isLiveDatabase;
   const toast = useToast();
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -187,7 +190,28 @@ export const AdminCategoriesPage: React.FC = () => {
 
       {/* Category Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {categories.map((cat) => {
+        {showSkeleton
+          ? Array.from({ length: 6 }).map((_, idx) => (
+              <div
+                key={`cat-skeleton-${idx}`}
+                className="bg-white border border-[#D5C6AD] rounded-brand overflow-hidden shadow-xs"
+              >
+                <Skeleton className="h-36 w-full rounded-none" />
+                <div className="p-5 space-y-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <Skeleton className="h-6 w-36" />
+                    <Skeleton className="h-4 w-12" />
+                  </div>
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-3.5 w-full" />
+                </div>
+                <div className="px-5 py-3 bg-[#F7F5EF] border-t border-[#D5C6AD] flex justify-end gap-2">
+                  <Skeleton className="h-7 w-14" />
+                  <Skeleton className="h-7 w-14" />
+                </div>
+              </div>
+            ))
+          : categories.map((cat) => {
           const count = products.filter((p) => p.category_id === cat.id).length;
           return (
             <div

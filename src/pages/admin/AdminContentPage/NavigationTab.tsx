@@ -56,21 +56,21 @@ export const NavigationTab: React.FC<NavigationTabProps> = ({
   return (
         <form
           onSubmit={handleSaveNavigationAndFooter}
-          className="bg-white border border-[#D5C6AD] rounded-brand p-6 space-y-6"
+          className="bg-white border border-coffee-beige rounded-brand p-6 space-y-6"
         >
-          <div className="flex items-center justify-between pb-4 border-b border-[#D5C6AD]">
+          <div className="flex items-center justify-between pb-4 border-b border-coffee-beige">
             <div>
-              <h2 className="font-serif text-xl font-semibold text-[#241914]">
+              <h2 className="font-serif text-xl font-semibold text-coffee-dark">
                 Thanh Điều Hướng (Header Navigation) & Chân Trang (Footer)
               </h2>
-              <p className="text-xs text-[#8C7565]">
+              <p className="text-xs text-coffee-muted">
                 Tùy chỉnh các mục menu trên Header, nút CTA và nội dung bản quyền dưới Footer.
               </p>
             </div>
             <button
               type="submit"
               disabled={savingNav}
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] rounded-brand"
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light rounded-brand"
             >
               {savingNav ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -83,21 +83,21 @@ export const NavigationTab: React.FC<NavigationTabProps> = ({
 
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <label className="text-xs font-semibold uppercase tracking-wider text-[#241914]">
+              <label className="text-xs font-semibold uppercase tracking-wider text-coffee-dark">
                 Các mục trên Thanh Menu (Navigation Items)
               </label>
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={handleRestoreDefaultNav}
-                  className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold bg-[#F7F5EF] border border-[#D5C6AD] text-[#4B2E24] hover:bg-[#E9E6D8] rounded-brand"
+                  className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold bg-ivory-light border border-coffee-beige text-coffee hover:bg-ivory rounded-brand"
                 >
                   <RotateCcw className="w-3.5 h-3.5" /> Mặc định
                 </button>
                 <button
                   type="button"
                   onClick={handleAddNavItem}
-                  className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold bg-[#E9E6D8] text-[#241914] hover:bg-[#D5C6AD] rounded-brand"
+                  className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold bg-ivory text-coffee-dark hover:bg-coffee-beige rounded-brand"
                 >
                   <Plus className="w-3.5 h-3.5" /> Thêm mục
                 </button>
@@ -105,8 +105,8 @@ export const NavigationTab: React.FC<NavigationTabProps> = ({
             </div>
 
             {restorableNavItems.length > 0 && (
-              <div className="p-3 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#8C7565]">
+              <div className="p-3 bg-ivory-light border border-coffee-beige rounded-brand space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-coffee-muted">
                   Các ô đã xóa (bấm để khôi phục lại):
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -115,7 +115,7 @@ export const NavigationTab: React.FC<NavigationTabProps> = ({
                       key={`${item.label}-${item.href}-${rIdx}`}
                       type="button"
                       onClick={() => handleRestoreSingleNavItem(item)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#3A221A] rounded-brand transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-coffee text-ivory-light hover:bg-[#3A221A] rounded-brand transition-colors"
                     >
                       <RotateCcw className="w-3 h-3" />
                       <span>Khôi phục: {item.label || item.href}</span>
@@ -136,7 +136,7 @@ export const NavigationTab: React.FC<NavigationTabProps> = ({
                       type="button"
                       onClick={() => moveNavItem(idx, -1)}
                       disabled={idx === 0}
-                      className="p-1.5 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand text-[#4B2E24] disabled:opacity-30 hover:bg-[#E9E6D8]"
+                      className="p-1.5 bg-ivory-light border border-coffee-beige rounded-brand text-coffee disabled:opacity-30 hover:bg-ivory"
                       title="Đưa lên trên"
                       aria-label="Đưa mục lên trên"
                     >
@@ -146,7 +146,7 @@ export const NavigationTab: React.FC<NavigationTabProps> = ({
                       type="button"
                       onClick={() => moveNavItem(idx, 1)}
                       disabled={idx === navItems.length - 1}
-                      className="p-1.5 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand text-[#4B2E24] disabled:opacity-30 hover:bg-[#E9E6D8]"
+                      className="p-1.5 bg-ivory-light border border-coffee-beige rounded-brand text-coffee disabled:opacity-30 hover:bg-ivory"
                       title="Đưa xuống dưới"
                       aria-label="Đưa mục xuống dưới"
                     >
@@ -163,7 +163,7 @@ export const NavigationTab: React.FC<NavigationTabProps> = ({
                       onMarkDirty();
                     }}
                     placeholder="Nhãn hiển thị"
-                    className="flex-1 min-w-0 px-3 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                    className="flex-1 min-w-0 px-3 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
                   />
                   <input
                     type="text"
@@ -175,7 +175,7 @@ export const NavigationTab: React.FC<NavigationTabProps> = ({
                       onMarkDirty();
                     }}
                     placeholder="#hero"
-                    className="flex-1 min-w-0 px-3 py-2 text-sm font-mono bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                    className="flex-1 min-w-0 px-3 py-2 text-sm font-mono bg-ivory-light border border-coffee-beige rounded-brand"
                   />
                   <button
                     type="button"
@@ -191,52 +191,52 @@ export const NavigationTab: React.FC<NavigationTabProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[#D5C6AD]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-coffee-beige">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Nút CTA trên Header
               </label>
               <input
                 type="text"
                 value={headerCtaLabel}
                 onChange={(e) => setHeaderCtaLabel(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Liên kết nút CTA Header
               </label>
               <input
                 type="text"
                 value={headerCtaHref}
                 onChange={(e) => setHeaderCtaHref(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm font-mono bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm font-mono bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
           </div>
 
-          <div className="space-y-4 pt-4 border-t border-[#D5C6AD]">
+          <div className="space-y-4 pt-4 border-t border-coffee-beige">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Đoạn giới thiệu thương hiệu ở Footer
               </label>
               <textarea
                 rows={2}
                 value={footerDesc}
                 onChange={(e) => setFooterDesc(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Dòng bản quyền (Copyright)
               </label>
               <input
                 type="text"
                 value={copyright}
                 onChange={(e) => setCopyright(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
           </div>

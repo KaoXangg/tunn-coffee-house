@@ -3,6 +3,7 @@ import { ArrowUpRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
 import { m, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { formatVND } from '../../lib/utils';
+import { Skeleton } from '../common/Skeleton';
 import type { Product } from '../../types/database';
 
 interface FeaturedSectionProps {
@@ -12,8 +13,9 @@ interface FeaturedSectionProps {
 const AUTOPLAY_MS = 5500;
 
 export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduct }) => {
-  const { products, categories, getSection } = useSiteData();
+  const { products, categories, getSection, loading, isLiveDatabase } = useSiteData();
   const section = getSection('featured');
+  const showSkeleton = loading && !isLiveDatabase;
 
   const featuredProducts = useMemo(
     () =>
@@ -40,7 +42,38 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
   }, [featuredProducts.length, isPaused]);
 
   if (section && !section.is_enabled) return null;
-  if (featuredProducts.length === 0) return null;
+  if (!showSkeleton && featuredProducts.length === 0) return null;
+
+  if (showSkeleton) {
+    return (
+      <section
+        id="featured"
+        className="py-16 sm:py-24 lg:py-28 bg-ivory border-b border-coffee-beige/60 dark:border-b-0 overflow-hidden"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
+          <div className="mb-8 sm:mb-12 pb-5 sm:pb-6 border-b border-coffee-beige/70">
+            <Skeleton className="h-4 w-36 mb-2.5" />
+            <Skeleton className="h-10 sm:h-12 w-72" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center bg-ivory-light border border-coffee-beige/80 rounded-2xl p-4 sm:p-7 lg:p-9 shadow-editorial">
+            <div className="lg:col-span-6 flex items-center justify-center py-2">
+              <Skeleton className="w-full max-w-[440px] aspect-[4/3] sm:aspect-[5/4] rounded-2xl" />
+            </div>
+            <div className="lg:col-span-6 space-y-4">
+              <Skeleton className="h-5 w-28" />
+              <Skeleton className="h-9 w-3/4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <div className="flex items-center gap-4 pt-3">
+                <Skeleton className="h-8 w-28" />
+                <Skeleton className="h-11 w-40 rounded-brand" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const activeProduct = featuredProducts[safeIndex];
   const nextProduct =
@@ -89,8 +122,8 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
         {/* Editorial Heading */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-8 sm:mb-12 pb-5 sm:pb-6 border-b border-coffee-beige/70 dark:border-b-0 dark:pb-0">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2">
-              {String(section?.content?.eyebrow || 'TUYỂN CHỌN ĐẶC SẮC')}
+            <p className="text-sm text-coffee font-medium mb-1.5">
+              {String(section?.content?.eyebrow || 'Tuyển chọn đặc sắc')}
             </p>
             <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
               {section?.title || 'Tác Phẩm Nổi Bật'}

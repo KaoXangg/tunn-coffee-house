@@ -85,10 +85,10 @@ export const AdminAppearancePage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-semibold text-[#241914]">
+          <h1 className="font-serif text-3xl font-semibold text-coffee-dark">
             Tùy Chỉnh Giao Diện & Hệ Thống Thiết Kế (Appearance)
           </h1>
-          <p className="text-sm text-[#8C7565] mt-1">
+          <p className="text-sm text-coffee-muted mt-1">
             Điều chỉnh bảng màu Warm Luxury, font chữ Serif/Sans-serif, độ bo góc và kiểu nút bấm mà không làm vỡ bố cục.
           </p>
         </div>
@@ -97,7 +97,7 @@ export const AdminAppearancePage: React.FC = () => {
           <button
             type="button"
             onClick={handleResetPalette}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold uppercase tracking-wider border border-[#D5C6AD] bg-white text-[#241914] hover:bg-[#E9E6D8] rounded-brand"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold uppercase tracking-wider border border-coffee-beige bg-white text-coffee-dark hover:bg-ivory rounded-brand"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Màu chuẩn TUNN</span>
@@ -106,7 +106,7 @@ export const AdminAppearancePage: React.FC = () => {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand"
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand"
           >
             {saving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -121,49 +121,49 @@ export const AdminAppearancePage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <form
           onSubmit={handleSave}
-          className="lg:col-span-7 bg-white border border-[#D5C6AD] rounded-brand p-6 space-y-6"
+          className="lg:col-span-7 bg-white border border-coffee-beige rounded-brand p-6 space-y-6"
         >
-          <h2 className="font-serif text-xl font-semibold text-[#241914] pb-3 border-b border-[#D5C6AD]">
+          <h2 className="font-serif text-xl font-semibold text-coffee-dark pb-3 border-b border-coffee-beige">
             1. Bảng Màu Thương Hiệu (Brand Color Palette)
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-3 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand flex items-center justify-between">
+            <div className="p-3 bg-ivory-light border border-coffee-beige rounded-brand flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-[#241914]">
+                <p className="text-xs font-semibold text-coffee-dark">
                   Màu chủ đạo (Coffee Brown)
                 </p>
-                <p className="text-[11px] font-mono text-[#8C7565]">{primaryColor}</p>
+                <p className="text-[11px] font-mono text-coffee-muted">{primaryColor}</p>
               </div>
               <input
                 type="color"
                 value={primaryColor}
                 onChange={(e) => setPrimaryColor(e.target.value)}
-                className="w-10 h-10 rounded cursor-pointer border border-[#D5C6AD]"
+                className="w-10 h-10 rounded cursor-pointer border border-coffee-beige"
               />
             </div>
 
-            <div className="p-3 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand flex items-center justify-between">
+            <div className="p-3 bg-ivory-light border border-coffee-beige rounded-brand flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-[#241914]">
+                <p className="text-xs font-semibold text-coffee-dark">
                   Nền chính (Cream White)
                 </p>
-                <p className="text-[11px] font-mono text-[#8C7565]">{primaryBgColor}</p>
+                <p className="text-[11px] font-mono text-coffee-muted">{primaryBgColor}</p>
               </div>
               <input
                 type="color"
                 value={primaryBgColor}
                 onChange={(e) => setPrimaryBgColor(e.target.value)}
-                className="w-10 h-10 rounded cursor-pointer border border-[#D5C6AD]"
+                className="w-10 h-10 rounded cursor-pointer border border-coffee-beige"
               />
             </div>
 
-            <div className="p-3 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand flex items-center justify-between">
+            <div className="p-3 bg-ivory-light border border-coffee-beige rounded-brand flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-[#241914]">
+                <p className="text-xs font-semibold text-coffee-dark">
                   Nền phụ (Warm Ivory)
                 </p>
-                <p className="text-[11px] font-mono text-[#8C7565]">
+                <p className="text-[11px] font-mono text-coffee-muted">
                   {secondaryBgColor}
                 </p>
               </div>
@@ -171,16 +171,16 @@ export const AdminAppearancePage: React.FC = () => {
                 type="color"
                 value={secondaryBgColor}
                 onChange={(e) => setSecondaryBgColor(e.target.value)}
-                className="w-10 h-10 rounded cursor-pointer border border-[#D5C6AD]"
+                className="w-10 h-10 rounded cursor-pointer border border-coffee-beige"
               />
             </div>
 
-            <div className="p-3 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand flex items-center justify-between">
+            <div className="p-3 bg-ivory-light border border-coffee-beige rounded-brand flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-[#241914]">
+                <p className="text-xs font-semibold text-coffee-dark">
                   Màu chữ chính (Dark Espresso)
                 </p>
-                <p className="text-[11px] font-mono text-[#8C7565]">
+                <p className="text-[11px] font-mono text-coffee-muted">
                   {textPrimaryColor}
                 </p>
               </div>
@@ -188,54 +188,54 @@ export const AdminAppearancePage: React.FC = () => {
                 type="color"
                 value={textPrimaryColor}
                 onChange={(e) => setTextPrimaryColor(e.target.value)}
-                className="w-10 h-10 rounded cursor-pointer border border-[#D5C6AD]"
+                className="w-10 h-10 rounded cursor-pointer border border-coffee-beige"
               />
             </div>
 
-            <div className="p-3 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand flex items-center justify-between">
+            <div className="p-3 bg-ivory-light border border-coffee-beige rounded-brand flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-[#241914]">
+                <p className="text-xs font-semibold text-coffee-dark">
                   Màu chữ phụ (Muted Brown)
                 </p>
-                <p className="text-[11px] font-mono text-[#8C7565]">{textMutedColor}</p>
+                <p className="text-[11px] font-mono text-coffee-muted">{textMutedColor}</p>
               </div>
               <input
                 type="color"
                 value={textMutedColor}
                 onChange={(e) => setTextMutedColor(e.target.value)}
-                className="w-10 h-10 rounded cursor-pointer border border-[#D5C6AD]"
+                className="w-10 h-10 rounded cursor-pointer border border-coffee-beige"
               />
             </div>
 
-            <div className="p-3 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand flex items-center justify-between">
+            <div className="p-3 bg-ivory-light border border-coffee-beige rounded-brand flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-[#241914]">
+                <p className="text-xs font-semibold text-coffee-dark">
                   Màu đường viền (Warm Beige)
                 </p>
-                <p className="text-[11px] font-mono text-[#8C7565]">{accentColor}</p>
+                <p className="text-[11px] font-mono text-coffee-muted">{accentColor}</p>
               </div>
               <input
                 type="color"
                 value={accentColor}
                 onChange={(e) => setAccentColor(e.target.value)}
-                className="w-10 h-10 rounded cursor-pointer border border-[#D5C6AD]"
+                className="w-10 h-10 rounded cursor-pointer border border-coffee-beige"
               />
             </div>
           </div>
 
-          <h2 className="font-serif text-xl font-semibold text-[#241914] pt-4 pb-3 border-b border-[#D5C6AD]">
+          <h2 className="font-serif text-xl font-semibold text-coffee-dark pt-4 pb-3 border-b border-coffee-beige">
             2. Typography & Hình Thái Nút Bấm
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Font tiêu đề (Serif chuẩn Tiếng Việt)
               </label>
               <select
                 value={headingFont}
                 onChange={(e) => setHeadingFont(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               >
                 <option value="Lora">
                   Lora (Chuẩn dấu Tiếng Việt — Sang trọng)
@@ -250,13 +250,13 @@ export const AdminAppearancePage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Font nội dung (Sans-serif chuẩn Tiếng Việt)
               </label>
               <select
                 value={bodyFont}
                 onChange={(e) => setBodyFont(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               >
                 <option value="Be Vietnam Pro">
                   Be Vietnam Pro (Chuẩn Tiếng Việt — Khuyên dùng)
@@ -268,13 +268,13 @@ export const AdminAppearancePage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Độ bo góc khung (Border Radius)
               </label>
               <select
                 value={borderRadius}
                 onChange={(e) => setBorderRadius(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               >
                 <option value="0px">Vuông sắc nét (0px - Brutalist Editorial)</option>
                 <option value="0.25rem">Tinh tế nhẹ (4px - Mặc định TUNN)</option>
@@ -283,13 +283,13 @@ export const AdminAppearancePage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Kiểu nút bấm (Button Style)
               </label>
               <select
                 value={buttonStyle}
                 onChange={(e) => setButtonStyle(e.target.value as 'editorial' | 'rounded' | 'pill')}
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               >
                 <option value="editorial">Editorial (Bo góc tối giản)</option>
                 <option value="rounded">Rounded (Bo góc 8px)</option>
@@ -301,7 +301,7 @@ export const AdminAppearancePage: React.FC = () => {
 
         {/* Live Design System Preview Card */}
         <div className="lg:col-span-5 sticky top-20 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#4B2E24]">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-coffee">
             <Eye className="w-4 h-4" />
             <span>Xem Trước Design System</span>
           </div>

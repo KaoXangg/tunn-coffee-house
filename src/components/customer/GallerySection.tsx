@@ -2,11 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Maximize2, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
+import { Skeleton } from '../common/Skeleton';
 import type { GalleryItem } from '../../types/database';
 
 export const GallerySection: React.FC = () => {
-  const { gallery, getSection } = useSiteData();
+  const { gallery, getSection, loading, isLiveDatabase } = useSiteData();
   const section = getSection('gallery');
+  const showSkeleton = loading && !isLiveDatabase;
 
   const [selectedCategory, setSelectedCategory] = useState<string>('Tất cả');
   const [lightboxItem, setLightboxItem] = useState<GalleryItem | null>(null);
@@ -45,7 +47,38 @@ export const GallerySection: React.FC = () => {
   }, [lightboxItem, navigateLightbox]);
 
   if (section && !section.is_enabled) return null;
-  if (visibleItems.length === 0) return null;
+  if (!showSkeleton && visibleItems.length === 0) return null;
+
+  if (showSkeleton) {
+    const skeletonAspects = [
+      'aspect-[4/5]',
+      'aspect-square',
+      'aspect-[16/11]',
+      'aspect-square',
+      'aspect-[4/5]',
+      'aspect-[16/11]',
+    ];
+    return (
+      <section
+        id="gallery"
+        className="py-20 sm:py-28 lg:py-32 bg-ivory-light border-b border-coffee-beige/60 dark:border-b-0"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
+          <div className="mb-12 pb-6 border-b border-coffee-beige/70">
+            <Skeleton className="h-4 w-32 mb-2.5" />
+            <Skeleton className="h-10 sm:h-12 w-72" />
+          </div>
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+            {skeletonAspects.map((aspect, idx) => (
+              <div key={idx} className="break-inside-avoid">
+                <Skeleton className={`w-full ${aspect} rounded-brand`} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -56,8 +89,8 @@ export const GallerySection: React.FC = () => {
         {/* Header & Filter */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pb-6 border-b border-coffee-beige/70 dark:border-b-0 dark:pb-0">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2.5">
-              {String(section?.content?.eyebrow || 'NHẬT KÝ HÌNH ẢNH')}
+            <p className="text-sm text-coffee font-medium mb-2">
+              {String(section?.content?.eyebrow || 'Nhật ký hình ảnh')}
             </p>
             <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
               {section?.title || 'Không Gian & Khoảnh Khắc'}

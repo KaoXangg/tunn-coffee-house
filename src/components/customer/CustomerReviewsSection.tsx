@@ -204,8 +204,8 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
           className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10 sm:mb-12"
         >
           <div>
-            <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2">
-              {String(contactContent.reviews_eyebrow || 'CẢM NHẬN TỪ KHÁCH HÀNG')}
+            <p className="text-sm text-coffee font-medium mb-1.5">
+              {String(contactContent.reviews_eyebrow || 'Cảm nhận từ khách hàng')}
             </p>
             <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
               {String(contactContent.reviews_title || 'Khách Hàng Nói Gì Về TUNN')}

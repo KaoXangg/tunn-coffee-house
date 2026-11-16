@@ -63,10 +63,10 @@ export const AdminBrandPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-semibold text-[#241914]">
+          <h1 className="font-serif text-3xl font-semibold text-coffee-dark">
             Nhận Diện Thương Hiệu (Brand Settings)
           </h1>
-          <p className="text-sm text-[#8C7565] mt-1">
+          <p className="text-sm text-coffee-muted mt-1">
             Quản lý Logo TUNN Coffee House, Favicon, tên thương hiệu, slogan và nội dung chân trang.
           </p>
         </div>
@@ -75,7 +75,7 @@ export const AdminBrandPage: React.FC = () => {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand"
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand"
         >
           {saving ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -89,63 +89,63 @@ export const AdminBrandPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <form
           onSubmit={handleSave}
-          className="lg:col-span-7 bg-white border border-[#D5C6AD] rounded-brand p-6 space-y-5"
+          className="lg:col-span-7 bg-white border border-coffee-beige rounded-brand p-6 space-y-5"
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Tên thương hiệu (Brand Name)
               </label>
               <input
                 type="text"
                 value={brandName}
                 onChange={(e) => setBrandName(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Slogan thương hiệu
               </label>
               <input
                 type="text"
                 value={slogan}
                 onChange={(e) => setSlogan(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
               Tiêu đề Website (Site Title)
             </label>
             <input
               type="text"
               value={siteTitle}
               onChange={(e) => setSiteTitle(e.target.value)}
-              className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+              className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
             />
           </div>
 
           {/* Logo Setting */}
-          <div className="pt-4 border-t border-[#D5C6AD] space-y-3">
+          <div className="pt-4 border-t border-coffee-beige space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold uppercase tracking-wider text-[#241914]">
+              <label className="text-xs font-semibold uppercase tracking-wider text-coffee-dark">
                 Logo Thương Hiệu (Đồng bộ Header, Footer, Admin, Login)
               </label>
               <button
                 type="button"
                 onClick={() => setLogoUrl('/logo.jpg')}
-                className="inline-flex items-center gap-1 text-xs text-[#4B2E24] hover:underline"
+                className="inline-flex items-center gap-1 text-xs text-coffee hover:underline"
               >
                 <RotateCcw className="w-3 h-3" /> Khôi phục Logo gốc (/logo.jpg)
               </button>
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-[#E9E6D8] border border-[#D5C6AD] overflow-hidden shrink-0 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-ivory border border-coffee-beige overflow-hidden shrink-0 flex items-center justify-center">
                 <img
                   src={logoUrl || '/logo.jpg'}
                   alt="Logo Preview"
@@ -157,12 +157,12 @@ export const AdminBrandPage: React.FC = () => {
                   type="text"
                   value={logoUrl}
                   onChange={(e) => setLogoUrl(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand font-mono"
+                  className="w-full px-3.5 py-2 text-xs bg-ivory-light border border-coffee-beige rounded-brand font-mono"
                 />
                 <button
                   type="button"
                   onClick={() => setPickerTarget('logo')}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-[#E9E6D8] text-[#241914] hover:bg-[#D5C6AD] rounded-brand"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-ivory text-coffee-dark hover:bg-coffee-beige rounded-brand"
                 >
                   <ImageIcon className="w-3.5 h-3.5" />
                   <span>Tải lên / Chọn Logo mới</span>
@@ -172,12 +172,12 @@ export const AdminBrandPage: React.FC = () => {
           </div>
 
           {/* Favicon Setting */}
-          <div className="pt-4 border-t border-[#D5C6AD] space-y-3">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914]">
+          <div className="pt-4 border-t border-coffee-beige space-y-3">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark">
               Favicon (Biểu tượng trên Tab trình duyệt)
             </label>
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-brand bg-[#E9E6D8] border border-[#D5C6AD] overflow-hidden shrink-0 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-brand bg-ivory border border-coffee-beige overflow-hidden shrink-0 flex items-center justify-center">
                 <img
                   src={faviconUrl || '/logo.jpg'}
                   alt="Favicon Preview"
@@ -189,12 +189,12 @@ export const AdminBrandPage: React.FC = () => {
                   type="text"
                   value={faviconUrl}
                   onChange={(e) => setFaviconUrl(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand font-mono"
+                  className="w-full px-3.5 py-2 text-xs bg-ivory-light border border-coffee-beige rounded-brand font-mono"
                 />
                 <button
                   type="button"
                   onClick={() => setPickerTarget('favicon')}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-[#E9E6D8] text-[#241914] hover:bg-[#D5C6AD] rounded-brand"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-ivory text-coffee-dark hover:bg-coffee-beige rounded-brand"
                 >
                   <ImageIcon className="w-3.5 h-3.5" />
                   <span>Chọn Favicon</span>
@@ -204,28 +204,28 @@ export const AdminBrandPage: React.FC = () => {
           </div>
 
           {/* Footer description & copyright */}
-          <div className="pt-4 border-t border-[#D5C6AD] space-y-4">
+          <div className="pt-4 border-t border-coffee-beige space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Giới thiệu thương hiệu ở Footer
               </label>
               <textarea
                 rows={3}
                 value={footerDescription}
                 onChange={(e) => setFooterDescription(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Bản quyền (Copyright)
               </label>
               <input
                 type="text"
                 value={copyrightText}
                 onChange={(e) => setCopyrightText(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
           </div>
@@ -233,32 +233,32 @@ export const AdminBrandPage: React.FC = () => {
 
         {/* Live Brand Preview */}
         <div className="lg:col-span-5 sticky top-20 space-y-4">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#4B2E24]">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-coffee">
             <Eye className="w-4 h-4" />
             <span>Xem Trước Đồng Bộ Thương Hiệu (Live Preview)</span>
           </div>
 
           {/* Header Preview */}
-          <div className="bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand p-5 space-y-3 shadow-xs">
-            <span className="text-[10px] uppercase tracking-widest text-[#8C7565] font-semibold">
+          <div className="bg-ivory-light border border-coffee-beige rounded-brand p-5 space-y-3 shadow-xs">
+            <span className="text-[10px] uppercase tracking-widest text-coffee-muted font-semibold">
               1. Hiển thị trên Header Website
             </span>
-            <div className="p-4 bg-[#E9E6D8] border border-[#D5C6AD] rounded-brand flex items-center justify-between">
+            <div className="p-4 bg-ivory border border-coffee-beige rounded-brand flex items-center justify-between">
               <BrandLogo
                 size="md"
                 subtitle="COFFEE HOUSE"
                 logoUrlOverride={logoUrl}
                 brandNameOverride={brandName}
               />
-              <span className="px-3 py-1.5 text-[10px] uppercase tracking-wider font-semibold bg-[#4B2E24] text-[#F7F5EF] rounded-brand">
+              <span className="px-3 py-1.5 text-[10px] uppercase tracking-wider font-semibold bg-coffee text-ivory-light rounded-brand">
                 Khám phá Menu
               </span>
             </div>
           </div>
 
           {/* Footer Preview */}
-          <div className="bg-[#241914] text-[#F7F5EF] border border-[#4B2E24] rounded-brand p-6 space-y-3 shadow-md">
-            <span className="text-[10px] uppercase tracking-widest text-[#D5C6AD] font-semibold">
+          <div className="bg-coffee-dark text-ivory-light border border-coffee rounded-brand p-6 space-y-3 shadow-md">
+            <span className="text-[10px] uppercase tracking-widest text-coffee-beige font-semibold">
               2. Hiển thị trên Footer & Admin Sidebar
             </span>
             <div className="pt-1">
@@ -267,14 +267,14 @@ export const AdminBrandPage: React.FC = () => {
                 subtitle="COFFEE HOUSE"
                 logoUrlOverride={logoUrl}
                 brandNameOverride={brandName}
-                textClassName="text-[#F7F5EF]"
+                textClassName="text-ivory-light"
               />
             </div>
-            <p className="text-xs text-[#D5C6AD]/85 leading-relaxed">
+            <p className="text-xs text-coffee-beige/85 leading-relaxed">
               {footerDescription}
             </p>
-            <p className="font-serif italic text-sm text-[#D5C6AD]">“{slogan}”</p>
-            <p className="text-[11px] text-[#D5C6AD]/60 pt-2 border-t border-[#4B2E24]">
+            <p className="font-serif italic text-sm text-coffee-beige">“{slogan}”</p>
+            <p className="text-[11px] text-coffee-beige/60 pt-2 border-t border-coffee">
               {copyrightText}
             </p>
           </div>

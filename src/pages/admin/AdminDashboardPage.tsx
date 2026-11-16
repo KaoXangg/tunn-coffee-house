@@ -145,10 +145,10 @@ export const AdminDashboardPage: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-semibold text-[#241914]">
+          <h1 className="font-serif text-3xl font-semibold text-coffee-dark">
             Tổng Quan Hệ Thống (Dashboard)
           </h1>
-          <p className="text-sm text-[#8C7565] mt-1">
+          <p className="text-sm text-coffee-muted mt-1">
             Quản lý thực đơn, hình ảnh, thương hiệu và nội dung trang chủ TUNN Coffee House.
           </p>
         </div>
@@ -157,14 +157,14 @@ export const AdminDashboardPage: React.FC = () => {
           <button
             type="button"
             onClick={() => refreshAll()}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider border border-[#D5C6AD] bg-white text-[#241914] hover:bg-[#E9E6D8] rounded-brand transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider border border-coffee-beige bg-white text-coffee-dark hover:bg-ivory rounded-brand transition-colors"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             <span>Đồng bộ dữ liệu</span>
           </button>
           <Link
             to="/admin/products"
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand transition-colors"
           >
             <Plus className="w-4 h-4" />
             <span>Thêm món mới</span>
@@ -178,7 +178,7 @@ export const AdminDashboardPage: React.FC = () => {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="h-28 bg-white border border-[#D5C6AD] rounded-brand p-5 animate-pulse"
+              className="h-28 bg-white border border-coffee-beige rounded-brand p-5 animate-pulse"
             />
           ))}
         </div>
@@ -190,18 +190,18 @@ export const AdminDashboardPage: React.FC = () => {
               <Link
                 key={idx}
                 to={stat.to}
-                className="group bg-white border border-[#D5C6AD] hover:border-[#4B2E24] rounded-brand p-5 transition-all shadow-xs flex items-start justify-between"
+                className="group bg-white border border-coffee-beige hover:border-coffee rounded-brand p-5 transition-all shadow-xs flex items-start justify-between"
               >
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-[#8C7565] font-semibold">
+                  <p className="text-xs font-medium text-coffee-muted">
                     {stat.label}
                   </p>
-                  <p className="font-serif text-4xl font-bold text-[#241914] mt-2">
+                  <p className="font-serif text-4xl font-bold text-coffee-dark mt-2">
                     {stat.value}
                   </p>
-                  <p className="text-xs text-[#8C7565] mt-1">{stat.sub}</p>
+                  <p className="text-xs text-coffee-muted mt-1">{stat.sub}</p>
                 </div>
-                <div className="w-11 h-11 rounded-brand bg-[#E9E6D8] text-[#4B2E24] group-hover:bg-[#4B2E24] group-hover:text-[#F7F5EF] flex items-center justify-center transition-colors">
+                <div className="w-11 h-11 rounded-brand bg-ivory text-coffee group-hover:bg-coffee group-hover:text-ivory-light flex items-center justify-center transition-colors">
                   <Icon className="w-5 h-5" />
                 </div>
               </Link>
@@ -211,91 +211,91 @@ export const AdminDashboardPage: React.FC = () => {
       )}
 
       {/* Quick Actions */}
-      <div className="bg-white border border-[#D5C6AD] rounded-brand p-6">
-        <h2 className="font-serif text-xl font-semibold text-[#241914] mb-4">
+      <div className="bg-white border border-coffee-beige rounded-brand p-6">
+        <h2 className="font-serif text-xl font-semibold text-coffee-dark mb-4">
           Thao Tác Nhanh (Quick Actions)
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           <Link
             to="/admin/products"
-            className="flex items-center justify-between p-4 border border-[#D5C6AD] rounded-brand hover:bg-[#E9E6D8]/40 transition-colors"
+            className="flex items-center justify-between p-4 border border-coffee-beige rounded-brand hover:bg-ivory/40 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <Coffee className="w-5 h-5 text-[#4B2E24]" />
+              <Coffee className="w-5 h-5 text-coffee" />
               <span className="text-xs font-semibold uppercase tracking-wider">
                 Quản lý Thực đơn
               </span>
             </div>
-            <ArrowUpRight className="w-4 h-4 text-[#8C7565]" />
+            <ArrowUpRight className="w-4 h-4 text-coffee-muted" />
           </Link>
 
           <Link
             to="/admin/media"
-            className="flex items-center justify-between p-4 border border-[#D5C6AD] rounded-brand hover:bg-[#E9E6D8]/40 transition-colors"
+            className="flex items-center justify-between p-4 border border-coffee-beige rounded-brand hover:bg-ivory/40 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <ImageIcon className="w-5 h-5 text-[#4B2E24]" />
+              <ImageIcon className="w-5 h-5 text-coffee" />
               <span className="text-xs font-semibold uppercase tracking-wider">
                 Upload Hình ảnh
               </span>
             </div>
-            <ArrowUpRight className="w-4 h-4 text-[#8C7565]" />
+            <ArrowUpRight className="w-4 h-4 text-coffee-muted" />
           </Link>
 
           {isOwnerAdmin ? (
             <>
               <Link
                 to="/admin/sections/hero"
-                className="flex items-center justify-between p-4 border border-[#D5C6AD] rounded-brand hover:bg-[#E9E6D8]/40 transition-colors"
+                className="flex items-center justify-between p-4 border border-coffee-beige rounded-brand hover:bg-ivory/40 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <Sparkles className="w-5 h-5 text-[#4B2E24]" />
+                  <Sparkles className="w-5 h-5 text-coffee" />
                   <span className="text-xs font-semibold uppercase tracking-wider">
                     Chỉnh sửa Hero Banner
                   </span>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-[#8C7565]" />
+                <ArrowUpRight className="w-4 h-4 text-coffee-muted" />
               </Link>
 
               <Link
                 to="/admin/brand"
-                className="flex items-center justify-between p-4 border border-[#D5C6AD] rounded-brand hover:bg-[#E9E6D8]/40 transition-colors"
+                className="flex items-center justify-between p-4 border border-coffee-beige rounded-brand hover:bg-ivory/40 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <Award className="w-5 h-5 text-[#4B2E24]" />
+                  <Award className="w-5 h-5 text-coffee" />
                   <span className="text-xs font-semibold uppercase tracking-wider">
                     Đổi Logo & Thương hiệu
                   </span>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-[#8C7565]" />
+                <ArrowUpRight className="w-4 h-4 text-coffee-muted" />
               </Link>
             </>
           ) : (
             <>
               <Link
                 to="/admin/categories"
-                className="flex items-center justify-between p-4 border border-[#D5C6AD] rounded-brand hover:bg-[#E9E6D8]/40 transition-colors"
+                className="flex items-center justify-between p-4 border border-coffee-beige rounded-brand hover:bg-ivory/40 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <FolderTree className="w-5 h-5 text-[#4B2E24]" />
+                  <FolderTree className="w-5 h-5 text-coffee" />
                   <span className="text-xs font-semibold uppercase tracking-wider">
                     Quản lý Danh mục
                   </span>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-[#8C7565]" />
+                <ArrowUpRight className="w-4 h-4 text-coffee-muted" />
               </Link>
 
               <Link
                 to="/admin/promotions"
-                className="flex items-center justify-between p-4 border border-[#D5C6AD] rounded-brand hover:bg-[#E9E6D8]/40 transition-colors"
+                className="flex items-center justify-between p-4 border border-coffee-beige rounded-brand hover:bg-ivory/40 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <Megaphone className="w-5 h-5 text-[#4B2E24]" />
+                  <Megaphone className="w-5 h-5 text-coffee" />
                   <span className="text-xs font-semibold uppercase tracking-wider">
                     Quản lý Khuyến mãi
                   </span>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-[#8C7565]" />
+                <ArrowUpRight className="w-4 h-4 text-coffee-muted" />
               </Link>
             </>
           )}
@@ -304,26 +304,26 @@ export const AdminDashboardPage: React.FC = () => {
 
       {/* Customer Interest & QR Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7 bg-white border border-[#D5C6AD] rounded-brand p-6">
+        <div className="lg:col-span-7 bg-white border border-coffee-beige rounded-brand p-6">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#4B2E24]" />
-              <h2 className="font-serif text-xl font-semibold text-[#241914]">
+              <TrendingUp className="w-4 h-4 text-coffee" />
+              <h2 className="font-serif text-xl font-semibold text-coffee-dark">
                 Món Được Khách Xem Nhiều Nhất
               </h2>
             </div>
-            <span className="text-[11px] font-medium text-[#8C7565]">
+            <span className="text-[11px] font-medium text-coffee-muted">
               {analyticsSummary.totalProductViews} lượt xem ·{' '}
               {analyticsSource === 'supabase' ? 'Đồng bộ máy chủ' : 'Trình duyệt hiện tại'}
             </span>
           </div>
 
           {analyticsSummary.topProducts.length === 0 ? (
-            <div className="py-8 text-center border border-dashed border-[#D5C6AD] rounded-brand bg-[#F7F5EF]/50 p-4">
-              <p className="text-sm font-medium text-[#241914]">
+            <div className="py-8 text-center border border-dashed border-coffee-beige rounded-brand bg-ivory-light/50 p-4">
+              <p className="text-sm font-medium text-coffee-dark">
                 Chưa ghi nhận lượt xem chi tiết món nào
               </p>
-              <p className="text-xs text-[#8C7565] mt-1">
+              <p className="text-xs text-coffee-muted mt-1">
                 Khi khách hàng nhấn xem chi tiết thức uống trên trang chủ, bảng xếp hạng sẽ tự động cập nhật tại đây.
               </p>
             </div>
@@ -335,16 +335,16 @@ export const AdminDashboardPage: React.FC = () => {
                 return (
                   <div key={item.name} className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-[#241914] truncate pr-3">
+                      <span className="font-semibold text-coffee-dark truncate pr-3">
                         #{idx + 1} · {item.name}
                       </span>
-                      <span className="font-semibold text-[#4B2E24] shrink-0">
+                      <span className="font-semibold text-coffee shrink-0">
                         {item.count} lượt xem
                       </span>
                     </div>
-                    <div className="h-2 bg-[#E9E6D8] rounded-full overflow-hidden">
+                    <div className="h-2 bg-ivory rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-[#4B2E24] rounded-full transition-all duration-500"
+                        className="h-full bg-coffee rounded-full transition-all duration-500"
                         style={{ width: `${widthPct}%` }}
                       />
                     </div>
@@ -355,19 +355,19 @@ export const AdminDashboardPage: React.FC = () => {
           )}
         </div>
 
-        <div className="lg:col-span-5 bg-white border border-[#D5C6AD] rounded-brand p-6 flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-white border border-coffee-beige rounded-brand p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <QrCode className="w-4 h-4 text-[#4B2E24]" />
-                <h2 className="font-serif text-xl font-semibold text-[#241914]">
+                <QrCode className="w-4 h-4 text-coffee" />
+                <h2 className="font-serif text-xl font-semibold text-coffee-dark">
                   Lượt Quét Mã QR Đặt Bàn
                 </h2>
               </div>
               {isOwnerAdmin && (
                 <Link
                   to="/admin/settings/backup"
-                  className="text-xs font-semibold uppercase tracking-wider text-[#4B2E24] hover:underline"
+                  className="text-xs font-semibold uppercase tracking-wider text-coffee hover:underline"
                 >
                   Tạo mã QR →
                 </Link>
@@ -375,19 +375,19 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-4 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand">
-                <p className="text-[11px] uppercase tracking-wider text-[#8C7565] font-semibold">
+              <div className="p-4 bg-ivory-light border border-coffee-beige rounded-brand">
+                <p className="text-xs font-medium text-coffee-muted">
                   Hôm nay
                 </p>
-                <p className="font-serif text-3xl font-bold text-[#241914] mt-1">
+                <p className="font-serif text-3xl font-bold text-coffee-dark mt-1">
                   {analyticsSummary.todayQrCount}
                 </p>
               </div>
-              <div className="p-4 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand">
-                <p className="text-[11px] uppercase tracking-wider text-[#8C7565] font-semibold">
+              <div className="p-4 bg-ivory-light border border-coffee-beige rounded-brand">
+                <p className="text-xs font-medium text-coffee-muted">
                   Tổng lượt quét
                 </p>
-                <p className="font-serif text-3xl font-bold text-[#4B2E24] mt-1">
+                <p className="font-serif text-3xl font-bold text-coffee mt-1">
                   {analyticsSummary.totalQrCount}
                 </p>
               </div>
@@ -395,14 +395,14 @@ export const AdminDashboardPage: React.FC = () => {
 
             {analyticsSummary.activeTablesToday.length > 0 ? (
               <div className="space-y-2">
-                <p className="text-[11px] uppercase tracking-wider font-semibold text-[#8C7565]">
+                <p className="text-xs font-medium text-coffee-muted">
                   Bàn quét QR hôm nay:
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {analyticsSummary.activeTablesToday.map(([table, cnt]) => (
                     <span
                       key={table}
-                      className="px-2.5 py-1 text-xs font-semibold bg-[#E9E6D8] text-[#241914] rounded-brand"
+                      className="px-2.5 py-1 text-xs font-semibold bg-ivory text-coffee-dark rounded-brand"
                     >
                       Bàn {table}: {cnt} lượt
                     </span>
@@ -410,7 +410,7 @@ export const AdminDashboardPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-[#8C7565]">
+              <p className="text-xs text-coffee-muted">
                 Chưa có lượt quét QR theo số bàn nào trong hôm nay (ví dụ: link có <code className="font-mono">?table=01</code>).
               </p>
             )}
@@ -421,25 +421,25 @@ export const AdminDashboardPage: React.FC = () => {
       {/* Bottom Split: Featured Products Overview & Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Recent Products */}
-        <div className="lg:col-span-7 bg-white border border-[#D5C6AD] rounded-brand p-6">
+        <div className="lg:col-span-7 bg-white border border-coffee-beige rounded-brand p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-serif text-xl font-semibold text-[#241914]">
+            <h2 className="font-serif text-xl font-semibold text-coffee-dark">
               Sản Phẩm Trong Thực Đơn
             </h2>
             <Link
               to="/admin/products"
-              className="text-xs font-semibold uppercase tracking-wider text-[#4B2E24] hover:underline"
+              className="text-xs font-semibold uppercase tracking-wider text-coffee hover:underline"
             >
               Xem tất cả →
             </Link>
           </div>
 
           {products.length === 0 ? (
-            <div className="py-10 text-center text-sm text-[#8C7565]">
+            <div className="py-10 text-center text-sm text-coffee-muted">
               Chưa có sản phẩm nào. Hãy thêm sản phẩm đầu tiên.
             </div>
           ) : (
-            <div className="divide-y divide-[#E9E6D8]">
+            <div className="divide-y divide-ivory">
               {products.slice(0, 5).map((prod) => (
                 <div
                   key={prod.id}
@@ -449,16 +449,16 @@ export const AdminDashboardPage: React.FC = () => {
                     <img
                       src={prod.image_url}
                       alt={prod.name}
-                      className="w-11 h-11 rounded-brand object-cover border border-[#D5C6AD] shrink-0"
+                      className="w-11 h-11 rounded-brand object-cover border border-coffee-beige shrink-0"
                     />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[#241914] truncate">
+                      <p className="text-sm font-semibold text-coffee-dark truncate">
                         {prod.name}
                       </p>
-                      <div className="flex items-center gap-2 text-xs text-[#8C7565]">
+                      <div className="flex items-center gap-2 text-xs text-coffee-muted">
                         <span>{formatVND(prod.sale_price || prod.price)}</span>
                         {prod.is_featured && (
-                          <span className="px-1.5 py-0.5 text-[10px] bg-[#E9E6D8] text-[#4B2E24] rounded font-medium">
+                          <span className="px-1.5 py-0.5 text-[10px] bg-ivory text-coffee rounded font-medium">
                             Featured
                           </span>
                         )}
@@ -486,18 +486,18 @@ export const AdminDashboardPage: React.FC = () => {
         </div>
 
         {/* Recent Admin Activity Logs */}
-        <div className="lg:col-span-5 bg-white border border-[#D5C6AD] rounded-brand p-6">
+        <div className="lg:col-span-5 bg-white border border-coffee-beige rounded-brand p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[#4B2E24]" />
-              <h2 className="font-serif text-xl font-semibold text-[#241914]">
+              <Clock className="w-4 h-4 text-coffee" />
+              <h2 className="font-serif text-xl font-semibold text-coffee-dark">
                 {isOwnerAdmin ? 'Hoạt Động Gần Đây' : 'Hoạt Động Của Bạn'}
               </h2>
             </div>
             {isOwnerAdmin && (
               <Link
                 to="/admin/settings/security"
-                className="text-xs font-semibold uppercase tracking-wider text-[#4B2E24] hover:underline"
+                className="text-xs font-semibold uppercase tracking-wider text-coffee hover:underline"
               >
                 Chi tiết →
               </Link>
@@ -505,11 +505,11 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
 
           {displayedLogs.length === 0 ? (
-            <div className="py-10 text-center border border-dashed border-[#D5C6AD] rounded-brand bg-[#F7F5EF]/50 p-4">
-              <p className="text-sm font-medium text-[#241914]">
+            <div className="py-10 text-center border border-dashed border-coffee-beige rounded-brand bg-ivory-light/50 p-4">
+              <p className="text-sm font-medium text-coffee-dark">
                 Chưa có nhật ký chỉnh sửa mới
               </p>
-              <p className="text-xs text-[#8C7565] mt-1">
+              <p className="text-xs text-coffee-muted mt-1">
                 Mọi thao tác thêm, sửa, xóa sản phẩm sẽ được ghi lại tại đây.
               </p>
             </div>
@@ -518,21 +518,21 @@ export const AdminDashboardPage: React.FC = () => {
               {displayedLogs.slice(0, 15).map((log) => (
                 <div
                   key={log.id}
-                  className="p-3 bg-[#F7F5EF] border border-[#D5C6AD]/70 rounded-brand text-xs"
+                  className="p-3 bg-ivory-light border border-coffee-beige/70 rounded-brand text-xs"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-semibold text-[#241914]">{log.action}</span>
-                    <span className="text-[10px] text-[#8C7565]">
+                    <span className="font-semibold text-coffee-dark">{log.action}</span>
+                    <span className="text-[10px] text-coffee-muted">
                       {formatDateVi(log.created_at)}
                     </span>
                   </div>
                   {log.entity_name && (
-                    <p className="text-[#4B2E24] mt-0.5 font-medium">
+                    <p className="text-coffee mt-0.5 font-medium">
                       Đối tượng: {log.entity_name}
                     </p>
                   )}
                   {log.actor_email && (
-                    <p className="text-[10px] text-[#8C7565] mt-1">
+                    <p className="text-[10px] text-coffee-muted mt-1">
                       Bởi: {log.actor_email}
                     </p>
                   )}

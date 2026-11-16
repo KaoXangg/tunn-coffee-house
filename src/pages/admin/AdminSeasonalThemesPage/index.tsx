@@ -198,7 +198,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] uppercase tracking-wider font-semibold bg-[#E9E6D8] text-[#8C7565] rounded-full">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] uppercase tracking-wider font-semibold bg-ivory text-coffee-muted rounded-full">
             Tạm tắt
           </span>
         );
@@ -208,15 +208,15 @@ export const AdminSeasonalThemesPage: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#D5C6AD] pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-coffee-beige pb-5">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.22em] text-[#8C7565] font-semibold">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-coffee-muted font-semibold">
             SEASONAL THEME ENGINE
           </p>
-          <h1 className="font-serif text-3xl font-semibold text-[#241914] mt-1">
+          <h1 className="font-serif text-3xl font-semibold text-coffee-dark mt-1">
             Quản Lý Giao Diện Lễ Hội &amp; Chiến Dịch
           </h1>
-          <p className="text-sm text-[#8C7565] mt-1">
+          <p className="text-sm text-coffee-muted mt-1">
             Kích hoạt hoặc lên lịch chủ đề theo mùa để đồng bộ màu sắc, banner, trang trí và hiệu ứng trên toàn bộ website khách hàng.
           </p>
         </div>
@@ -226,7 +226,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
             <button
               type="button"
               onClick={handleDeactivateAll}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-xs uppercase tracking-wider font-semibold border border-[#D5C6AD] bg-white text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-xs uppercase tracking-wider font-semibold border border-coffee-beige bg-white text-coffee hover:bg-ivory-light rounded-brand transition-colors"
             >
               <PowerOff className="w-4 h-4" />
               <span>Về Giao diện Mặc định</span>
@@ -235,7 +235,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
           <button
             type="button"
             onClick={handleCreateCustom}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs uppercase tracking-wider font-semibold bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-xs uppercase tracking-wider font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand transition-colors"
           >
             <Plus className="w-4 h-4" />
             <span>Tạo Chủ Đề Mới</span>
@@ -245,16 +245,16 @@ export const AdminSeasonalThemesPage: React.FC = () => {
 
       {/* Overview KPIs */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7 bg-white border border-[#D5C6AD] rounded-brand p-6 flex flex-col justify-between min-h-[176px]">
+        <div className="lg:col-span-7 bg-white border border-coffee-beige rounded-brand p-6 flex flex-col justify-between min-h-[176px]">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#8C7565] font-semibold">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-coffee-muted font-semibold">
                 CHỦ ĐỀ ĐANG HIỂN THỊ TRÊN WEBSITE
               </p>
-              <h2 className="font-serif text-2xl font-semibold text-[#241914] mt-1 truncate">
+              <h2 className="font-serif text-2xl font-semibold text-coffee-dark mt-1 truncate">
                 {activeTheme ? activeTheme.name : 'TUNN Coffee House (Mặc định)'}
               </h2>
-              <p className="text-sm text-[#8C7565] mt-1 line-clamp-2">
+              <p className="text-sm text-coffee-muted mt-1 line-clamp-2">
                 {activeTheme
                   ? activeTheme.description
                   : 'Đang sử dụng bộ màu sắc thương hiệu gốc của quán. Chọn một chủ đề bên dưới để kích hoạt.'}
@@ -263,7 +263,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
             {activeTheme && renderStatusBadge(activeTheme)}
           </div>
 
-          <div className="mt-4 pt-4 border-t border-[#E9E6D8] flex items-center justify-between gap-3">
+          <div className="mt-4 pt-4 border-t border-ivory flex items-center justify-between gap-3">
             {activeTheme ? (
               <>
                 <div className="flex items-center gap-2 shrink-0">
@@ -286,7 +286,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => openFullSitePreview(activeTheme)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-[#D5C6AD] rounded-brand text-[#4B2E24] hover:bg-[#F7F5EF]"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-coffee-beige rounded-brand text-coffee hover:bg-ivory-light"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span>Xem Website</span>
@@ -297,7 +297,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                       setEditingTheme(activeTheme);
                       setEditorTab('effects');
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#E9E6D8] rounded-brand text-[#241914] hover:bg-[#D5C6AD]"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-ivory rounded-brand text-coffee-dark hover:bg-coffee-beige"
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5" />
                     <span>Tùy chỉnh</span>
@@ -305,7 +305,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                 </div>
               </>
             ) : (
-              <div className="flex items-center justify-between w-full text-xs text-[#8C7565]">
+              <div className="flex items-center justify-between w-full text-xs text-coffee-muted">
                 <div className="flex items-center gap-2">
                   {['#4B2E24', '#D5C6AD', '#F7F5EF', '#E9E6D8', '#241914'].map((c, idx) => (
                     <span
@@ -323,15 +323,15 @@ export const AdminSeasonalThemesPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="lg:col-span-5 bg-white border border-[#D5C6AD] rounded-brand p-6">
+        <div className="lg:col-span-5 bg-white border border-coffee-beige rounded-brand p-6">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-[#8C7565] font-semibold">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-coffee-muted font-semibold">
               LỊCH SẮP DIỄN RA ({upcomingThemes.length})
             </p>
-            <Calendar className="w-4 h-4 text-[#8C7565]" />
+            <Calendar className="w-4 h-4 text-coffee-muted" />
           </div>
           {upcomingThemes.length === 0 ? (
-            <p className="text-sm text-[#8C7565] py-4">
+            <p className="text-sm text-coffee-muted py-4">
               Chưa có chủ đề nào được hẹn lịch tự động. Bấm <strong>Tùy chỉnh → Lịch tự động</strong> trên bất kỳ chủ đề nào để lên lịch.
             </p>
           ) : (
@@ -339,11 +339,11 @@ export const AdminSeasonalThemesPage: React.FC = () => {
               {upcomingThemes.map((t) => (
                 <li
                   key={t.id}
-                  className="p-3 rounded-brand bg-[#F7F5EF] border border-[#E9E6D8] flex items-center justify-between gap-3"
+                  className="p-3 rounded-brand bg-ivory-light border border-ivory flex items-center justify-between gap-3"
                 >
                   <div className="min-w-0">
-                    <p className="font-medium text-sm text-[#241914] truncate">{t.name}</p>
-                    <p className="text-xs text-[#8C7565]">
+                    <p className="font-medium text-sm text-coffee-dark truncate">{t.name}</p>
+                    <p className="text-xs text-coffee-muted">
                       Bắt đầu: {t.schedule_start ? new Date(t.schedule_start).toLocaleString('vi-VN') : '—'}
                     </p>
                   </div>
@@ -353,7 +353,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                       setEditingTheme(t);
                       setEditorTab('schedule');
                     }}
-                    className="text-xs font-semibold text-[#4B2E24] hover:underline shrink-0"
+                    className="text-xs font-semibold text-coffee hover:underline shrink-0"
                   >
                     Sửa lịch
                   </button>
@@ -371,8 +371,8 @@ export const AdminSeasonalThemesPage: React.FC = () => {
           onClick={() => setCategoryFilter('all')}
           className={`px-4 py-2 text-xs uppercase tracking-wider font-semibold rounded-brand transition-colors ${
             categoryFilter === 'all'
-              ? 'bg-[#4B2E24] text-[#F7F5EF]'
-              : 'bg-white border border-[#D5C6AD] text-[#4B2E24] hover:bg-[#F7F5EF]'
+              ? 'bg-coffee text-ivory-light'
+              : 'bg-white border border-coffee-beige text-coffee hover:bg-ivory-light'
           }`}
         >
           Tất cả ({themes.length})
@@ -387,8 +387,8 @@ export const AdminSeasonalThemesPage: React.FC = () => {
               onClick={() => setCategoryFilter(cat)}
               className={`px-4 py-2 text-xs uppercase tracking-wider font-semibold rounded-brand transition-colors ${
                 categoryFilter === cat
-                  ? 'bg-[#4B2E24] text-[#F7F5EF]'
-                  : 'bg-white border border-[#D5C6AD] text-[#4B2E24] hover:bg-[#F7F5EF]'
+                  ? 'bg-coffee text-ivory-light'
+                  : 'bg-white border border-coffee-beige text-coffee hover:bg-ivory-light'
               }`}
             >
               {CATEGORY_LABELS[cat]} ({count})
@@ -405,7 +405,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
             <article
               key={theme.id}
               className={`bg-white border rounded-brand overflow-hidden flex flex-col transition-shadow hover:shadow-md ${
-                isCurrentActive ? 'border-emerald-500 ring-1 ring-emerald-500/40' : 'border-[#D5C6AD]'
+                isCurrentActive ? 'border-emerald-500 ring-1 ring-emerald-500/40' : 'border-coffee-beige'
               }`}
             >
               {/* Visual Theme Preview Header */}
@@ -447,11 +447,11 @@ export const AdminSeasonalThemesPage: React.FC = () => {
               {/* Body */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div>
-                  <p className="text-xs text-[#8C7565] leading-relaxed">
+                  <p className="text-xs text-coffee-muted leading-relaxed">
                     {theme.description}
                   </p>
                   {(theme.schedule_start || theme.schedule_end) && (
-                    <div className="mt-3 p-2.5 rounded-brand bg-[#F7F5EF] border border-[#E9E6D8] text-[11px] text-[#4B2E24] space-y-0.5">
+                    <div className="mt-3 p-2.5 rounded-brand bg-ivory-light border border-ivory text-[11px] text-coffee space-y-0.5">
                       {theme.schedule_start && (
                         <p>
                           <strong>Bắt đầu:</strong>{' '}
@@ -469,7 +469,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                 </div>
 
                 {/* Action Bar (Single-row aligned) */}
-                <div className="pt-3 border-t border-[#E9E6D8] flex items-center justify-between gap-1">
+                <div className="pt-3 border-t border-ivory flex items-center justify-between gap-1">
                   <div className="flex items-center gap-1 min-w-0">
                     {isCurrentActive ? (
                       <button
@@ -484,7 +484,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleActivate(theme)}
-                        className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors whitespace-nowrap"
+                        className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand transition-colors whitespace-nowrap"
                       >
                         <Power className="w-3 h-3 shrink-0" />
                         <span>Kích hoạt</span>
@@ -494,7 +494,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setPreviewModalTheme(theme)}
-                      className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-medium border border-[#D5C6AD] text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors whitespace-nowrap"
+                      className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-medium border border-coffee-beige text-coffee hover:bg-ivory-light rounded-brand transition-colors whitespace-nowrap"
                       title="Xem trước"
                     >
                       <Eye className="w-3 h-3 shrink-0" />
@@ -507,7 +507,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                         setEditingTheme(theme);
                         setEditorTab('colors');
                       }}
-                      className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-medium border border-[#D5C6AD] text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors whitespace-nowrap"
+                      className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-medium border border-coffee-beige text-coffee hover:bg-ivory-light rounded-brand transition-colors whitespace-nowrap"
                       title="Tùy chỉnh & Lên lịch"
                     >
                       <SlidersHorizontal className="w-3 h-3 shrink-0" />
@@ -519,7 +519,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleDuplicate(theme)}
-                      className="p-1.5 border border-[#D5C6AD] text-[#8C7565] hover:text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors"
+                      className="p-1.5 border border-coffee-beige text-coffee-muted hover:text-coffee hover:bg-ivory-light rounded-brand transition-colors"
                       title="Nhân bản chủ đề"
                     >
                       <Copy className="w-3.5 h-3.5" />

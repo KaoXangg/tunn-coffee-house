@@ -52,15 +52,15 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
   onClearLogs: handleClearLogs,
 }) => {
   return (
-      <div className="bg-white border border-[#D5C6AD] rounded-brand p-6 space-y-6 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#D5C6AD]">
+      <div className="bg-white border border-coffee-beige rounded-brand p-6 space-y-6 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-coffee-beige">
           <div className="flex items-center gap-2.5">
-            <Activity className="w-5 h-5 text-[#4B2E24]" />
+            <Activity className="w-5 h-5 text-coffee" />
             <div>
-              <h2 className="font-serif text-xl font-semibold text-[#241914]">
+              <h2 className="font-serif text-xl font-semibold text-coffee-dark">
                 Giám Sát Thời Gian Hoạt Động & Nhật Ký Thao Tác Của Quản Lý
               </h2>
-              <p className="text-xs text-[#8C7565]">
+              <p className="text-xs text-coffee-muted">
                 Theo dõi xem từng Quản lý đang online hay offline, đang mở trang nào, hoạt động trong bao lâu và đã chỉnh sửa những gì.
               </p>
             </div>
@@ -71,7 +71,7 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
               type="button"
               disabled={refreshingLogs}
               onClick={handleRefreshLogs}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#F7F5EF] text-[#241914] border border-[#D5C6AD] hover:bg-[#E9E6D8] rounded-brand transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-ivory-light text-coffee-dark border border-coffee-beige hover:bg-ivory rounded-brand transition-colors"
             >
               <RefreshCw
                 className={`w-3.5 h-3.5 ${refreshingLogs ? 'animate-spin' : ''}`}
@@ -95,14 +95,14 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
 
         {/* SUB-SECTION 2A: PER-MANAGER ONLINE STATUS & ACTIVE DURATION SUMMARY */}
         <div className="space-y-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-[#4B2E24]">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-coffee">
             1. Thống Kê Thời Gian Trực & Trạng Thái Hoạt Động Theo Từng Quản Lý
           </h3>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse border border-[#E9E6D8]">
+            <table className="w-full text-left border-collapse border border-ivory">
               <thead>
-                <tr className="bg-[#F7F5EF] border-b border-[#D5C6AD] text-[11px] uppercase tracking-wider text-[#241914] font-semibold">
+                <tr className="bg-ivory-light border-b border-coffee-beige text-[11px] uppercase tracking-wider text-coffee-dark font-semibold">
                   <th className="py-2.5 px-3.5">Quản lý</th>
                   <th className="py-2.5 px-3.5">Trạng thái & Trang đang xem</th>
                   <th className="py-2.5 px-3.5">Thời gian phiên gần nhất</th>
@@ -111,7 +111,7 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
                   <th className="py-2.5 px-3.5 text-right">Lọc xem</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E9E6D8] text-xs">
+              <tbody className="divide-y divide-ivory text-xs">
                 {managerActivitySummary.map((mgr) => {
                   const isSelected =
                     selectedManagerEmail.toLowerCase() === mgr.email.toLowerCase();
@@ -122,14 +122,14 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
                       className={`transition-colors ${
                         isSelected
                           ? 'bg-amber-50/70'
-                          : 'hover:bg-[#F7F5EF]/60'
+                          : 'hover:bg-ivory-light/60'
                       }`}
                     >
                       <td className="py-3 px-3.5">
-                        <p className="font-semibold text-[#241914]">
+                        <p className="font-semibold text-coffee-dark">
                           {String(mgr.fullName)}
                         </p>
-                        <p className="text-[11px] text-[#8C7565]">{mgr.email}</p>
+                        <p className="text-[11px] text-coffee-muted">{mgr.email}</p>
                       </td>
 
                       <td className="py-3 px-3.5">
@@ -139,7 +139,7 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
                               <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
                               <span>Đang trực tuyến (Online)</span>
                             </span>
-                            <p className="text-[11px] text-[#4B2E24] font-medium">
+                            <p className="text-[11px] text-coffee font-medium">
                               Đang ở: {String(mgr.currentPage)}
                             </p>
                           </div>
@@ -149,12 +149,12 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
                               <span className="w-2 h-2 rounded-full bg-stone-400" />
                               <span>Ngoại tuyến</span>
                             </span>
-                            <p className="text-[11px] text-[#8C7565]">
+                            <p className="text-[11px] text-coffee-muted">
                               Hoạt động cuối: {formatDateTimeVi(mgr.latestLog.created_at)}
                             </p>
                           </div>
                         ) : (
-                          <span className="text-[11px] text-[#8C7565] italic">
+                          <span className="text-[11px] text-coffee-muted italic">
                             Chưa từng đăng nhập
                           </span>
                         )}
@@ -162,34 +162,34 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
 
                       <td className="py-3 px-3.5 whitespace-nowrap">
                         {mgr.latestSessionDurationSec > 0 ? (
-                          <span className="font-semibold text-[#241914]">
+                          <span className="font-semibold text-coffee-dark">
                             {formatDurationVi(mgr.latestSessionDurationSec)}
                           </span>
                         ) : (
-                          <span className="text-[#8C7565]">—</span>
+                          <span className="text-coffee-muted">—</span>
                         )}
                       </td>
 
                       <td className="py-3 px-3.5 whitespace-nowrap">
                         {mgr.totalDurationSec > 0 ? (
                           <div>
-                            <span className="font-bold text-[#4B2E24]">
+                            <span className="font-bold text-coffee">
                               {formatDurationVi(mgr.totalDurationSec)}
                             </span>
-                            <p className="text-[10px] text-[#8C7565]">
+                            <p className="text-[10px] text-coffee-muted">
                               ({mgr.sessionCount} phiên đăng nhập)
                             </p>
                           </div>
                         ) : (
-                          <span className="text-[#8C7565]">0 phút</span>
+                          <span className="text-coffee-muted">0 phút</span>
                         )}
                       </td>
 
                       <td className="py-3 px-3.5 whitespace-nowrap">
-                        <span className="font-semibold text-[#241914]">
+                        <span className="font-semibold text-coffee-dark">
                           {mgr.totalActions} hành động
                         </span>
-                        <p className="text-[10px] text-[#8C7565]">
+                        <p className="text-[10px] text-coffee-muted">
                           {mgr.dataEditCount} chỉnh sửa · {mgr.pageViewCount} xem trang
                         </p>
                       </td>
@@ -204,8 +204,8 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
                           }
                           className={`inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-brand border transition-colors ${
                             isSelected
-                              ? 'bg-[#4B2E24] text-[#F7F5EF] border-[#4B2E24]'
-                              : 'bg-white text-[#241914] border-[#D5C6AD] hover:bg-[#E9E6D8]'
+                              ? 'bg-coffee text-ivory-light border-coffee'
+                              : 'bg-white text-coffee-dark border-coffee-beige hover:bg-ivory'
                           }`}
                         >
                           <Eye className="w-3 h-3" />
@@ -221,9 +221,9 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
         </div>
 
         {/* SUB-SECTION 2B: DETAILED ACTION LOGS & FILTERS */}
-        <div className="space-y-3 pt-2 border-t border-[#E9E6D8]">
+        <div className="space-y-3 pt-2 border-t border-ivory">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#4B2E24] flex items-center gap-1.5">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-coffee flex items-center gap-1.5">
               <Filter className="w-3.5 h-3.5" />
               <span>
                 2. Nhật Ký Chi Tiết Từng Hành Động ({filteredActivityLogs.length} bản ghi)
@@ -234,7 +234,7 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
               <select
                 value={selectedManagerEmail}
                 onChange={(e) => setSelectedManagerEmail(e.target.value)}
-                className="px-3 py-1.5 text-xs font-medium bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand text-[#241914]"
+                className="px-3 py-1.5 text-xs font-medium bg-ivory-light border border-coffee-beige rounded-brand text-coffee-dark"
               >
                 <option value="all">Tất cả Quản lý ({managerActivitySummary.length})</option>
                 {managerActivitySummary.map((m) => (
@@ -251,7 +251,7 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
                     e.target.value as 'all' | 'data' | 'navigation' | 'session'
                   )
                 }
-                className="px-3 py-1.5 text-xs font-medium bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand text-[#241914]"
+                className="px-3 py-1.5 text-xs font-medium bg-ivory-light border border-coffee-beige rounded-brand text-coffee-dark"
               >
                 <option value="all">Mọi hoạt động (Chỉnh sửa + Xem trang + Đăng nhập)</option>
                 <option value="data">Chỉ xem: Chỉnh sửa dữ liệu (Món, Giá, Cài đặt...)</option>
@@ -262,7 +262,7 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
           </div>
 
           {filteredActivityLogs.length === 0 ? (
-            <p className="text-xs text-[#8C7565] py-8 text-center bg-[#F7F5EF] border border-dashed border-[#D5C6AD] rounded-brand">
+            <p className="text-xs text-coffee-muted py-8 text-center bg-ivory-light border border-dashed border-coffee-beige rounded-brand">
               Chưa có hoạt động nào khớp với bộ lọc hiện tại.
             </p>
           ) : (
@@ -283,7 +283,7 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
                 return (
                   <div
                     key={log.id}
-                    className="p-3.5 bg-[#F7F5EF] border border-[#D5C6AD]/80 rounded-brand text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:border-[#4B2E24]/50 transition-colors"
+                    className="p-3.5 bg-ivory-light border border-coffee-beige/80 rounded-brand text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 hover:border-coffee/50 transition-colors"
                   >
                     <div className="space-y-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
@@ -292,24 +292,24 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
                         >
                           {badge.label}
                         </span>
-                        <span className="font-semibold text-[#241914] text-sm">
+                        <span className="font-semibold text-coffee-dark text-sm">
                           {log.action}
                         </span>
                         {log.entity_name && (
-                          <span className="font-medium text-[#4B2E24] bg-white px-2 py-0.5 rounded border border-[#D5C6AD]/60">
+                          <span className="font-medium text-coffee bg-white px-2 py-0.5 rounded border border-coffee-beige/60">
                             {log.entity_name}
                           </span>
                         )}
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#8C7565]">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-coffee-muted">
                         <span>
                           Thực hiện bởi:{' '}
-                          <strong className="text-[#241914]">{String(actorName)}</strong> (
+                          <strong className="text-coffee-dark">{String(actorName)}</strong> (
                           {log.actor_email || 'Admin'})
                         </span>
                         {durationSec > 0 && (
-                          <span className="inline-flex items-center gap-1 text-[#4B2E24] font-medium">
+                          <span className="inline-flex items-center gap-1 text-coffee font-medium">
                             <Clock className="w-3 h-3" />
                             <span>
                               Đã hoạt động trong phiên: {formatDurationVi(durationSec)}
@@ -320,7 +320,7 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
                     </div>
 
                     <div className="text-left sm:text-right shrink-0">
-                      <span className="inline-block px-2.5 py-1 bg-white border border-[#D5C6AD] rounded text-[11px] font-mono text-[#241914]">
+                      <span className="inline-block px-2.5 py-1 bg-white border border-coffee-beige rounded text-[11px] font-mono text-coffee-dark">
                         {formatDateTimeVi(log.created_at)}
                       </span>
                     </div>

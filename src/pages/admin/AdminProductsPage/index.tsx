@@ -25,6 +25,7 @@ import { useSiteData } from '../../../contexts/SiteDataContext';
 import { useToast } from '../../../contexts/ToastContext';
 import { formatVND, slugify } from '../../../lib/utils';
 import { ConfirmDialog } from '../../../components/common/ConfirmDialog';
+import { Skeleton } from '../../../components/common/Skeleton';
 import { ProductFormModal } from './ProductFormModal';
 import type { Product } from '../../../types/database';
 
@@ -51,7 +52,9 @@ export type ProductFormValues = z.infer<typeof productSchema>;
 const ITEMS_PER_PAGE = 8;
 
 export const AdminProductsPage: React.FC = () => {
-  const { products, categories, settings, refreshAll, logAdminActivity } = useSiteData();
+  const { products, categories, settings, loading, isLiveDatabase, refreshAll, logAdminActivity } =
+    useSiteData();
+  const showSkeleton = loading && !isLiveDatabase;
   const toast = useToast();
 
   // View Mode: 'full' (Standard Table) | 'counter' (1-Tap Quick Counter Mode for Mobile/Tablet)
@@ -656,24 +659,24 @@ export const AdminProductsPage: React.FC = () => {
       {/* Header & Mode Switcher */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-semibold text-[#241914]">
+          <h1 className="font-serif text-3xl font-semibold text-coffee-dark">
             Quản Lý Thực Đơn & Sản Phẩm
           </h1>
-          <p className="text-sm text-[#8C7565] mt-1">
+          <p className="text-sm text-coffee-muted mt-1">
             Chạm vào giá tiền để sửa nhanh tại chỗ, bấm Nhân bản để tạo món tương tự hoặc bật Chế độ Tại Quầy.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Counter Quick Mode Switch */}
-          <div className="inline-flex rounded-brand border border-[#D5C6AD] bg-white p-1">
+          <div className="inline-flex rounded-brand border border-coffee-beige bg-white p-1">
             <button
               type="button"
               onClick={() => setViewMode('full')}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-brand transition-colors ${
                 viewMode === 'full'
-                  ? 'bg-[#4B2E24] text-[#F7F5EF]'
-                  : 'text-[#241914] hover:bg-[#E9E6D8]'
+                  ? 'bg-coffee text-ivory-light'
+                  : 'text-coffee-dark hover:bg-ivory'
               }`}
             >
               <LayoutList className="w-3.5 h-3.5" />
@@ -684,8 +687,8 @@ export const AdminProductsPage: React.FC = () => {
               onClick={() => setViewMode('counter')}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-brand transition-colors ${
                 viewMode === 'counter'
-                  ? 'bg-[#4B2E24] text-[#F7F5EF]'
-                  : 'text-[#241914] hover:bg-[#E9E6D8]'
+                  ? 'bg-coffee text-ivory-light'
+                  : 'text-coffee-dark hover:bg-ivory'
               }`}
             >
               <Zap className="w-3.5 h-3.5" />
@@ -696,7 +699,7 @@ export const AdminProductsPage: React.FC = () => {
           <button
             type="button"
             onClick={handlePrintMenuA4}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider bg-white border border-[#D5C6AD] text-[#241914] hover:bg-[#E9E6D8] rounded-brand transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider bg-white border border-coffee-beige text-coffee-dark hover:bg-ivory rounded-brand transition-colors"
           >
             <Printer className="w-4 h-4" />
             <span>In Thực Đơn A4</span>
@@ -705,7 +708,7 @@ export const AdminProductsPage: React.FC = () => {
           <button
             type="button"
             onClick={openCreateModal}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand transition-colors"
           >
             <Plus className="w-4 h-4" />
             <span>Thêm Món Mới</span>
@@ -714,9 +717,9 @@ export const AdminProductsPage: React.FC = () => {
       </div>
 
       {/* Filters & Search Bar */}
-      <div className="bg-white border border-[#D5C6AD] rounded-brand p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-center">
+      <div className="bg-white border border-coffee-beige rounded-brand p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-center">
         <div className="lg:col-span-5 relative">
-          <Search className="w-4 h-4 text-[#8C7565] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-coffee-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
@@ -725,7 +728,7 @@ export const AdminProductsPage: React.FC = () => {
               setPage(1);
             }}
             placeholder="Tìm nhanh tên món để báo hết / sửa giá..."
-            className="w-full pl-10 pr-4 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand focus:outline-none focus:border-[#4B2E24]"
+            className="w-full pl-10 pr-4 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand focus:outline-none focus:border-coffee"
           />
         </div>
 
@@ -737,7 +740,7 @@ export const AdminProductsPage: React.FC = () => {
               setPage(1);
             }}
             aria-label="Lọc theo danh mục"
-            className="w-full px-3 py-2 text-xs font-medium bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+            className="w-full px-3 py-2 text-xs font-medium bg-ivory-light border border-coffee-beige rounded-brand"
           >
             <option value="all">Tất cả danh mục</option>
             {categories.map((cat) => (
@@ -756,7 +759,7 @@ export const AdminProductsPage: React.FC = () => {
               setPage(1);
             }}
             aria-label="Lọc theo trạng thái"
-            className="w-full px-3 py-2 text-xs font-medium bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+            className="w-full px-3 py-2 text-xs font-medium bg-ivory-light border border-coffee-beige rounded-brand"
           >
             <option value="all">Mọi trạng thái</option>
             <option value="visible">Đang hiển thị</option>
@@ -771,7 +774,7 @@ export const AdminProductsPage: React.FC = () => {
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as Parameters<typeof setSortBy>[0])}
             aria-label="Sắp xếp"
-            className="w-full px-3 py-2 text-xs font-medium bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+            className="w-full px-3 py-2 text-xs font-medium bg-ivory-light border border-coffee-beige rounded-brand"
           >
             <option value="order">Thứ tự hiển thị</option>
             <option value="price-asc">Giá tăng dần</option>
@@ -784,9 +787,9 @@ export const AdminProductsPage: React.FC = () => {
       {/* VIEW MODE 1: QUICK COUNTER MODE (1-TAP MOBILE/TABLET GRID) */}
       {viewMode === 'counter' ? (
         <div className="space-y-4">
-          <div className="p-3.5 bg-[#E9E6D8] border border-[#D5C6AD] rounded-brand flex items-center justify-between text-xs text-[#241914]">
+          <div className="p-3.5 bg-ivory border border-coffee-beige rounded-brand flex items-center justify-between text-xs text-coffee-dark">
             <span className="inline-flex items-center gap-2">
-              <Zap className="w-4 h-4 text-[#4B2E24] shrink-0" />
+              <Zap className="w-4 h-4 text-coffee shrink-0" />
               <span>
                 <strong>Chế độ Tại Quầy (1-Chạm):</strong> Chạm trực tiếp vào nút{' '}
                 <strong>CÒN MÓN / TẠM HẾT</strong> để cập nhật ngay lên website khách hàng.
@@ -804,7 +807,7 @@ export const AdminProductsPage: React.FC = () => {
                 key={prod.id}
                 className={`p-4 rounded-brand border transition-all flex items-center justify-between gap-3 ${
                   prod.is_available
-                    ? 'bg-white border-[#D5C6AD]'
+                    ? 'bg-white border-coffee-beige'
                     : 'bg-red-50/60 border-red-200'
                 }`}
               >
@@ -812,18 +815,18 @@ export const AdminProductsPage: React.FC = () => {
                   <img
                     src={prod.image_url}
                     alt={prod.name}
-                    className={`w-14 h-14 rounded-brand object-cover border border-[#D5C6AD] shrink-0 ${
+                    className={`w-14 h-14 rounded-brand object-cover border border-coffee-beige shrink-0 ${
                       !prod.is_available ? 'grayscale opacity-70' : ''
                     }`}
                   />
                   <div className="min-w-0">
-                    <p className="font-serif text-base font-bold text-[#241914] truncate">
+                    <p className="font-serif text-base font-bold text-coffee-dark truncate">
                       {prod.name}
                     </p>
-                    <p className="text-xs font-semibold text-[#4B2E24] mt-0.5">
+                    <p className="text-xs font-semibold text-coffee mt-0.5">
                       {formatVND(prod.sale_price || prod.price)}
                     </p>
-                    <p className="text-[10px] text-[#8C7565]">
+                    <p className="text-[10px] text-coffee-muted">
                       {getCategoryName(prod.category_id)}
                     </p>
                   </div>
@@ -848,7 +851,7 @@ export const AdminProductsPage: React.FC = () => {
         /* VIEW MODE 2: FULL TABLE WITH INLINE PRICE EDIT & DUPLICATE */
         <div className="space-y-4">
           {selectedIds.length > 0 && (
-            <div className="p-3.5 bg-[#241914] text-[#F7F5EF] rounded-brand flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-sm">
+            <div className="p-3.5 bg-coffee-dark text-ivory-light rounded-brand flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-sm">
               <div className="flex items-center gap-3 text-xs">
                 <span className="font-semibold">
                   Đã chọn {selectedIds.length} món
@@ -856,7 +859,7 @@ export const AdminProductsPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSelectedIds([])}
-                  className="text-[#D5C6AD] hover:text-white underline"
+                  className="text-coffee-beige hover:text-white underline"
                 >
                   Bỏ chọn
                 </button>
@@ -889,7 +892,7 @@ export const AdminProductsPage: React.FC = () => {
                   onClick={() =>
                     handleBulkUpdateField('is_visible', false, 'Ẩn hàng loạt')
                   }
-                  className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider bg-[#4B2E24] hover:bg-[#5c392d] text-white rounded-brand disabled:opacity-50"
+                  className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider bg-coffee hover:bg-[#5c392d] text-white rounded-brand disabled:opacity-50"
                 >
                   Ẩn trên Web
                 </button>
@@ -899,23 +902,23 @@ export const AdminProductsPage: React.FC = () => {
                   onClick={() =>
                     handleBulkUpdateField('is_visible', true, 'Hiện hàng loạt')
                   }
-                  className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider bg-[#4B2E24] hover:bg-[#5c392d] text-white rounded-brand disabled:opacity-50"
+                  className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider bg-coffee hover:bg-[#5c392d] text-white rounded-brand disabled:opacity-50"
                 >
                   Hiện trên Web
                 </button>
 
-                <div className="flex items-center gap-1.5 pl-2 border-l border-[#4B2E24]">
+                <div className="flex items-center gap-1.5 pl-2 border-l border-coffee">
                   <input
                     type="number"
                     value={bulkPriceInput}
                     onChange={(e) => setBulkPriceInput(e.target.value)}
                     placeholder="+10 hoặc -5000"
-                    className="w-28 px-2.5 py-1 text-xs bg-white text-[#241914] rounded-brand"
+                    className="w-28 px-2.5 py-1 text-xs bg-white text-coffee-dark rounded-brand"
                   />
                   <select
                     value={bulkPriceUnit}
                     onChange={(e) => setBulkPriceUnit(e.target.value as 'percent' | 'vnd')}
-                    className="px-2 py-1 text-xs bg-white text-[#241914] rounded-brand"
+                    className="px-2 py-1 text-xs bg-white text-coffee-dark rounded-brand"
                   >
                     <option value="percent">%</option>
                     <option value="vnd">VNĐ</option>
@@ -924,7 +927,7 @@ export const AdminProductsPage: React.FC = () => {
                     type="button"
                     disabled={bulkProcessing}
                     onClick={handleBulkAdjustPrice}
-                    className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider bg-[#D5C6AD] text-[#241914] hover:bg-white rounded-brand disabled:opacity-50"
+                    className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider bg-coffee-beige text-coffee-dark hover:bg-white rounded-brand disabled:opacity-50"
                   >
                     Đổi giá
                   </button>
@@ -933,13 +936,13 @@ export const AdminProductsPage: React.FC = () => {
             </div>
           )}
 
-        <div className="bg-white border border-[#D5C6AD] rounded-brand overflow-hidden">
+        <div className="bg-white border border-coffee-beige rounded-brand overflow-hidden">
           {paginatedProducts.length === 0 ? (
             <div className="py-14 text-center">
-              <p className="font-serif text-xl text-[#241914]">
+              <p className="font-serif text-xl text-coffee-dark">
                 Không tìm thấy sản phẩm nào
               </p>
-              <p className="text-xs text-[#8C7565] mt-1">
+              <p className="text-xs text-coffee-muted mt-1">
                 Hãy thử bộ lọc khác hoặc nhấn &ldquo;Thêm Món Mới&rdquo;.
               </p>
             </div>
@@ -947,7 +950,7 @@ export const AdminProductsPage: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-[#E9E6D8] border-b border-[#D5C6AD] text-[11px] uppercase tracking-wider text-[#241914] font-semibold">
+                  <tr className="bg-ivory border-b border-coffee-beige text-xs text-coffee-dark font-semibold">
                     <th className="py-3.5 pl-4 pr-2 w-10">
                       <input
                         type="checkbox"
@@ -957,7 +960,7 @@ export const AdminProductsPage: React.FC = () => {
                         }
                         onChange={() => toggleSelectPage(paginatedProducts)}
                         aria-label="Chọn tất cả món trong trang"
-                        className="rounded border-[#D5C6AD] text-[#4B2E24]"
+                        className="rounded border-coffee-beige text-coffee"
                       />
                     </th>
                     <th className="py-3.5 px-4">Món đồ uống</th>
@@ -969,14 +972,49 @@ export const AdminProductsPage: React.FC = () => {
                     <th className="py-3.5 px-4 text-right">Thao tác</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E9E6D8] text-sm">
-                  {paginatedProducts.map((prod) => {
+                <tbody className="divide-y divide-ivory text-sm">
+                  {showSkeleton
+                    ? Array.from({ length: 5 }).map((_, idx) => (
+                        <tr key={`skeleton-${idx}`}>
+                          <td className="py-3.5 pl-4 pr-2">
+                            <Skeleton className="w-4 h-4" />
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="w-11 h-11 rounded-brand shrink-0" />
+                              <div className="space-y-1.5">
+                                <Skeleton className="h-4 w-36" />
+                                <Skeleton className="h-3 w-24" />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <Skeleton className="h-4 w-24" />
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <Skeleton className="h-4 w-20" />
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <Skeleton className="h-6 w-6 mx-auto" />
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <Skeleton className="h-6 w-12 mx-auto" />
+                          </td>
+                          <td className="py-3.5 px-4 text-center">
+                            <Skeleton className="h-6 w-12 mx-auto" />
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <Skeleton className="h-7 w-16 ml-auto" />
+                          </td>
+                        </tr>
+                      ))
+                    : paginatedProducts.map((prod) => {
                     const isEditingPrice = inlinePriceId === prod.id;
                     const isChecked = selectedIds.includes(prod.id);
                     return (
                       <tr
                         key={prod.id}
-                        className={`hover:bg-[#F7F5EF]/60 transition-colors ${
+                        className={`hover:bg-ivory-light/60 transition-colors ${
                           isChecked ? 'bg-amber-50/50' : ''
                         }`}
                       >
@@ -986,7 +1024,7 @@ export const AdminProductsPage: React.FC = () => {
                             checked={isChecked}
                             onChange={() => toggleSelectProduct(prod.id)}
                             aria-label={`Chọn ${prod.name}`}
-                            className="rounded border-[#D5C6AD] text-[#4B2E24]"
+                            className="rounded border-coffee-beige text-coffee"
                           />
                         </td>
                         <td className="py-3.5 px-4">
@@ -994,18 +1032,18 @@ export const AdminProductsPage: React.FC = () => {
                             <img
                               src={prod.image_url}
                               alt={prod.name}
-                              className="w-12 h-12 rounded-brand object-cover border border-[#D5C6AD] shrink-0"
+                              className="w-12 h-12 rounded-brand object-cover border border-coffee-beige shrink-0"
                             />
                             <div className="min-w-0">
-                              <p className="font-semibold text-[#241914] truncate">
+                              <p className="font-semibold text-coffee-dark truncate">
                                 {prod.name}
                               </p>
                               <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="text-[11px] text-[#8C7565]">
+                                <span className="text-[11px] text-coffee-muted">
                                   #{prod.sort_order}
                                 </span>
                                 {prod.badge && (
-                                  <span className="px-1.5 py-0.5 text-[10px] bg-[#E9E6D8] text-[#4B2E24] rounded font-semibold">
+                                  <span className="px-1.5 py-0.5 text-[10px] bg-ivory text-coffee rounded font-semibold">
                                     {prod.badge}
                                   </span>
                                 )}
@@ -1014,14 +1052,14 @@ export const AdminProductsPage: React.FC = () => {
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4 text-xs text-[#241914] whitespace-nowrap">
+                        <td className="py-3.5 px-4 text-xs text-coffee-dark whitespace-nowrap">
                           {getCategoryName(prod.category_id)}
                         </td>
 
                         {/* Inline Price Editor Cell */}
                         <td className="py-3.5 px-4 whitespace-nowrap">
                           {isEditingPrice ? (
-                            <div className="flex items-center gap-1.5 bg-[#F7F5EF] p-1.5 rounded-brand border border-[#4B2E24]">
+                            <div className="flex items-center gap-1.5 bg-ivory-light p-1.5 rounded-brand border border-coffee">
                               <div className="space-y-1">
                                 <input
                                   type="number"
@@ -1029,7 +1067,7 @@ export const AdminProductsPage: React.FC = () => {
                                   value={inlinePriceVal}
                                   onChange={(e) => setInlinePriceVal(e.target.value)}
                                   placeholder="Giá gốc"
-                                  className="w-24 px-2 py-1 text-xs bg-white border border-[#D5C6AD] rounded"
+                                  className="w-24 px-2 py-1 text-xs bg-white border border-coffee-beige rounded"
                                 />
                                 <input
                                   type="number"
@@ -1039,14 +1077,14 @@ export const AdminProductsPage: React.FC = () => {
                                     setInlineSalePriceVal(e.target.value)
                                   }
                                   placeholder="Giá KM (tùy chọn)"
-                                  className="w-24 px-2 py-1 text-xs bg-white border border-[#D5C6AD] rounded block"
+                                  className="w-24 px-2 py-1 text-xs bg-white border border-coffee-beige rounded block"
                                 />
                               </div>
                               <button
                                 type="button"
                                 disabled={savingInline}
                                 onClick={() => handleSaveInlinePrice(prod)}
-                                className="p-1.5 bg-[#4B2E24] text-white rounded hover:bg-[#241914]"
+                                className="p-1.5 bg-coffee text-white rounded hover:bg-coffee-dark"
                                 title="Lưu giá"
                               >
                                 <Check className="w-3.5 h-3.5" />
@@ -1054,7 +1092,7 @@ export const AdminProductsPage: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => setInlinePriceId(null)}
-                                className="p-1.5 text-[#8C7565] hover:text-[#241914]"
+                                className="p-1.5 text-coffee-muted hover:text-coffee-dark"
                                 title="Hủy"
                               >
                                 <X className="w-3.5 h-3.5" />
@@ -1064,15 +1102,15 @@ export const AdminProductsPage: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => startInlinePriceEdit(prod)}
-                              className="group text-left hover:bg-[#E9E6D8]/70 px-2 py-1 -mx-2 rounded transition-colors"
+                              className="group text-left hover:bg-ivory/70 px-2 py-1 -mx-2 rounded transition-colors"
                               title="Nhấn để sửa nhanh giá tiền"
                             >
-                              <span className="font-semibold text-[#4B2E24] inline-flex items-center gap-1">
+                              <span className="font-semibold text-coffee inline-flex items-center gap-1">
                                 {formatVND(prod.sale_price || prod.price)}
-                                <DollarSign className="w-3 h-3 opacity-0 group-hover:opacity-100 text-[#8C7565]" />
+                                <DollarSign className="w-3 h-3 opacity-0 group-hover:opacity-100 text-coffee-muted" />
                               </span>
                               {prod.sale_price && prod.sale_price < prod.price && (
-                                <span className="block text-[11px] text-[#8C7565] line-through">
+                                <span className="block text-[11px] text-coffee-muted line-through">
                                   {formatVND(prod.price)}
                                 </span>
                               )}
@@ -1087,7 +1125,7 @@ export const AdminProductsPage: React.FC = () => {
                             className={`p-1.5 rounded-brand transition-colors ${
                               prod.is_featured
                                 ? 'bg-amber-100 text-amber-800'
-                                : 'text-[#8C7565] hover:bg-[#E9E6D8]'
+                                : 'text-coffee-muted hover:bg-ivory'
                             }`}
                             title="Bật/Tắt món nổi bật"
                           >
@@ -1120,7 +1158,7 @@ export const AdminProductsPage: React.FC = () => {
                             className={`p-1.5 rounded-brand ${
                               prod.is_visible
                                 ? 'text-emerald-700 hover:bg-emerald-50'
-                                : 'text-[#8C7565] hover:bg-stone-100'
+                                : 'text-coffee-muted hover:bg-stone-100'
                             }`}
                             title="Hiện / Ẩn trên website"
                           >
@@ -1137,7 +1175,7 @@ export const AdminProductsPage: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => handleDuplicateProduct(prod)}
-                              className="p-2 text-[#8C7565] hover:text-[#241914] hover:bg-[#E9E6D8] rounded-brand transition-colors"
+                              className="p-2 text-coffee-muted hover:text-coffee-dark hover:bg-ivory rounded-brand transition-colors"
                               title="Nhân bản món này (Duplicate)"
                             >
                               <Copy className="w-4 h-4" />
@@ -1145,7 +1183,7 @@ export const AdminProductsPage: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => openEditModal(prod)}
-                              className="p-2 text-[#4B2E24] hover:bg-[#E9E6D8] rounded-brand transition-colors"
+                              className="p-2 text-coffee hover:bg-ivory rounded-brand transition-colors"
                               title="Chỉnh sửa chi tiết"
                             >
                               <Edit3 className="w-4 h-4" />
@@ -1170,8 +1208,8 @@ export const AdminProductsPage: React.FC = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="px-4 py-3 bg-[#F7F5EF] border-t border-[#D5C6AD] flex items-center justify-between text-xs">
-              <span className="text-[#8C7565]">
+            <div className="px-4 py-3 bg-ivory-light border-t border-coffee-beige flex items-center justify-between text-xs">
+              <span className="text-coffee-muted">
                 Trang {page} / {totalPages} ({filteredProducts.length} món)
               </span>
               <div className="flex items-center gap-2">
@@ -1179,7 +1217,7 @@ export const AdminProductsPage: React.FC = () => {
                   type="button"
                   disabled={page <= 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="p-1.5 border border-[#D5C6AD] bg-white rounded-brand disabled:opacity-40"
+                  className="p-1.5 border border-coffee-beige bg-white rounded-brand disabled:opacity-40"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -1187,7 +1225,7 @@ export const AdminProductsPage: React.FC = () => {
                   type="button"
                   disabled={page >= totalPages}
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  className="p-1.5 border border-[#D5C6AD] bg-white rounded-brand disabled:opacity-40"
+                  className="p-1.5 border border-coffee-beige bg-white rounded-brand disabled:opacity-40"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

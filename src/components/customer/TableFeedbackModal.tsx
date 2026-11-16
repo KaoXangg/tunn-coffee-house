@@ -358,7 +358,7 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
                   </m.div>
 
                   <div className="space-y-2">
-                    <p className="text-[11px] uppercase tracking-[0.22em] font-semibold text-coffee/80">
+                    <p className="text-xs font-medium text-coffee/80">
                       TUNN Coffee House
                     </p>
                     <h4 className="font-serif text-2xl font-semibold text-coffee-dark">

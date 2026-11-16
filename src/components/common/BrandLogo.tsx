@@ -3,7 +3,7 @@ import { useSiteData } from '../../contexts/SiteDataContext';
 import { cn } from '../../lib/utils';
 
 interface BrandLogoProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   showText?: boolean;
   subtitle?: string;
   className?: string;
@@ -17,6 +17,7 @@ const SIZE_MAP = {
   md: 'w-11 h-11',
   lg: 'w-14 h-14',
   xl: 'w-20 h-20',
+  '2xl': 'w-28 h-28',
 };
 
 export const BrandLogo: React.FC<BrandLogoProps> = ({

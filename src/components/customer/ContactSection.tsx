@@ -54,8 +54,8 @@ export const ContactSection: React.FC = () => {
           className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 sm:mb-12"
         >
           <div>
-            <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2">
-              {String(section?.content?.eyebrow || 'ĐỊA CHỈ & LIÊN HỆ')}
+            <p className="text-sm text-coffee font-medium mb-1.5">
+              {String(section?.content?.eyebrow || 'Địa chỉ & Liên hệ')}
             </p>
             <h2 className="font-serif text-3xl sm:text-5xl font-normal text-coffee-dark">
               {section?.title || 'Ghé Thăm TUNN Coffee House'}

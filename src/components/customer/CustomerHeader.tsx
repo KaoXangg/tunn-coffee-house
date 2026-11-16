@@ -165,7 +165,7 @@ export const CustomerHeader: React.FC = () => {
                 key={`${item.href}-${idx}`}
                 href={item.href}
                 onClick={() => handleNavClick(item.href)}
-                className={`relative whitespace-nowrap text-xs uppercase tracking-[0.14em] font-medium transition-colors py-1.5 ${
+                className={`relative whitespace-nowrap text-sm font-medium transition-colors py-1.5 ${
                   isActive
                     ? 'text-coffee font-semibold'
                     : 'text-coffee-dark/80 hover:text-coffee'
@@ -212,7 +212,7 @@ export const CustomerHeader: React.FC = () => {
           {isAdmin && (
             <Link
               to="/admin/dashboard"
-              className="whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-2 text-[11px] uppercase tracking-wider font-medium text-coffee border border-coffee-beige hover:bg-ivory transition-colors rounded-brand"
+              className="whitespace-nowrap inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-coffee border border-coffee-beige hover:bg-ivory transition-colors rounded-brand"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Quản trị CMS</span>
@@ -276,7 +276,7 @@ export const CustomerHeader: React.FC = () => {
                   key={`mob-${item.href}-${idx}`}
                   href={item.href}
                   onClick={() => handleNavClick(item.href)}
-                  className={`flex items-center justify-between text-xs uppercase tracking-[0.18em] px-3 py-2.5 rounded-xl transition-colors ${
+                  className={`flex items-center justify-between text-sm px-3 py-2.5 rounded-xl transition-colors ${
                     activeHash === item.href
                       ? 'bg-coffee/[0.08] dark:bg-white/[0.07] text-coffee font-semibold'
                       : 'text-coffee-dark/85 hover:bg-coffee/[0.04] dark:hover:bg-white/[0.04]'
