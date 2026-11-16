@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tunn-storefront-v2';
+const CACHE_NAME = 'tunn-storefront-v3';
 const APP_SHELL = [
   '/',
   '/index.html',
