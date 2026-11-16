@@ -67,7 +67,7 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
       setNewlyAddedId(rec.id);
       window.setTimeout(() => {
         setNewlyAddedId((curr) => (curr === rec.id ? null : curr));
-      }, 6500);
+      }, 7500);
     };
     window.addEventListener('tunn:review-submitted', onNewReview);
     return () => window.removeEventListener('tunn:review-submitted', onNewReview);
@@ -168,12 +168,16 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
                   return (
                   <motion.article
                     key={`${dupIndex}-${rev.id}`}
-                    initial={isJustAdded ? { opacity: 0, scale: 0.88, y: -14 } : false}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+                    initial={
+                      isJustAdded
+                        ? { opacity: 0, scale: 0.72, y: -28, rotate: -2 }
+                        : false
+                    }
+                    animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+                    transition={{ type: 'spring', stiffness: 280, damping: 20 }}
                     className={`w-[290px] sm:w-[340px] shrink-0 p-6 rounded-2xl border shadow-sm hover:shadow-editorial hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between gap-4 ${
                       isJustAdded
-                        ? 'bg-ivory dark:bg-white/[0.07] border-coffee ring-2 ring-coffee/30 shadow-editorial'
+                        ? 'bg-ivory dark:bg-white/[0.08] border-amber-400/70 ring-2 ring-amber-400/45 shadow-[0_0_28px_rgba(245,158,11,0.28)]'
                         : 'bg-ivory/65 dark:bg-white/[0.03] border-coffee-beige/60 dark:border-white/[0.08]'
                     }`}
                   >
@@ -193,8 +197,9 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
                             ))}
                           </div>
                           {isJustAdded && (
-                            <span className="px-2 py-0.5 text-[9px] uppercase tracking-wider font-bold rounded-full bg-emerald-600 text-white animate-pulse">
-                              Vừa gửi
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] uppercase tracking-wider font-bold rounded-full bg-emerald-600 text-white shadow-sm animate-pulse">
+                              <Sparkles className="w-2.5 h-2.5" />
+                              <span>Đánh giá của bạn</span>
                             </span>
                           )}
                         </div>

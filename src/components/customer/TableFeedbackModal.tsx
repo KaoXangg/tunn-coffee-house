@@ -1,7 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Star, X, Send, CheckCircle2, MessageSquareHeart, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  Star,
+  X,
+  Send,
+  CheckCircle2,
+  MessageSquareHeart,
+  AlertCircle,
+  Clock,
+  Sparkles,
+} from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { submitTableFeedback, validateGmailFormat } from '../../lib/feedback';
+import { submitTableFeedback, validateGmailFormat, type PublicReviewRecord } from '../../lib/feedback';
+import { formatDateVi } from '../../lib/utils';
 import { useToast } from '../../contexts/ToastContext';
 
 interface TableFeedbackModalProps {
@@ -42,6 +52,54 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [nowStr, setNowStr] = useState(() => formatDateVi(new Date().toISOString()));
+  const pendingRecordRef = useRef<PublicReviewRecord | null>(null);
+  const closeTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setNowStr(formatDateVi(new Date().toISOString()));
+    const clockTimer = window.setInterval(() => {
+      setNowStr(formatDateVi(new Date().toISOString()));
+    }, 30_000);
+    return () => window.clearInterval(clockTimer);
+  }, [open]);
+
+  const finishAndRevealReview = useCallback(() => {
+    if (closeTimerRef.current) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    const rec = pendingRecordRef.current;
+    pendingRecordRef.current = null;
+
+    setSubmitted(false);
+    setCustomerName('');
+    setCustomerEmail('');
+    setHoneypot('');
+    setComment('');
+    setSelectedTags([]);
+    setRating(5);
+    onClose();
+
+    if (rec && rec.rating >= 4) {
+      const reviewsEl = document.getElementById('reviews');
+      if (reviewsEl) {
+        reviewsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      window.setTimeout(() => {
+        window.dispatchEvent(
+          new CustomEvent('tunn:review-submitted', { detail: rec })
+        );
+      }, 280);
+    }
+  }, [onClose]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
+    };
+  }, []);
 
   const emailCheck = customerEmail.trim()
     ? validateGmailFormat(customerEmail)
@@ -81,23 +139,11 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
       return;
     }
 
-    if (record && record.rating >= 4) {
-      window.dispatchEvent(
-        new CustomEvent('tunn:review-submitted', { detail: record })
-      );
-    }
-
+    pendingRecordRef.current = record ?? null;
     setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setCustomerName('');
-      setCustomerEmail('');
-      setHoneypot('');
-      setComment('');
-      setSelectedTags([]);
-      setRating(5);
-      onClose();
-    }, 1700);
+    closeTimerRef.current = window.setTimeout(() => {
+      finishAndRevealReview();
+    }, 5000);
   };
 
   const displayRating = hoverRating || rating;
@@ -133,11 +179,18 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
                   <h3 id="table-feedback-title" className="font-serif text-xl font-semibold">
                     Đánh Giá Trải Nghiệm
                   </h3>
-                  {tableNumber && (
-                    <p className="text-[11px] text-coffee-muted">
-                      Gửi từ <strong>Bàn {tableNumber}</strong> · Không cần đăng nhập
-                    </p>
-                  )}
+                  <p className="inline-flex items-center gap-1.5 text-[11px] text-coffee-muted mt-0.5">
+                    <Clock className="w-3 h-3 text-coffee" />
+                    <span>{nowStr}</span>
+                    {tableNumber && (
+                      <>
+                        <span>·</span>
+                        <span>
+                          <strong>Bàn {tableNumber}</strong>
+                        </span>
+                      </>
+                    )}
+                  </p>
                 </div>
               </div>
               <button
@@ -150,16 +203,76 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
               </button>
             </div>
 
-            {submitted ? (
-              <div className="p-8 text-center space-y-3">
-                <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-                <h4 className="font-serif text-2xl font-semibold">Cảm ơn bạn thật nhiều!</h4>
-                <p className="text-sm text-coffee-muted leading-relaxed">
-                  Góp ý của bạn đã được gửi đến đội ngũ TUNN Coffee House để phục vụ bạn ngày một tốt hơn.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <AnimatePresence mode="wait">
+              {submitted ? (
+                <motion.div
+                  key="thank-you"
+                  initial={{ opacity: 0, scale: 0.92, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.94, y: -10 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  className="p-8 text-center space-y-4 relative overflow-hidden"
+                >
+                  <motion.div
+                    initial={{ scale: 0, rotate: -25 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: 'spring', stiffness: 280, damping: 18, delay: 0.08 }}
+                    className="relative w-16 h-16 mx-auto rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center"
+                  >
+                    <CheckCircle2 className="w-9 h-9 text-emerald-600" />
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: [0, 1, 0], scale: [0.6, 1.35, 1.6] }}
+                      transition={{ duration: 1.6, repeat: Infinity }}
+                      className="absolute inset-0 rounded-full border border-emerald-500/40"
+                    />
+                  </motion.div>
+
+                  <div className="space-y-1.5">
+                    <p className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.2em] font-semibold text-coffee">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Gửi đánh giá thành công</span>
+                    </p>
+                    <h4 className="font-serif text-2xl font-semibold text-coffee-dark">
+                      Cảm ơn {customerName.trim() || 'bạn'} thật nhiều!
+                    </h4>
+                    <p className="text-sm text-coffee-muted leading-relaxed">
+                      Góp ý của bạn lúc <strong>{nowStr}</strong> đã được ghi nhận để TUNN Coffee House phục vụ bạn ngày một tốt hơn.
+                    </p>
+                  </div>
+
+                  {/* 5-second smooth progress bar */}
+                  <div className="pt-2 space-y-2">
+                    <div className="w-full h-1.5 bg-coffee-beige/50 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ scaleX: 1 }}
+                        animate={{ scaleX: 0 }}
+                        transition={{ duration: 5, ease: 'linear' }}
+                        style={{ transformOrigin: 'left' }}
+                        className="h-full bg-coffee rounded-full"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-coffee-muted">
+                      <span>Tự động đóng sau 5 giây...</span>
+                      <button
+                        type="button"
+                        onClick={finishAndRevealReview}
+                        className="font-semibold text-coffee hover:underline"
+                      >
+                        Đóng &amp; xem ngay
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.form
+                  key="feedback-form"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onSubmit={handleSubmit}
+                  className="p-6 space-y-5"
+                >
                 {/* Star Selector */}
                 <div className="text-center space-y-2">
                   <div className="flex items-center justify-center gap-2">
@@ -313,8 +426,9 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
                   <Send className="w-3.5 h-3.5" />
                   <span>{submitting ? 'Đang gửi...' : 'Gửi Đánh Giá'}</span>
                 </button>
-              </form>
+              </motion.form>
             )}
+            </AnimatePresence>
           </motion.div>
         </div>
       )}
