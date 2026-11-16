@@ -7,7 +7,6 @@ import {
   Lock,
   Mail,
   ArrowLeft,
-  ArrowRight,
   Loader2,
   Database,
   CheckCircle2,
@@ -190,296 +189,257 @@ export const AdminLoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#FAF8F4] text-[#1C1410] grid grid-cols-1 lg:grid-cols-12">
-      {/* Left Full-Bleed Brand Showcase */}
-      <aside className="relative lg:col-span-6 xl:col-span-7 bg-[#160F0C] text-[#F7F5EF] p-8 sm:p-12 xl:p-16 flex flex-col justify-between overflow-hidden">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+    <div
+      className="min-h-screen w-full bg-ivory text-coffee-dark font-sans flex items-center justify-center p-4 sm:p-6 lg:p-10"
+      style={{
+        backgroundImage:
+          'radial-gradient(ellipse 90% 60% at 50% 0%, var(--color-bg-primary, #F7F5EF), transparent 75%)',
+      }}
+    >
+      <div className="w-full max-w-[880px] bg-ivory-light border border-coffee-beige rounded-2xl shadow-editorial-lg overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+        {/* Mobile/Tablet Top Coffee Band (< 1024px) */}
+        <div className="lg:hidden bg-coffee-dark text-ivory-light px-6 py-5 flex items-center gap-3.5">
+          <div className="shrink-0">
+            <BrandLogo size="md" showText={false} />
+          </div>
+          <div>
+            <h1 className="font-serif text-xl font-medium leading-tight text-ivory-light">
+              TUNN Coffee House
+            </h1>
+            <p className="text-xs text-coffee-beige/90 mt-0.5">
+              Quản trị cửa hàng
+            </p>
+          </div>
+        </div>
+
+        {/* Left Espresso Brand Panel (Desktop >= 1024px) */}
+        <aside
+          className="hidden lg:flex lg:col-span-5 bg-coffee-dark text-ivory-light p-10 flex-col justify-between relative overflow-hidden"
           style={{
-            backgroundImage: 'radial-gradient(#E9E6D8 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
+            backgroundImage:
+              'radial-gradient(circle at 20% 15%, rgba(213, 198, 173, 0.14), transparent 55%), radial-gradient(circle at 85% 90%, rgba(75, 46, 36, 0.65), transparent 60%)',
           }}
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-32 -right-32 w-[420px] h-[420px] rounded-full bg-[#6B4232]/35 blur-3xl"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-32 -left-24 w-[360px] h-[360px] rounded-full bg-[#A67C52]/15 blur-3xl"
-        />
+        >
+          <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center py-4">
+            <BrandLogo size="xl" showText={false} />
 
-        {/* Top Brand & Live Status */}
-        <div className="relative z-10 flex items-center justify-between gap-4">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-3.5 group focus:outline-none"
-          >
-            <BrandLogo
-              size="md"
-              showText={false}
-              className="ring-1 ring-[#D5C6AD]/30 rounded-full"
-            />
-            <div>
-              <p className="font-serif text-lg font-semibold tracking-wide text-[#F7F5EF] group-hover:text-[#D5C6AD] transition-colors">
-                TUNN Coffee House
-              </p>
-              <p className="text-[10px] uppercase tracking-[0.24em] text-[#D5C6AD]/70">
-                CMS Studio v2.0
-              </p>
-            </div>
-          </Link>
-
-          <span className="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-[11px] font-medium text-[#E9E6D8]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Hệ thống sẵn sàng</span>
-          </span>
-        </div>
-
-        {/* Center Editorial Statement */}
-        <div className="relative z-10 my-10 lg:my-0 max-w-xl space-y-5">
-          <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.26em] text-[#D4A574] font-semibold">
-            <span>Workspace Quản Trị</span>
-          </div>
-          <h1 className="font-serif text-3xl sm:text-4xl xl:text-[2.75rem] font-normal leading-[1.16] tracking-tight text-[#FAF8F4]">
-            Kiểm soát mọi điểm chạm thương hiệu trên một nền tảng tinh gọn.
-          </h1>
-          <p className="text-sm sm:text-base text-[#D5C6AD]/80 leading-relaxed max-w-lg">
-            Quản lý thực đơn, chương trình ưu đãi, giao diện theo mùa và phản hồi khách hàng tại bàn theo thời gian thực.
-          </p>
-        </div>
-
-        {/* Bottom Architecture Pillars */}
-        <div className="relative z-10 hidden lg:grid grid-cols-3 gap-4 pt-8 border-t border-white/10">
-          <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#D4A574] font-semibold">
-              01 · Đồng bộ tức thì
-            </p>
-            <p className="text-xs font-medium text-[#F7F5EF] mt-1.5">
-              Thực đơn &amp; Bố cục
-            </p>
-            <p className="text-[11px] text-[#D5C6AD]/65 mt-1 leading-relaxed">
-              Xuất bản thay đổi trực tiếp tới trang khách hàng không cần tải lại.
+            <h1 className="font-serif text-[26px] font-medium leading-tight tracking-tight text-ivory-light mt-6 whitespace-nowrap">
+              TUNN Coffee House
+            </h1>
+            <div className="w-10 h-px bg-coffee-beige/40 my-3.5" aria-hidden="true" />
+            <p className="text-sm text-coffee-beige/90">
+              Quản trị cửa hàng
             </p>
           </div>
-          <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#D4A574] font-semibold">
-              02 · Bảo mật đa lớp
-            </p>
-            <p className="text-xs font-medium text-[#F7F5EF] mt-1.5">
-              2FA &amp; Phân quyền
-            </p>
-            <p className="text-[11px] text-[#D5C6AD]/65 mt-1 leading-relaxed">
-              Xác thực OTP, khóa brute-force và nhật ký thao tác chi tiết.
+
+          <div className="relative z-10 pt-5 border-t border-coffee-beige/20 text-center">
+            <p className="text-xs text-coffee-beige/75">
+              Khu vực nội bộ dành cho quản trị viên
             </p>
           </div>
-          <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[#D4A574] font-semibold">
-              03 · Trải nghiệm QR
-            </p>
-            <p className="text-xs font-medium text-[#F7F5EF] mt-1.5">
-              Đánh giá &amp; Thống kê
-            </p>
-            <p className="text-[11px] text-[#D5C6AD]/65 mt-1 leading-relaxed">
-              Theo dõi lượt quét bàn và phản hồi xác thực từ khách ghé quán.
-            </p>
-          </div>
-        </div>
-      </aside>
+        </aside>
 
-      {/* Right Clean Auth Workspace */}
-      <main className="lg:col-span-6 xl:col-span-5 flex flex-col justify-between p-6 sm:p-10 xl:p-16 bg-[#FAF8F4]">
-        <div className="flex items-center justify-between">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#7A6558] hover:text-[#1C1410] transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Về trang khách hàng</span>
-          </Link>
-          <span className="text-[11px] uppercase tracking-[0.2em] text-[#8C7565] font-semibold">
-            Admin Access
-          </span>
-        </div>
-
-        <div className="w-full max-w-[400px] mx-auto my-10">
-          <div className="mb-8">
-            <div className="w-11 h-11 rounded-2xl bg-[#EFECE3] border border-[#DDD3C2] flex items-center justify-center mb-5">
+        {/* Right Form Panel */}
+        <main className="lg:col-span-7 p-6 sm:p-10 lg:p-11 flex flex-col justify-between bg-ivory-light">
+          <div>
+            <div className="pb-4 mb-6 border-b border-coffee-beige flex items-center justify-between gap-3">
+              <h2 className="font-serif text-2xl font-medium text-coffee-dark">
+                {mfaFactorId
+                  ? 'Xác thực 2 lớp (2FA)'
+                  : lockoutRemainingSec > 0 || accountLockedMessage
+                  ? 'Tạm khóa truy cập'
+                  : 'Đăng nhập quản trị'}
+              </h2>
               {mfaFactorId ? (
-                <Smartphone className="w-5 h-5 text-[#4B2E24]" />
-              ) : (
-                <Lock className="w-5 h-5 text-[#4B2E24]" />
-              )}
+                <Smartphone className="w-5 h-5 text-coffee shrink-0" />
+              ) : lockoutRemainingSec > 0 || accountLockedMessage ? (
+                <ShieldAlert className="w-5 h-5 text-red-700 shrink-0" />
+              ) : null}
             </div>
-            <h2 className="font-serif text-3xl font-semibold tracking-tight text-[#1C1410]">
-              {mfaFactorId ? 'Xác thực 2 lớp' : 'Chào mừng trở lại'}
-            </h2>
-            <p className="text-sm text-[#7A6558] mt-1.5">
-              {mfaFactorId
-                ? 'Nhập mã OTP 6 chữ số từ ứng dụng Authenticator để tiếp tục.'
-                : 'Đăng nhập bằng tài khoản Quản trị viên để vào TUNN CMS.'}
-            </p>
-          </div>
 
-          {lockoutRemainingSec > 0 && (
-            <div className="mb-5 p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-900 flex items-start gap-2.5">
-              <ShieldAlert className="w-4 h-4 text-red-700 shrink-0 mt-0.5" />
-              <div>
-                <strong>Chế độ bảo vệ chống dò mật khẩu đang bật:</strong> Vui lòng đợi{' '}
-                <span className="font-bold">{lockoutRemainingSec} giây</span> trước khi thử đăng nhập lại.
-              </div>
-            </div>
-          )}
-
-          {accountLockedMessage && (
-            <div className="mb-5 p-3.5 bg-red-50 border border-red-300 rounded-xl text-xs text-red-900 flex items-start gap-2.5">
-              <ShieldAlert className="w-4 h-4 text-red-700 shrink-0 mt-0.5" />
-              <div>
-                <strong className="block mb-0.5">Tài Khoản Đã Bị Khóa</strong>
-                <span>{accountLockedMessage}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Login Form or 2FA Step */}
-          {mfaFactorId ? (
-            <form onSubmit={handleVerifyMfa} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-[#1C1410] mb-1.5">
-                  Mã OTP 6 chữ số
-                </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  autoFocus
-                  value={mfaCode}
-                  onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
-                  placeholder="000000"
-                  className="w-full h-12 px-4 text-xl font-mono tracking-[0.45em] text-center bg-white border border-[#DDD3C2] rounded-xl focus:outline-none focus:ring-4 focus:ring-[#4B2E24]/10 focus:border-[#241914] transition-all"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={verifyingMfa || mfaCode.length < 6}
-                className="w-full h-11 px-4 bg-[#241914] hover:bg-[#3A251C] text-[#FAF8F4] text-xs font-semibold uppercase tracking-[0.16em] rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
-              >
-                {verifyingMfa && <Loader2 className="w-4 h-4 animate-spin" />}
-                <span>Xác Nhận &amp; Vào Quản Trị</span>
-                {!verifyingMfa && <ArrowRight className="w-4 h-4" />}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleCancelMfa}
-                className="w-full py-2 text-xs font-medium text-[#7A6558] hover:text-[#1C1410] transition-colors"
-              >
-                Hủy &amp; Đăng nhập tài khoản khác
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-[#1C1410] mb-1.5">
-                  Email quản trị
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-[#8C7565] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <input
-                    type="email"
-                    autoComplete="email"
-                    disabled={lockoutRemainingSec > 0}
-                    {...loginForm.register('email')}
-                    placeholder="admin@tunncoffee.com"
-                    className="w-full h-11 pl-10 pr-3.5 text-sm bg-white border border-[#DDD3C2] rounded-xl focus:outline-none focus:ring-4 focus:ring-[#4B2E24]/10 focus:border-[#241914] transition-all disabled:opacity-50"
-                  />
+            {lockoutRemainingSec > 0 && (
+              <div className="mb-5 p-3.5 bg-red-50 border border-red-300 rounded-xl text-xs text-red-900 flex items-start gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-red-700 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="block mb-0.5">
+                    Chế độ bảo vệ chống dò mật khẩu đang bật:
+                  </strong>
+                  <span>
+                    Vui lòng đợi <span className="font-bold">{lockoutRemainingSec} giây</span> trước khi thử đăng nhập lại.
+                  </span>
                 </div>
-                {loginForm.formState.errors.email && (
-                  <p className="text-xs text-red-700 mt-1.5">
-                    {loginForm.formState.errors.email.message}
-                  </p>
-                )}
               </div>
+            )}
 
-              <div>
-                <label className="block text-xs font-semibold text-[#1C1410] mb-1.5">
-                  Mật khẩu
-                </label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-[#8C7565] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    disabled={lockoutRemainingSec > 0}
-                    {...loginForm.register('password')}
-                    placeholder="••••••••"
-                    className="w-full h-11 pl-10 pr-10 text-sm bg-white border border-[#DDD3C2] rounded-xl focus:outline-none focus:ring-4 focus:ring-[#4B2E24]/10 focus:border-[#241914] transition-all disabled:opacity-50"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#8C7565] hover:text-[#1C1410] transition-colors"
-                    aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+            {accountLockedMessage && (
+              <div className="mb-5 p-3.5 bg-red-50 border border-red-300 rounded-xl text-xs text-red-900 flex items-start gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-red-700 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="block mb-0.5">Tài Khoản Đã Bị Khóa</strong>
+                  <span>{accountLockedMessage}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Login Form or 2FA Step */}
+            {mfaFactorId ? (
+              <form onSubmit={handleVerifyMfa} className="space-y-4">
+                <div className="p-3.5 bg-ivory/70 border border-coffee-beige rounded-xl text-xs text-coffee-dark flex items-start gap-2.5">
+                  <Smartphone className="w-4 h-4 text-coffee shrink-0 mt-0.5" />
+                  <span>
+                    Mở ứng dụng Authenticator trên điện thoại và nhập mã 6 chữ số để hoàn tất đăng nhập.
+                  </span>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="admin-login-mfa-otp"
+                    className="block text-[13px] font-medium text-coffee-dark mb-1.5"
                   >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
+                    Mã OTP 6 chữ số
+                  </label>
+                  <input
+                    id="admin-login-mfa-otp"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    autoFocus
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
+                    placeholder="000000"
+                    className="w-full min-h-[48px] px-4 text-lg font-mono tracking-[0.4em] text-center bg-white text-coffee-dark border border-coffee-beige rounded-xl focus:outline-none focus:ring-2 focus:ring-coffee/25 focus:border-coffee transition-all"
+                  />
                 </div>
-                {loginForm.formState.errors.password && (
-                  <p className="text-xs text-red-700 mt-1.5">
-                    {loginForm.formState.errors.password.message}
-                  </p>
-                )}
-              </div>
 
-              <button
-                type="submit"
-                disabled={submitting || lockoutRemainingSec > 0}
-                className="w-full h-11 mt-2 px-4 bg-[#241914] hover:bg-[#3A251C] text-[#FAF8F4] text-xs font-semibold uppercase tracking-[0.16em] rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
-              >
-                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                <span>
-                  {lockoutRemainingSec > 0
-                    ? `Tạm khóa (${lockoutRemainingSec}s)`
-                    : 'Đăng Nhập Hệ Thống'}
-                </span>
-                {!submitting && lockoutRemainingSec === 0 && (
-                  <ArrowRight className="w-4 h-4" />
-                )}
-              </button>
-            </form>
-          )}
+                <button
+                  type="submit"
+                  disabled={verifyingMfa || mfaCode.length < 6}
+                  className="w-full min-h-[44px] px-4 bg-coffee hover:bg-coffee-dark text-ivory-light text-sm font-medium rounded-xl shadow-editorial transition-all hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:translate-y-0"
+                >
+                  {verifyingMfa && <Loader2 className="w-4 h-4 animate-spin" />}
+                  <span>Xác nhận</span>
+                </button>
 
-          {!isConfigured && (
-            <div className="mt-6 pt-6 border-t border-[#DDD3C2]">
-              <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-950 space-y-2">
-                <div className="flex items-center gap-2 font-semibold">
-                  <Database className="w-4 h-4 text-amber-700 shrink-0" />
-                  <span>Chưa phát hiện biến môi trường Supabase (.env)</span>
-                </div>
                 <button
                   type="button"
-                  onClick={handleEnterPreviewMode}
-                  className="w-full py-2 px-3 bg-[#241914] text-[#FAF8F4] text-[11px] font-semibold uppercase tracking-wider rounded-xl hover:bg-[#4B2E24] transition-colors flex items-center justify-center gap-1.5"
+                  onClick={handleCancelMfa}
+                  className="w-full min-h-[44px] py-2 text-xs font-medium text-coffee-muted hover:text-coffee-dark transition-colors"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Mở Giao Diện Admin CMS (Chế độ Xem trước)</span>
+                  Hủy và đăng nhập tài khoản khác
                 </button>
-              </div>
-            </div>
-          )}
-        </div>
+              </form>
+            ) : (
+              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="admin-login-email"
+                    className="block text-[13px] font-medium text-coffee-dark mb-1.5"
+                  >
+                    Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-coffee-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      id="admin-login-email"
+                      type="email"
+                      autoComplete="email"
+                      disabled={lockoutRemainingSec > 0}
+                      {...loginForm.register('email')}
+                      placeholder="admin@tunncoffee.com"
+                      className="w-full min-h-[44px] pl-10 pr-3.5 py-2.5 text-sm bg-white text-coffee-dark placeholder:text-coffee-muted/70 border border-coffee-beige rounded-xl focus:outline-none focus:ring-2 focus:ring-coffee/25 focus:border-coffee transition-all disabled:opacity-50"
+                    />
+                  </div>
+                  {loginForm.formState.errors.email && (
+                    <p className="text-xs text-red-700 mt-1.5 font-medium">
+                      {loginForm.formState.errors.email.message}
+                    </p>
+                  )}
+                </div>
 
-        <div className="flex items-center justify-between text-[11px] text-[#8C7565] pt-4 border-t border-[#E6DFD1]">
-          <span>© 2026 TUNN Coffee House</span>
-          <span>Bảo vệ bởi 2FA &amp; Supabase Auth</span>
-        </div>
-      </main>
+                <div>
+                  <label
+                    htmlFor="admin-login-password"
+                    className="block text-[13px] font-medium text-coffee-dark mb-1.5"
+                  >
+                    Mật khẩu
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-coffee-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      id="admin-login-password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      disabled={lockoutRemainingSec > 0}
+                      {...loginForm.register('password')}
+                      placeholder="••••••••"
+                      className="w-full min-h-[44px] pl-10 pr-11 py-2.5 text-sm bg-white text-coffee-dark placeholder:text-coffee-muted/70 border border-coffee-beige rounded-xl focus:outline-none focus:ring-2 focus:ring-coffee/25 focus:border-coffee transition-all disabled:opacity-50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-xl text-coffee-muted hover:text-coffee-dark transition-colors"
+                      aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                  {loginForm.formState.errors.password && (
+                    <p className="text-xs text-red-700 mt-1.5 font-medium">
+                      {loginForm.formState.errors.password.message}
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting || lockoutRemainingSec > 0}
+                  className="w-full min-h-[44px] mt-2 px-4 bg-coffee hover:bg-coffee-dark text-ivory-light text-sm font-medium rounded-xl shadow-editorial transition-all hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:translate-y-0"
+                >
+                  {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  <span>
+                    {lockoutRemainingSec > 0
+                      ? `Tạm khóa (${lockoutRemainingSec}s)`
+                      : 'Đăng nhập'}
+                  </span>
+                </button>
+              </form>
+            )}
+
+            {!isConfigured && (
+              <div className="mt-6 pt-5 border-t border-coffee-beige">
+                <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-950 space-y-2">
+                  <div className="flex items-center gap-2 font-medium">
+                    <Database className="w-4 h-4 text-amber-700 shrink-0" />
+                    <span>Chưa phát hiện biến môi trường Supabase (.env)</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleEnterPreviewMode}
+                    className="w-full min-h-[44px] py-2 px-3 bg-coffee-dark text-ivory-light text-xs font-medium rounded-xl hover:bg-coffee transition-all hover:-translate-y-0.5 active:scale-[0.98] flex items-center justify-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Mở chế độ xem trước CMS</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-8 pt-4 border-t border-coffee-beige/60">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-coffee-muted hover:text-coffee-dark transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Quay về trang khách hàng</span>
+            </Link>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
