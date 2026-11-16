@@ -65,7 +65,7 @@ export const HeroSection: React.FC = () => {
             className={`lg:col-span-7 flex flex-col ${alignmentClass}`}
           >
             {/* Editorial Masthead Stamp */}
-            <div className="inline-flex items-center mb-7 pb-2 border-b border-coffee/30">
+            <div className="inline-flex items-center mb-7 pb-2 border-b border-coffee/25 dark:border-white/[0.12]">
               <span className="text-[11px] uppercase tracking-[0.22em] font-semibold text-coffee">
                 {content.badge || 'TRÀ NGUYÊN LÁ & CÀ PHÊ THỦ CÔNG'}
               </span>
@@ -94,7 +94,7 @@ export const HeroSection: React.FC = () => {
               {content.secondary_cta_label && (
                 <a
                   href={sanitizeUrl(content.secondary_cta_href, '#about')}
-                  className={`inline-flex items-center gap-2 px-6 py-4 text-xs uppercase tracking-[0.18em] font-semibold border border-coffee/45 text-coffee-dark hover:border-coffee hover:bg-ivory-light/70 transition-all duration-300 active:scale-[0.98] ${buttonRadiusClass}`}
+                  className={`inline-flex items-center gap-2 px-6 py-4 text-xs uppercase tracking-[0.18em] font-semibold border border-coffee/35 dark:border-white/[0.16] dark:bg-white/[0.04] text-coffee-dark hover:border-coffee hover:bg-ivory-light/70 transition-all duration-300 active:scale-[0.98] ${buttonRadiusClass}`}
                 >
                   <span>{content.secondary_cta_label}</span>
                 </a>
@@ -103,7 +103,7 @@ export const HeroSection: React.FC = () => {
 
             {/* Roastery & Tea Bar Specification Ledger */}
             <div className="mt-12 pt-8 border-t border-coffee-beige/80 dark:border-t-0 grid grid-cols-3 gap-6 sm:gap-10 w-full max-w-xl">
-              <div className="border-l-2 border-coffee/30 pl-3.5">
+              <div className="border-l-2 border-coffee/25 dark:border-white/[0.14] pl-3.5">
                 <p className="font-serif text-2xl sm:text-3xl font-semibold text-coffee">
                   100%
                 </p>
@@ -111,7 +111,7 @@ export const HeroSection: React.FC = () => {
                   Trà Nguyên Lá &amp; Hạt Mộc
                 </p>
               </div>
-              <div className="border-l-2 border-coffee/30 pl-3.5">
+              <div className="border-l-2 border-coffee/25 dark:border-white/[0.14] pl-3.5">
                 <p className="font-serif text-2xl sm:text-3xl font-semibold text-coffee">
                   18 Giờ
                 </p>
@@ -119,7 +119,7 @@ export const HeroSection: React.FC = () => {
                   Ủ Lạnh Chiết Xuất Chậm
                 </p>
               </div>
-              <div className="border-l-2 border-coffee/30 pl-3.5">
+              <div className="border-l-2 border-coffee/25 dark:border-white/[0.14] pl-3.5">
                 <p className="font-serif text-2xl sm:text-3xl font-semibold text-coffee">
                   Uji Kyoto
                 </p>

@@ -276,10 +276,10 @@ export const CustomerHeader: React.FC = () => {
                   key={`mob-${item.href}-${idx}`}
                   href={item.href}
                   onClick={() => handleNavClick(item.href)}
-                  className={`flex items-center justify-between text-xs uppercase tracking-[0.18em] py-2.5 border-b border-coffee-beige/40 ${
+                  className={`flex items-center justify-between text-xs uppercase tracking-[0.18em] px-3 py-2.5 rounded-xl transition-colors ${
                     activeHash === item.href
-                      ? 'text-coffee font-semibold'
-                      : 'text-coffee-dark/85'
+                      ? 'bg-coffee/[0.08] dark:bg-white/[0.07] text-coffee font-semibold'
+                      : 'text-coffee-dark/85 hover:bg-coffee/[0.04] dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   <span>{item.label}</span>
@@ -314,7 +314,7 @@ export const CustomerHeader: React.FC = () => {
         )}
       </AnimatePresence>
       </header>
-      <div className="h-[76px] sm:h-[80px] lg:h-[116px] shrink-0" aria-hidden="true" />
+      <div className="h-[84px] sm:h-[88px] lg:h-[116px] shrink-0" aria-hidden="true" />
     </>
   );
 };
