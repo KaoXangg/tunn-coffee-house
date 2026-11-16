@@ -63,7 +63,109 @@ export const CustomerHomePage: React.FC = () => {
     const root = document.documentElement;
     if (!effectiveTheme) return;
 
-    const { tokens } = effectiveTheme;
+    const { tokens, key: themeKey } = effectiveTheme;
+
+    const DARK_VARIANT_BY_KEY: Record<
+      string,
+      {
+        primary: string;
+        background: string;
+        surface: string;
+        text: string;
+        textMuted: string;
+        border: string;
+      }
+    > = {
+      christmas: {
+        primary: '#C83E46',
+        background: '#0E1915',
+        surface: '#162620',
+        text: '#F2F7F4',
+        textMuted: '#9FB8AD',
+        border: '#243D33',
+      },
+      valentine: {
+        primary: '#F43F5E',
+        background: '#1A0D13',
+        surface: '#26131C',
+        text: '#FDF2F6',
+        textMuted: '#CFA3B5',
+        border: '#3D1E2C',
+      },
+      tet: {
+        primary: '#EAB308',
+        background: '#1A0E0B',
+        surface: '#271510',
+        text: '#FFF7ED',
+        textMuted: '#D6B39A',
+        border: '#42241B',
+      },
+      summer: {
+        primary: '#38BDF8',
+        background: '#0B1822',
+        surface: '#122433',
+        text: '#F0F9FF',
+        textMuted: '#93B8D4',
+        border: '#1E3A52',
+      },
+    };
+
+    const LIGHT_VARIANT_BY_KEY: Record<
+      string,
+      {
+        primary: string;
+        background: string;
+        surface: string;
+        text: string;
+        textMuted: string;
+        border: string;
+      }
+    > = {
+      halloween: {
+        primary: '#9333EA',
+        background: '#F8F4FC',
+        surface: '#EFE7F8',
+        text: '#231433',
+        textMuted: '#6D5488',
+        border: '#DCCCEB',
+      },
+      black_friday: {
+        primary: '#DC2626',
+        background: '#F6F5F3',
+        surface: '#ECEAE6',
+        text: '#141416',
+        textMuted: '#63636B',
+        border: '#D6D3CD',
+      },
+      mid_autumn: {
+        primary: '#D97706',
+        background: '#F3F6FB',
+        surface: '#E6ECF7',
+        text: '#142038',
+        textMuted: '#586A8F',
+        border: '#C9D5EC',
+      },
+    };
+
+    const inherentlyDark =
+      themeKey === 'halloween' ||
+      themeKey === 'black_friday' ||
+      themeKey === 'mid_autumn';
+
+    const resolved =
+      themeMode === 'dark' && !inherentlyDark
+        ? DARK_VARIANT_BY_KEY[themeKey] || {
+            primary: tokens.primary,
+            background: '#13100E',
+            surface: '#1D1815',
+            text: '#F5EFE6',
+            textMuted: '#A9988A',
+            border: '#2E2621',
+          }
+        : themeMode === 'light' && inherentlyDark
+        ? LIGHT_VARIANT_BY_KEY[themeKey] || tokens
+        : tokens;
+
     const prev = {
       primary: root.style.getPropertyValue('--color-primary'),
       bgSecondary: root.style.getPropertyValue('--color-bg-secondary'),
@@ -74,12 +176,12 @@ export const CustomerHomePage: React.FC = () => {
     };
 
     root.dataset.seasonalActive = '1';
-    root.style.setProperty('--color-primary', tokens.primary);
-    root.style.setProperty('--color-bg-secondary', tokens.surface || tokens.secondary);
-    root.style.setProperty('--color-bg-primary', tokens.background);
-    root.style.setProperty('--color-text-primary', tokens.text);
-    root.style.setProperty('--color-text-muted', tokens.textMuted);
-    root.style.setProperty('--color-accent', tokens.border || tokens.accent);
+    root.style.setProperty('--color-primary', resolved.primary);
+    root.style.setProperty('--color-bg-secondary', resolved.surface || tokens.secondary);
+    root.style.setProperty('--color-bg-primary', resolved.background);
+    root.style.setProperty('--color-text-primary', resolved.text);
+    root.style.setProperty('--color-text-muted', resolved.textMuted);
+    root.style.setProperty('--color-accent', resolved.border || tokens.accent);
 
     root.style.setProperty('--theme-primary', tokens.primary);
     root.style.setProperty('--theme-secondary', tokens.secondary);

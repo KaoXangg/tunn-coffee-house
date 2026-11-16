@@ -243,9 +243,9 @@ export const ContactSection: React.FC = () => {
                       href={sanitizeUrl(settings.google_maps_url)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs uppercase tracking-wider font-semibold border border-coffee-beige dark:border-white/[0.14] bg-ivory/60 dark:bg-white/[0.04] text-coffee-dark hover:border-coffee hover:-translate-y-0.5 active:scale-[0.98] transition-all ${buttonRadiusClass}`}
+                      className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs uppercase tracking-wider font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark hover:-translate-y-0.5 active:scale-[0.98] transition-all ${buttonRadiusClass}`}
                     >
-                      <Navigation className="w-3.5 h-3.5 text-coffee" />
+                      <Navigation className="w-3.5 h-3.5" />
                       <span>Chỉ đường</span>
                     </a>
                   )}

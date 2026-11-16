@@ -292,16 +292,16 @@ export const AdminSeasonalThemesPage: React.FC = () => {
 
       {/* Overview KPIs */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7 bg-white border border-[#D5C6AD] rounded-brand p-6 flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-white border border-[#D5C6AD] rounded-brand p-6 flex flex-col justify-between min-h-[176px]">
           <div className="flex items-start justify-between gap-4">
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-[11px] uppercase tracking-[0.2em] text-[#8C7565] font-semibold">
                 CHỦ ĐỀ ĐANG HIỂN THỊ TRÊN WEBSITE
               </p>
-              <h2 className="font-serif text-2xl font-semibold text-[#241914] mt-1">
+              <h2 className="font-serif text-2xl font-semibold text-[#241914] mt-1 truncate">
                 {activeTheme ? activeTheme.name : 'TUNN Coffee House (Mặc định)'}
               </h2>
-              <p className="text-sm text-[#8C7565] mt-1">
+              <p className="text-sm text-[#8C7565] mt-1 line-clamp-2">
                 {activeTheme
                   ? activeTheme.description
                   : 'Đang sử dụng bộ màu sắc thương hiệu gốc của quán. Chọn một chủ đề bên dưới để kích hoạt.'}
@@ -310,47 +310,64 @@ export const AdminSeasonalThemesPage: React.FC = () => {
             {activeTheme && renderStatusBadge(activeTheme)}
           </div>
 
-          {activeTheme && (
-            <div className="mt-5 pt-4 border-t border-[#E9E6D8] flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2 shrink-0">
-                {[
-                  activeTheme.tokens.headerBg,
-                  activeTheme.tokens.primary,
-                  activeTheme.tokens.accent,
-                  activeTheme.tokens.background,
-                  activeTheme.tokens.footerBg,
-                ].map((c, idx) => (
-                  <span
-                    key={idx}
-                    className="w-6 h-6 rounded-full border border-black/10"
-                    style={{ backgroundColor: c }}
-                    title={c}
-                  />
-                ))}
+          <div className="mt-4 pt-4 border-t border-[#E9E6D8] flex items-center justify-between gap-3">
+            {activeTheme ? (
+              <>
+                <div className="flex items-center gap-2 shrink-0">
+                  {[
+                    activeTheme.tokens.headerBg,
+                    activeTheme.tokens.primary,
+                    activeTheme.tokens.accent,
+                    activeTheme.tokens.background,
+                    activeTheme.tokens.footerBg,
+                  ].map((c, idx) => (
+                    <span
+                      key={idx}
+                      className="w-6 h-6 rounded-full border border-black/10"
+                      style={{ backgroundColor: c }}
+                      title={c}
+                    />
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => openFullSitePreview(activeTheme)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-[#D5C6AD] rounded-brand text-[#4B2E24] hover:bg-[#F7F5EF]"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Xem Website</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingTheme(activeTheme);
+                      setEditorTab('effects');
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#E9E6D8] rounded-brand text-[#241914] hover:bg-[#D5C6AD]"
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <span>Tùy chỉnh</span>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-between w-full text-xs text-[#8C7565]">
+                <div className="flex items-center gap-2">
+                  {['#4B2E24', '#D5C6AD', '#F7F5EF', '#E9E6D8', '#241914'].map((c, idx) => (
+                    <span
+                      key={idx}
+                      className="w-6 h-6 rounded-full border border-black/10"
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                </div>
+                <span className="text-[11px] uppercase tracking-wider font-medium">
+                  Giao diện mặc định
+                </span>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => openFullSitePreview(activeTheme)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-[#D5C6AD] rounded-brand text-[#4B2E24] hover:bg-[#F7F5EF]"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  <span>Xem Website</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingTheme(activeTheme);
-                    setEditorTab('effects');
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#E9E6D8] rounded-brand text-[#241914] hover:bg-[#D5C6AD]"
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span>Tùy chỉnh</span>
-                </button>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         <div className="lg:col-span-5 bg-white border border-[#D5C6AD] rounded-brand p-6">
@@ -498,70 +515,74 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Action Bar */}
-                <div className="pt-3 border-t border-[#E9E6D8] flex flex-wrap items-center gap-2">
-                  {isCurrentActive ? (
+                {/* Action Bar (Single-row aligned) */}
+                <div className="pt-3 border-t border-[#E9E6D8] flex items-center justify-between gap-1.5">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    {isCurrentActive ? (
+                      <button
+                        type="button"
+                        onClick={handleDeactivateAll}
+                        className="inline-flex items-center gap-1 px-2.5 py-2 text-[11px] font-semibold bg-stone-800 text-white hover:bg-stone-900 rounded-brand transition-colors whitespace-nowrap"
+                      >
+                        <PowerOff className="w-3.5 h-3.5 shrink-0" />
+                        <span>Tắt</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleActivate(theme)}
+                        className="inline-flex items-center gap-1 px-2.5 py-2 text-[11px] font-semibold bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors whitespace-nowrap"
+                      >
+                        <Power className="w-3.5 h-3.5 shrink-0" />
+                        <span>Kích hoạt</span>
+                      </button>
+                    )}
+
                     <button
                       type="button"
-                      onClick={handleDeactivateAll}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-stone-800 text-white hover:bg-stone-900 rounded-brand transition-colors"
+                      onClick={() => setPreviewModalTheme(theme)}
+                      className="inline-flex items-center gap-1 px-2.5 py-2 text-[11px] font-medium border border-[#D5C6AD] text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors whitespace-nowrap"
+                      title="Xem trước"
                     >
-                      <PowerOff className="w-3.5 h-3.5" />
-                      <span>Tắt</span>
+                      <Eye className="w-3.5 h-3.5 shrink-0" />
+                      <span>Preview</span>
                     </button>
-                  ) : (
+
                     <button
                       type="button"
-                      onClick={() => handleActivate(theme)}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors"
+                      onClick={() => {
+                        setEditingTheme(theme);
+                        setEditorTab('colors');
+                      }}
+                      className="inline-flex items-center gap-1 px-2.5 py-2 text-[11px] font-medium border border-[#D5C6AD] text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors whitespace-nowrap"
+                      title="Tùy chỉnh & Lên lịch"
                     >
-                      <Power className="w-3.5 h-3.5" />
-                      <span>Kích hoạt</span>
+                      <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
+                      <span>Tùy chỉnh</span>
                     </button>
-                  )}
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setPreviewModalTheme(theme)}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-[#D5C6AD] text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors"
-                    title="Xem trước"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>Preview</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditingTheme(theme);
-                      setEditorTab('colors');
-                    }}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-[#D5C6AD] text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors"
-                    title="Tùy chỉnh & Lên lịch"
-                  >
-                    <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span>Tùy chỉnh</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleDuplicate(theme)}
-                    className="p-2 border border-[#D5C6AD] text-[#8C7565] hover:text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors ml-auto"
-                    title="Nhân bản chủ đề"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                  </button>
-
-                  {!theme.is_preset && (
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
                       type="button"
-                      onClick={() => handleDelete(theme)}
-                      className="p-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-brand transition-colors"
-                      title="Xóa chủ đề"
+                      onClick={() => handleDuplicate(theme)}
+                      className="p-2 border border-[#D5C6AD] text-[#8C7565] hover:text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors"
+                      title="Nhân bản chủ đề"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Copy className="w-3.5 h-3.5" />
                     </button>
-                  )}
+
+                    {!theme.is_preset && (
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(theme)}
+                        className="p-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-brand transition-colors"
+                        title="Xóa chủ đề"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </article>
