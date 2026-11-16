@@ -83,11 +83,11 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
   return (
     <section
       id="featured"
-      className="py-16 sm:py-24 lg:py-28 bg-ivory border-b border-coffee-beige/60 overflow-hidden"
+      className="py-16 sm:py-24 lg:py-28 bg-ivory border-b border-coffee-beige/60 dark:border-b-0 overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Editorial Heading */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-8 sm:mb-12 pb-5 sm:pb-6 border-b border-coffee-beige/70">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-8 sm:mb-12 pb-5 sm:pb-6 border-b border-coffee-beige/70 dark:border-b-0 dark:pb-0">
           <div>
             <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2">
               {section?.content?.eyebrow || 'TUYỂN CHỌN ĐẶC SẮC'}
@@ -133,7 +133,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
           onTouchEnd={() => setIsPaused(false)}
           className="space-y-6"
         >
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center bg-ivory-light border border-coffee-beige/80 rounded-2xl p-4 sm:p-7 lg:p-9 shadow-editorial relative overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center bg-ivory-light border border-coffee-beige/80 dark:border-white/[0.08] rounded-2xl p-4 sm:p-7 lg:p-9 shadow-editorial relative overflow-hidden">
             {/* Ambient subtle glow behind active drink */}
             <div
               aria-hidden="true"
@@ -289,7 +289,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
               </AnimatePresence>
 
               {/* Uniform Footer (Same single-row height whether discounted or not) */}
-              <div className="mt-6 pt-4 border-t border-coffee-beige/60 flex items-center justify-between gap-3">
+              <div className="mt-6 pt-4 border-t border-coffee-beige/60 dark:border-white/[0.07] flex items-center justify-between gap-3">
                 <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 min-w-0">
                   <span className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-coffee whitespace-nowrap">
                     {formatVND(

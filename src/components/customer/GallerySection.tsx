@@ -50,11 +50,11 @@ export const GallerySection: React.FC = () => {
   return (
     <section
       id="gallery"
-      className="py-20 sm:py-28 lg:py-32 bg-ivory-light border-b border-coffee-beige/60"
+      className="py-20 sm:py-28 lg:py-32 bg-ivory-light border-b border-coffee-beige/60 dark:border-b-0"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Header & Filter */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pb-6 border-b border-coffee-beige/70">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pb-6 border-b border-coffee-beige/70 dark:border-b-0 dark:pb-0">
           <div>
             <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2.5">
               {section?.content?.eyebrow || 'NHẬT KÝ HÌNH ẢNH'}

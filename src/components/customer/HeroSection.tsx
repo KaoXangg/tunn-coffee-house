@@ -53,7 +53,7 @@ export const HeroSection: React.FC = () => {
               color: content.text_color || settings.text_primary_color || '#241914',
             }
       }
-      className="relative min-h-[85vh] pt-12 pb-16 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28 overflow-hidden bg-ivory text-coffee-dark border-b border-coffee-beige/70 flex items-center"
+      className="relative min-h-[85vh] pt-12 pb-16 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28 overflow-hidden bg-ivory text-coffee-dark border-b border-coffee-beige/70 dark:border-b-0 flex items-center"
     >
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-12 items-center">
@@ -102,7 +102,7 @@ export const HeroSection: React.FC = () => {
             </div>
 
             {/* Roastery & Tea Bar Specification Ledger */}
-            <div className="mt-12 pt-8 border-t border-coffee-beige/80 grid grid-cols-3 gap-6 sm:gap-10 w-full max-w-xl">
+            <div className="mt-12 pt-8 border-t border-coffee-beige/80 dark:border-t-0 grid grid-cols-3 gap-6 sm:gap-10 w-full max-w-xl">
               <div className="border-l-2 border-coffee/30 pl-3.5">
                 <p className="font-serif text-2xl sm:text-3xl font-semibold text-coffee">
                   100%

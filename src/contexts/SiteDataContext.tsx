@@ -140,7 +140,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       root.style.setProperty('--color-bg-primary', '#140F0C');
       root.style.setProperty('--color-text-primary', '#F5EFE6');
       root.style.setProperty('--color-text-muted', '#A9988A');
-      root.style.setProperty('--color-accent', '#3A2A22');
+      root.style.setProperty('--color-accent', '#2A201B');
       root.classList.add('dark');
     } else {
       root.style.setProperty('--color-primary', settings.primary_color || '#4B2E24');

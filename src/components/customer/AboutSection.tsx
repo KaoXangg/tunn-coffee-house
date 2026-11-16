@@ -21,7 +21,7 @@ export const AboutSection: React.FC = () => {
   return (
     <section
       id="about"
-      className="py-20 sm:py-28 lg:py-32 bg-ivory-light border-b border-coffee-beige/60 overflow-hidden"
+      className="py-20 sm:py-28 lg:py-32 bg-ivory-light border-b border-coffee-beige/60 dark:border-b-0 overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Section Header */}
@@ -117,7 +117,7 @@ export const AboutSection: React.FC = () => {
 
         {/* 3 Architectural Pillars */}
         {content.pillars && content.pillars.length > 0 && (
-          <div className="mt-20 pt-14 border-t border-coffee-beige grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="mt-20 pt-14 border-t border-coffee-beige dark:border-t-0 grid grid-cols-1 md:grid-cols-3 gap-10">
             {content.pillars.map((pillar, index) => (
               <motion.div
                 key={index}

@@ -117,7 +117,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
   return (
     <section
       id="menu"
-      className="py-20 sm:py-28 lg:py-32 bg-ivory-light border-b border-coffee-beige/60"
+      className="py-20 sm:py-28 lg:py-32 bg-ivory-light border-b border-coffee-beige/60 dark:border-b-0"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Editorial Section Header */}
@@ -219,7 +219,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
         )}
 
         {/* Sticky Category Jump Bar (Wraps cleanly on desktop, horizontal swipe on mobile) */}
-        <div className="sticky top-[62px] lg:top-[70px] z-30 bg-ivory-light/95 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0 pt-2.5 pb-3 mb-4 border-b border-coffee-beige/60 overflow-x-auto sm:overflow-visible no-scrollbar">
+        <div className="sticky top-[62px] lg:top-[70px] z-30 bg-ivory-light/95 backdrop-blur-md -mx-4 px-4 sm:mx-0 sm:px-0 pt-2.5 pb-3 mb-4 border-b border-coffee-beige/60 dark:border-white/[0.07] overflow-x-auto sm:overflow-visible no-scrollbar">
           <div className="flex flex-nowrap sm:flex-wrap items-center sm:justify-center gap-2 w-max sm:w-full mx-auto px-1">
             <button
               type="button"

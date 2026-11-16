@@ -27,11 +27,11 @@ export const PromotionsSection: React.FC = () => {
   return (
     <section
       id="promotions"
-      className="py-20 sm:py-28 bg-ivory border-b border-coffee-beige/60"
+      className="py-20 sm:py-28 bg-ivory border-b border-coffee-beige/60 dark:border-b-0"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Heading */}
-        <div className="mb-14 pb-6 border-b border-coffee-beige/70">
+        <div className="mb-14 pb-6 border-b border-coffee-beige/70 dark:border-b-0 dark:pb-0">
           <p className="text-[11px] uppercase tracking-[0.25em] text-coffee font-semibold mb-2.5">
             {section?.content?.eyebrow || 'ƯU ĐÃI ĐẶC BIỆT'}
           </p>
