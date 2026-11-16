@@ -408,7 +408,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
         <img
           src={decorations.cornerRightAssetUrl}
           alt=""
-          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-16 right-2 sm:bottom-4 sm:right-16 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain opacity-90 drop-shadow-md`}
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute top-28 right-2.5 sm:top-32 sm:right-6 w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain opacity-90 drop-shadow-md`}
         />
       )}
 
@@ -433,7 +433,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
       {!showCustomRight && key === 'christmas' && (
         <svg
           viewBox="0 0 100 100"
-          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-16 right-2.5 sm:bottom-4 sm:right-16 w-12 h-12 sm:w-16 sm:h-16 opacity-90 drop-shadow`}
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute top-28 right-2.5 sm:top-32 sm:right-6 w-12 h-12 sm:w-16 sm:h-16 opacity-90 drop-shadow`}
           fill="none"
         >
           <rect x="18" y="36" width="64" height="50" rx="4" fill="#8B1E24" />
@@ -482,7 +482,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
       {!showCustomRight && key === 'tet' && (
         <svg
           viewBox="0 0 110 110"
-          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute bottom-16 right-2 sm:bottom-4 sm:right-16 w-14 h-14 sm:w-20 sm:h-20 opacity-90 drop-shadow`}
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute top-28 right-2.5 sm:top-32 sm:right-6 w-14 h-14 sm:w-20 sm:h-20 opacity-90 drop-shadow`}
           fill="none"
         >
           <path d="M95 98 Q68 72 42 58 Q25 48 16 28" stroke="#78350F" strokeWidth="4" strokeLinecap="round" />
@@ -562,7 +562,7 @@ export const SeasonalEffectsLayer: React.FC = () => {
         </svg>
       )}
 
-      {/* Valentine: Trái tim đôi */}
+      {/* Valentine: Trái tim đôi (Góc trái dưới) & Trái tim bay (Góc phải trên) */}
       {!showCustomLeft && key === 'valentine' && (
         <svg
           viewBox="0 0 110 100"
@@ -580,7 +580,21 @@ export const SeasonalEffectsLayer: React.FC = () => {
         </svg>
       )}
 
-      {/* Black Friday: Nhãn Sale Vàng Kim */}
+      {!showCustomRight && key === 'valentine' && (
+        <svg
+          viewBox="0 0 100 100"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute top-28 right-2.5 sm:top-32 sm:right-6 w-12 h-12 sm:w-16 sm:h-16 opacity-85 drop-shadow`}
+          fill="none"
+        >
+          <path
+            d="M50 82 C24 62, 16 40, 30 26 C40 16, 50 24, 50 34 C50 24, 60 16, 70 26 C84 40, 76 62, 50 82 Z"
+            fill="#F43F5E"
+          />
+          <circle cx="78" cy="24" r="4" fill="#FDA4AF" />
+        </svg>
+      )}
+
+      {/* Black Friday: Nhãn Sale Vàng Kim (Góc trái dưới) & Ngôi sao Flash (Góc phải trên) */}
       {!showCustomLeft && key === 'black_friday' && (
         <svg
           viewBox="0 0 110 100"
@@ -592,6 +606,19 @@ export const SeasonalEffectsLayer: React.FC = () => {
           <text x="34" y="56" fill="#EAB308" fontSize="16" fontWeight="bold" fontFamily="serif">
             SALE
           </text>
+        </svg>
+      )}
+
+      {!showCustomRight && key === 'black_friday' && (
+        <svg
+          viewBox="0 0 100 100"
+          className={`${decorations.enableMobile ? 'block' : 'hidden md:block'} absolute top-28 right-2.5 sm:top-32 sm:right-6 w-12 h-12 sm:w-16 sm:h-16 opacity-85 drop-shadow`}
+          fill="none"
+        >
+          <polygon
+            points="50,10 61,36 89,38 67,57 74,85 50,70 26,85 33,57 11,38 39,36"
+            fill="#EAB308"
+          />
         </svg>
       )}
 

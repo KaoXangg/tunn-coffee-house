@@ -516,24 +516,24 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                 </div>
 
                 {/* Action Bar (Single-row aligned) */}
-                <div className="pt-3 border-t border-[#E9E6D8] flex items-center justify-between gap-1.5">
-                  <div className="flex items-center gap-1.5 min-w-0">
+                <div className="pt-3 border-t border-[#E9E6D8] flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-1 min-w-0">
                     {isCurrentActive ? (
                       <button
                         type="button"
                         onClick={handleDeactivateAll}
-                        className="inline-flex items-center gap-1 px-2.5 py-2 text-[11px] font-semibold bg-stone-800 text-white hover:bg-stone-900 rounded-brand transition-colors whitespace-nowrap"
+                        className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold bg-stone-800 text-white hover:bg-stone-900 rounded-brand transition-colors whitespace-nowrap"
                       >
-                        <PowerOff className="w-3.5 h-3.5 shrink-0" />
+                        <PowerOff className="w-3 h-3 shrink-0" />
                         <span>Tắt</span>
                       </button>
                     ) : (
                       <button
                         type="button"
                         onClick={() => handleActivate(theme)}
-                        className="inline-flex items-center gap-1 px-2.5 py-2 text-[11px] font-semibold bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors whitespace-nowrap"
+                        className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-semibold bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors whitespace-nowrap"
                       >
-                        <Power className="w-3.5 h-3.5 shrink-0" />
+                        <Power className="w-3 h-3 shrink-0" />
                         <span>Kích hoạt</span>
                       </button>
                     )}
@@ -541,10 +541,10 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setPreviewModalTheme(theme)}
-                      className="inline-flex items-center gap-1 px-2.5 py-2 text-[11px] font-medium border border-[#D5C6AD] text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors whitespace-nowrap"
+                      className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-medium border border-[#D5C6AD] text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors whitespace-nowrap"
                       title="Xem trước"
                     >
-                      <Eye className="w-3.5 h-3.5 shrink-0" />
+                      <Eye className="w-3 h-3 shrink-0" />
                       <span>Preview</span>
                     </button>
 
@@ -554,10 +554,10 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                         setEditingTheme(theme);
                         setEditorTab('colors');
                       }}
-                      className="inline-flex items-center gap-1 px-2.5 py-2 text-[11px] font-medium border border-[#D5C6AD] text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors whitespace-nowrap"
+                      className="inline-flex items-center gap-1 px-2 py-1.5 text-[11px] font-medium border border-[#D5C6AD] text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors whitespace-nowrap"
                       title="Tùy chỉnh & Lên lịch"
                     >
-                      <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
+                      <SlidersHorizontal className="w-3 h-3 shrink-0" />
                       <span>Tùy chỉnh</span>
                     </button>
                   </div>
@@ -566,7 +566,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => handleDuplicate(theme)}
-                      className="p-2 border border-[#D5C6AD] text-[#8C7565] hover:text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors"
+                      className="p-1.5 border border-[#D5C6AD] text-[#8C7565] hover:text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand transition-colors"
                       title="Nhân bản chủ đề"
                     >
                       <Copy className="w-3.5 h-3.5" />
@@ -576,7 +576,7 @@ export const AdminSeasonalThemesPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleDelete(theme)}
-                        className="p-2 border border-red-200 text-red-600 hover:bg-red-50 rounded-brand transition-colors"
+                        className="p-1.5 border border-red-200 text-red-600 hover:bg-red-50 rounded-brand transition-colors"
                         title="Xóa chủ đề"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
