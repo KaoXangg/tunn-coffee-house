@@ -172,8 +172,13 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
     if (!open || submitted || !TURNSTILE_SITE_KEY) return;
 
     let cancelled = false;
+    let rafId = 0;
     const renderWidget = () => {
-      if (cancelled || !turnstileContainerRef.current || !window.turnstile) return;
+      if (cancelled || !window.turnstile) return;
+      if (!turnstileContainerRef.current) {
+        rafId = window.requestAnimationFrame(renderWidget);
+        return;
+      }
       if (turnstileWidgetIdRef.current) {
         try {
           window.turnstile.remove(turnstileWidgetIdRef.current);
@@ -211,6 +216,7 @@ export const TableFeedbackModal: React.FC<TableFeedbackModalProps> = ({
 
     return () => {
       cancelled = true;
+      if (rafId) window.cancelAnimationFrame(rafId);
       if (turnstileWidgetIdRef.current && window.turnstile) {
         try {
           window.turnstile.remove(turnstileWidgetIdRef.current);
