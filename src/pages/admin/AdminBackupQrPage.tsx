@@ -8,6 +8,8 @@ import {
   Loader2,
   Database,
   Printer,
+  Wifi,
+  Save,
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useSiteData } from '../../contexts/SiteDataContext';
@@ -23,6 +25,7 @@ export const AdminBackupQrPage: React.FC = () => {
     promotions,
     gallery,
     sections,
+    updatePageSection,
     refreshAll,
     logAdminActivity,
   } = useSiteData();
@@ -53,6 +56,46 @@ export const AdminBackupQrPage: React.FC = () => {
   const [qrTargetUrl, setQrTargetUrl] = useState(`${defaultOrigin}/#menu`);
   const [qrTitle, setQrTitle] = useState('QUÉT MÃ XEM THỰC ĐƠN');
   const [qrSubtitle, setQrSubtitle] = useState('TUNN Coffee House — Your Daily Ritual');
+  const [showWifiOnQr, setShowWifiOnQr] = useState(true);
+
+  const contactSection = sections.find((s) => s.section_key === 'contact');
+  const remoteWifiName = String(contactSection?.content?.wifi_name || '');
+  const remoteWifiPassword = String(contactSection?.content?.wifi_password || '');
+  const [wifiName, setWifiName] = useState(remoteWifiName);
+  const [wifiPassword, setWifiPassword] = useState(remoteWifiPassword);
+  const [wifiDirty, setWifiDirty] = useState(false);
+  const [savingWifi, setSavingWifi] = useState(false);
+
+  const [prevWifiKey, setPrevWifiKey] = useState(`${remoteWifiName}\0${remoteWifiPassword}`);
+  const currentWifiKey = `${remoteWifiName}\0${remoteWifiPassword}`;
+  if (currentWifiKey !== prevWifiKey) {
+    setPrevWifiKey(currentWifiKey);
+    if (!wifiDirty) {
+      setWifiName(remoteWifiName);
+      setWifiPassword(remoteWifiPassword);
+    }
+  }
+
+  const handleSaveWifi = async () => {
+    setSavingWifi(true);
+    try {
+      const { error } = await updatePageSection('contact', {
+        content: {
+          ...(contactSection?.content || {}),
+          wifi_name: wifiName.trim(),
+          wifi_password: wifiPassword.trim(),
+        },
+      });
+      if (error) {
+        toast.info('Đã cập nhật tạm thời', error);
+      } else {
+        setWifiDirty(false);
+        toast.success('Đã lưu thông tin Wi-Fi!', 'Tên và mật khẩu Wi-Fi đã được lưu vào hệ thống.');
+      }
+    } finally {
+      setSavingWifi(false);
+    }
+  };
   const [tableNumber, setTableNumber] = useState('');
   const [downloadingQr, setDownloadingQr] = useState(false);
 
@@ -286,9 +329,31 @@ export const AdminBackupQrPage: React.FC = () => {
       ctx.font = '20px "Be Vietnam Pro", sans-serif';
       ctx.fillText('Sử dụng Camera điện thoại hoặc Zalo để quét mã', 450, 950);
 
-      ctx.fillStyle = '#241914';
-      ctx.font = '18px monospace';
-      ctx.fillText(qrTargetUrl.replace(/^https?:\/\//, ''), 450, 1045);
+      const cleanWifiName = wifiName.trim();
+      const cleanWifiPassword = wifiPassword.trim();
+      if (showWifiOnQr && (cleanWifiName || cleanWifiPassword)) {
+        const hasBoth = Boolean(cleanWifiName && cleanWifiPassword);
+        ctx.fillStyle = '#E9E6D8';
+        ctx.fillRect(120, 974, 660, hasBoth ? 64 : 44);
+        ctx.strokeStyle = '#D5C6AD';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(120, 974, 660, hasBoth ? 64 : 44);
+
+        ctx.fillStyle = '#241914';
+        if (hasBoth) {
+          ctx.font = '600 19px "Be Vietnam Pro", sans-serif';
+          ctx.fillText(`Wi-Fi: ${cleanWifiName}`, 450, 1001);
+          ctx.font = '700 19px monospace';
+          ctx.fillText(`Pass: ${cleanWifiPassword}`, 450, 1027);
+        } else {
+          ctx.font = '600 20px "Be Vietnam Pro", sans-serif';
+          ctx.fillText(
+            cleanWifiName ? `Wi-Fi: ${cleanWifiName}` : `Pass: ${cleanWifiPassword}`,
+            450,
+            1002
+          );
+        }
+      }
 
       const dataUrl = canvas.toDataURL('image/png');
       const a = document.createElement('a');
@@ -514,6 +579,68 @@ export const AdminBackupQrPage: React.FC = () => {
               />
             </div>
 
+            <div className="p-4 bg-ivory-light/70 border border-coffee-beige rounded-brand space-y-3">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <label className="flex items-center gap-2 text-xs font-semibold text-coffee-dark cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showWifiOnQr}
+                    onChange={(e) => setShowWifiOnQr(e.target.checked)}
+                    className="rounded border-coffee-beige text-coffee"
+                  />
+                  <Wifi className="w-3.5 h-3.5 text-coffee shrink-0" />
+                  <span>In kèm Tên &amp; Mật khẩu Wi-Fi lên thẻ QR</span>
+                </label>
+
+                <button
+                  type="button"
+                  onClick={handleSaveWifi}
+                  disabled={savingWifi}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white border border-coffee-beige text-coffee-dark hover:bg-ivory rounded-brand transition-colors disabled:opacity-50"
+                >
+                  {savingWifi ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Save className="w-3.5 h-3.5" />
+                  )}
+                  <span>Lưu Wi-Fi</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-medium text-coffee-muted mb-1">
+                    Tên Wi-Fi quán
+                  </label>
+                  <input
+                    type="text"
+                    value={wifiName}
+                    onChange={(e) => {
+                      setWifiDirty(true);
+                      setWifiName(e.target.value);
+                    }}
+                    placeholder="VD: TUNN Coffee House"
+                    className="w-full px-3 py-2 text-sm bg-white border border-coffee-beige rounded-brand"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-coffee-muted mb-1">
+                    Mật khẩu Wi-Fi
+                  </label>
+                  <input
+                    type="text"
+                    value={wifiPassword}
+                    onChange={(e) => {
+                      setWifiDirty(true);
+                      setWifiPassword(e.target.value);
+                    }}
+                    placeholder="VD: tunncoffee2026"
+                    className="w-full px-3 py-2 text-sm bg-white border border-coffee-beige rounded-brand font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="pt-3 flex flex-wrap gap-3">
               <button
                 type="button"
@@ -578,6 +705,21 @@ export const AdminBackupQrPage: React.FC = () => {
                   <p className="text-[10px] text-coffee-muted mt-0.5">
                     Mở Camera hoặc Zalo để quét mã
                   </p>
+                  {showWifiOnQr && (wifiName.trim() || wifiPassword.trim()) && (
+                    <div className="mt-2 px-3 py-1.5 bg-ivory border border-coffee-beige rounded-brand text-[10px] text-coffee-dark font-medium flex flex-col items-center gap-0.5 leading-snug">
+                      {wifiName.trim() && (
+                        <span className="inline-flex items-center gap-1 break-all">
+                          <Wifi className="w-3 h-3 text-coffee shrink-0" />
+                          <span>Wi-Fi: {wifiName.trim()}</span>
+                        </span>
+                      )}
+                      {wifiPassword.trim() && (
+                        <span className="font-mono font-semibold break-all">
+                          Pass: {wifiPassword.trim()}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

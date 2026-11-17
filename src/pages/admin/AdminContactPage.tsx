@@ -19,21 +19,24 @@ export const AdminContactPage: React.FC = () => {
   const [tiktokUrl, setTiktokUrl] = useState(settings.tiktok_url);
   const [orderUrl, setOrderUrl] = useState(settings.order_url);
   const [saving, setSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   const [prevSettings, setPrevSettings] = useState(settings);
   if (settings !== prevSettings) {
     setPrevSettings(settings);
-    setStoreName(settings.store_name);
-    setAddress(settings.address);
-    setHotline(settings.hotline);
-    setEmail(settings.email);
-    setOpeningHours(settings.opening_hours);
-    setGoogleMapsUrl(settings.google_maps_url);
-    setGoogleMapsEmbed(settings.google_maps_embed);
-    setFacebookUrl(settings.facebook_url);
-    setInstagramUrl(settings.instagram_url);
-    setTiktokUrl(settings.tiktok_url);
-    setOrderUrl(settings.order_url);
+    if (!isDirty) {
+      setStoreName(settings.store_name);
+      setAddress(settings.address);
+      setHotline(settings.hotline);
+      setEmail(settings.email);
+      setOpeningHours(settings.opening_hours);
+      setGoogleMapsUrl(settings.google_maps_url);
+      setGoogleMapsEmbed(settings.google_maps_embed);
+      setFacebookUrl(settings.facebook_url);
+      setInstagramUrl(settings.instagram_url);
+      setTiktokUrl(settings.tiktok_url);
+      setOrderUrl(settings.order_url);
+    }
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -57,6 +60,7 @@ export const AdminContactPage: React.FC = () => {
       if (error) {
         toast.info('Đã cập nhật tạm thời', error);
       } else {
+        setIsDirty(false);
         toast.success(
           'Đã lưu Thông tin Liên hệ!',
           'Mọi thông tin địa chỉ, hotline và mạng xã hội đã đồng bộ với trang khách hàng.'
