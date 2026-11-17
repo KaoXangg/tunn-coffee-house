@@ -312,7 +312,7 @@ export const AdminSecurityPage: React.FC = () => {
     }
     return {
       label: 'Chỉnh sửa dữ liệu',
-      cls: 'bg-[#E9E6D8] text-[#4B2E24] border-[#D5C6AD]',
+      cls: 'bg-ivory text-coffee border-coffee-beige',
     };
   };
 
@@ -620,10 +620,10 @@ export const AdminSecurityPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-semibold text-[#241914]">
+          <h1 className="font-serif text-3xl font-semibold text-coffee-dark">
             Quản Lý Người Dùng & Bảo Mật Hệ Thống
           </h1>
-          <p className="text-sm text-[#8C7565] mt-1">
+          <p className="text-sm text-coffee-muted mt-1">
             Thêm tài khoản Quản lý con để vào trang Admin. Chỉ Admin gốc (Owner) mới có quyền cấp mật khẩu mới hoặc xóa các Quản lý con.
           </p>
         </div>
@@ -631,7 +631,7 @@ export const AdminSecurityPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setCreateModalOpen(true)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors shrink-0"
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand transition-colors shrink-0"
         >
           <UserPlus className="w-4 h-4" />
           <span>Thêm Quản Lý Mới</span>

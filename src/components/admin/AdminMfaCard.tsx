@@ -160,15 +160,15 @@ export const AdminMfaCard: React.FC = () => {
   };
 
   return (
-    <div className="bg-white border border-[#D5C6AD] rounded-brand p-6 space-y-4 shadow-xs">
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#D5C6AD]">
+    <div className="bg-white border border-coffee-beige rounded-brand p-6 space-y-4 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-coffee-beige">
         <div className="flex items-center gap-2.5">
-          <Smartphone className="w-5 h-5 text-[#4B2E24]" />
+          <Smartphone className="w-5 h-5 text-coffee" />
           <div>
-            <h2 className="font-serif text-xl font-semibold text-[#241914]">
+            <h2 className="font-serif text-xl font-semibold text-coffee-dark">
               Xác Thực 2 Lớp (2FA — Google / Microsoft Authenticator)
             </h2>
-            <p className="text-xs text-[#8C7565]">
+            <p className="text-xs text-coffee-muted">
               Bảo vệ tài khoản Admin Gốc bằng mã OTP 6 chữ số mỗi lần đăng nhập
             </p>
           </div>
@@ -195,11 +195,11 @@ export const AdminMfaCard: React.FC = () => {
       </div>
 
       {!isSupabaseConfigured ? (
-        <p className="text-sm text-[#8C7565]">
+        <p className="text-sm text-coffee-muted">
           Tính năng 2FA yêu cầu kết nối Supabase Auth trực tiếp.
         </p>
       ) : loading ? (
-        <div className="py-4 flex items-center gap-2 text-xs text-[#8C7565]">
+        <div className="py-4 flex items-center gap-2 text-xs text-coffee-muted">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span>Đang kiểm tra trạng thái 2FA...</span>
         </div>
@@ -224,9 +224,9 @@ export const AdminMfaCard: React.FC = () => {
           </button>
         </div>
       ) : qrCodeSvg ? (
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center p-4 bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center p-4 bg-ivory-light border border-coffee-beige rounded-brand">
           <div className="md:col-span-5 flex flex-col items-center gap-2">
-            <div className="p-3 bg-white border border-[#D5C6AD] rounded-brand">
+            <div className="p-3 bg-white border border-coffee-beige rounded-brand">
               <img
                 src={qrCodeSvg}
                 alt="QR Code 2FA Authenticator"
@@ -237,7 +237,7 @@ export const AdminMfaCard: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCopySecret}
-                className="inline-flex items-center gap-1.5 text-[11px] font-mono text-[#4B2E24] hover:underline"
+                className="inline-flex items-center gap-1.5 text-[11px] font-mono text-coffee hover:underline"
               >
                 {copiedSecret ? (
                   <Check className="w-3.5 h-3.5 text-emerald-600" />
@@ -250,7 +250,7 @@ export const AdminMfaCard: React.FC = () => {
           </div>
 
           <form onSubmit={handleVerifyEnroll} className="md:col-span-7 space-y-4">
-            <div className="text-xs text-[#4B2E24] space-y-1 leading-relaxed">
+            <div className="text-xs text-coffee space-y-1 leading-relaxed">
               <p>
                 <strong>Bước 1:</strong> Mở ứng dụng <strong>Google Authenticator</strong> hoặc{' '}
                 <strong>Microsoft Authenticator</strong> trên điện thoại và quét mã QR bên cạnh.
@@ -261,7 +261,7 @@ export const AdminMfaCard: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Mã OTP 6 chữ số *
               </label>
               <input
@@ -271,7 +271,7 @@ export const AdminMfaCard: React.FC = () => {
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
                 placeholder="000000"
-                className="w-full max-w-xs px-4 py-2.5 text-base font-mono tracking-[0.35em] text-center bg-white border border-[#D5C6AD] rounded-brand"
+                className="w-full max-w-xs px-4 py-2.5 text-base font-mono tracking-[0.35em] text-center bg-white border border-coffee-beige rounded-brand"
               />
             </div>
 
@@ -279,7 +279,7 @@ export const AdminMfaCard: React.FC = () => {
               <button
                 type="submit"
                 disabled={verifying || otpCode.length < 6}
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand disabled:opacity-50"
               >
                 <KeyRound className="w-3.5 h-3.5" />
                 <span>{verifying ? 'Đang xác nhận...' : 'Xác nhận & Bật 2FA'}</span>
@@ -291,7 +291,7 @@ export const AdminMfaCard: React.FC = () => {
                   setQrCodeSvg(null);
                   setSecretKey(null);
                 }}
-                className="px-4 py-2 text-xs text-[#8C7565] hover:text-[#241914]"
+                className="px-4 py-2 text-xs text-coffee-muted hover:text-coffee-dark"
               >
                 Hủy
               </button>
@@ -300,14 +300,14 @@ export const AdminMfaCard: React.FC = () => {
         </div>
       ) : (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <p className="text-xs sm:text-sm text-[#8C7565] leading-relaxed max-w-2xl">
+          <p className="text-xs sm:text-sm text-coffee-muted leading-relaxed max-w-2xl">
             Khi bật 2FA, ngay cả khi ai đó biết được mật khẩu của bạn, họ vẫn không thể đăng nhập vào trang quản trị nếu không có mã xác thực 6 chữ số trên điện thoại của bạn.
           </p>
           <button
             type="button"
             disabled={enrolling}
             onClick={handleStartEnroll}
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand shrink-0 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand shrink-0 disabled:opacity-50"
           >
             <ShieldCheck className="w-4 h-4" />
             <span>{enrolling ? 'Đang tạo mã QR...' : 'Bật Xác Thực 2 Lớp'}</span>

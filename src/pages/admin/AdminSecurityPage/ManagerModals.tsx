@@ -54,32 +54,32 @@ export const ManagerModals: React.FC<ManagerModalsProps> = ({
         <div className="fixed inset-0 z-[85] flex items-center justify-center p-4">
           <div
             onClick={() => onCloseCreateModal()}
-            className="fixed inset-0 bg-[#241914]/60 backdrop-blur-[2px]"
+            className="fixed inset-0 bg-coffee-dark/60 backdrop-blur-[2px]"
           />
-          <div className="relative z-10 w-full max-w-md bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand shadow-2xl overflow-hidden">
-            <div className="px-6 py-4 bg-[#E9E6D8] border-b border-[#D5C6AD] flex items-center justify-between">
+          <div className="relative z-10 w-full max-w-md bg-ivory-light border border-coffee-beige rounded-brand shadow-2xl overflow-hidden">
+            <div className="px-6 py-4 bg-ivory border-b border-coffee-beige flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-[#4B2E24]" />
-                <h3 className="font-serif text-xl font-semibold text-[#241914]">
+                <UserPlus className="w-5 h-5 text-coffee" />
+                <h3 className="font-serif text-xl font-semibold text-coffee-dark">
                   Thêm Tài Khoản Quản Lý Mới
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => onCloseCreateModal()}
-                className="p-1 text-[#8C7565] hover:text-[#241914]"
+                className="p-1 text-coffee-muted hover:text-coffee-dark"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleCreateSubManager} className="p-6 space-y-4">
-              <p className="text-xs text-[#8C7565] leading-relaxed">
+              <p className="text-xs text-coffee-muted leading-relaxed">
                 Tạo tài khoản Quản lý con để nhân sự có thể đăng nhập vào trang <code className="font-mono">/admin</code> và phụ giúp bạn cập nhật món, hình ảnh.
               </p>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                   Họ và Tên Quản lý *
                 </label>
                 <input
@@ -88,12 +88,12 @@ export const ManagerModals: React.FC<ManagerModalsProps> = ({
                   value={newMgrName}
                   onChange={(e) => setNewMgrName(e.target.value)}
                   placeholder="VD: Nguyễn Văn A (Quản lý ca)"
-                  className="w-full px-3.5 py-2 text-sm bg-white border border-[#D5C6AD] rounded-brand"
+                  className="w-full px-3.5 py-2 text-sm bg-white border border-coffee-beige rounded-brand"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                   Email đăng nhập *
                 </label>
                 <input
@@ -102,12 +102,12 @@ export const ManagerModals: React.FC<ManagerModalsProps> = ({
                   value={newMgrEmail}
                   onChange={(e) => setNewMgrEmail(e.target.value)}
                   placeholder="quanly@tunncoffee.com"
-                  className="w-full px-3.5 py-2 text-sm bg-white border border-[#D5C6AD] rounded-brand"
+                  className="w-full px-3.5 py-2 text-sm bg-white border border-coffee-beige rounded-brand"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                   Mật khẩu khởi tạo (Tối thiểu 6 ký tự) *
                 </label>
                 <input
@@ -117,22 +117,22 @@ export const ManagerModals: React.FC<ManagerModalsProps> = ({
                   value={newMgrPassword}
                   onChange={(e) => setNewMgrPassword(e.target.value)}
                   placeholder="Nhập mật khẩu cấp cho quản lý..."
-                  className="w-full px-3.5 py-2 text-sm bg-white border border-[#D5C6AD] rounded-brand"
+                  className="w-full px-3.5 py-2 text-sm bg-white border border-coffee-beige rounded-brand"
                 />
               </div>
 
-              <div className="pt-3 border-t border-[#D5C6AD] flex justify-end gap-3">
+              <div className="pt-3 border-t border-coffee-beige flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => onCloseCreateModal()}
-                  className="px-4 py-2 text-xs font-semibold uppercase tracking-wider border border-[#D5C6AD] rounded-brand"
+                  className="px-4 py-2 text-xs font-semibold uppercase tracking-wider border border-coffee-beige rounded-brand"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={creatingMgr}
-                  className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand disabled:opacity-50"
                 >
                   {creatingMgr ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -152,35 +152,35 @@ export const ManagerModals: React.FC<ManagerModalsProps> = ({
         <div className="fixed inset-0 z-[85] flex items-center justify-center p-4">
           <div
             onClick={() => onCloseResetModal()}
-            className="fixed inset-0 bg-[#241914]/60 backdrop-blur-[2px]"
+            className="fixed inset-0 bg-coffee-dark/60 backdrop-blur-[2px]"
           />
-          <div className="relative z-10 w-full max-w-md bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand shadow-2xl overflow-hidden">
-            <div className="px-6 py-4 bg-[#E9E6D8] border-b border-[#D5C6AD] flex items-center justify-between">
+          <div className="relative z-10 w-full max-w-md bg-ivory-light border border-coffee-beige rounded-brand shadow-2xl overflow-hidden">
+            <div className="px-6 py-4 bg-ivory border-b border-coffee-beige flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <KeyRound className="w-5 h-5 text-[#4B2E24]" />
-                <h3 className="font-serif text-xl font-semibold text-[#241914]">
+                <KeyRound className="w-5 h-5 text-coffee" />
+                <h3 className="font-serif text-xl font-semibold text-coffee-dark">
                   Cấp Mật Khẩu Mới Cho Quản Lý
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => onCloseResetModal()}
-                className="p-1 text-[#8C7565] hover:text-[#241914]"
+                className="p-1 text-coffee-muted hover:text-coffee-dark"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleOwnerResetPassword} className="p-6 space-y-4">
-              <div className="p-3 bg-white border border-[#D5C6AD] rounded-brand text-xs">
-                <p className="font-semibold text-[#241914]">
+              <div className="p-3 bg-white border border-coffee-beige rounded-brand text-xs">
+                <p className="font-semibold text-coffee-dark">
                   {resetTarget.full_name}
                 </p>
-                <p className="text-[#8C7565]">{resetTarget.email}</p>
+                <p className="text-coffee-muted">{resetTarget.email}</p>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                   Nhập mật khẩu mới (Tối thiểu 6 ký tự) *
                 </label>
                 <input
@@ -190,22 +190,22 @@ export const ManagerModals: React.FC<ManagerModalsProps> = ({
                   value={resetPasswordValue}
                   onChange={(e) => setResetPasswordValue(e.target.value)}
                   placeholder="Nhập mật khẩu mới để cấp cho quản lý..."
-                  className="w-full px-3.5 py-2 text-sm bg-white border border-[#D5C6AD] rounded-brand font-mono"
+                  className="w-full px-3.5 py-2 text-sm bg-white border border-coffee-beige rounded-brand font-mono"
                 />
               </div>
 
-              <div className="pt-3 border-t border-[#D5C6AD] flex justify-end gap-3">
+              <div className="pt-3 border-t border-coffee-beige flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => onCloseResetModal()}
-                  className="px-4 py-2 text-xs font-semibold uppercase tracking-wider border border-[#D5C6AD] rounded-brand"
+                  className="px-4 py-2 text-xs font-semibold uppercase tracking-wider border border-coffee-beige rounded-brand"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={resettingMgrPassword}
-                  className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand disabled:opacity-50"
                 >
                   {resettingMgrPassword ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

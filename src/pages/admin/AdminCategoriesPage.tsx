@@ -170,10 +170,10 @@ export const AdminCategoriesPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-semibold text-[#241914]">
+          <h1 className="font-serif text-3xl font-semibold text-coffee-dark">
             Quản Lý Danh Mục Menu
           </h1>
-          <p className="text-sm text-[#8C7565] mt-1">
+          <p className="text-sm text-coffee-muted mt-1">
             Danh mục được đồng bộ trực tiếp với bộ lọc Thực đơn trên trang khách hàng.
           </p>
         </div>
@@ -181,7 +181,7 @@ export const AdminCategoriesPage: React.FC = () => {
         <button
           type="button"
           onClick={openCreateModal}
-          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand transition-colors"
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand transition-colors"
         >
           <Plus className="w-4 h-4" />
           <span>Thêm Danh Mục</span>
@@ -194,7 +194,7 @@ export const AdminCategoriesPage: React.FC = () => {
           ? Array.from({ length: 6 }).map((_, idx) => (
               <div
                 key={`cat-skeleton-${idx}`}
-                className="bg-white border border-[#D5C6AD] rounded-brand overflow-hidden shadow-xs"
+                className="bg-white border border-coffee-beige rounded-brand overflow-hidden shadow-xs"
               >
                 <Skeleton className="h-36 w-full rounded-none" />
                 <div className="p-5 space-y-2.5">
@@ -205,7 +205,7 @@ export const AdminCategoriesPage: React.FC = () => {
                   <Skeleton className="h-3 w-24" />
                   <Skeleton className="h-3.5 w-full" />
                 </div>
-                <div className="px-5 py-3 bg-[#F7F5EF] border-t border-[#D5C6AD] flex justify-end gap-2">
+                <div className="px-5 py-3 bg-ivory-light border-t border-coffee-beige flex justify-end gap-2">
                   <Skeleton className="h-7 w-14" />
                   <Skeleton className="h-7 w-14" />
                 </div>
@@ -216,10 +216,10 @@ export const AdminCategoriesPage: React.FC = () => {
           return (
             <div
               key={cat.id}
-              className="bg-white border border-[#D5C6AD] rounded-brand overflow-hidden flex flex-col justify-between shadow-xs"
+              className="bg-white border border-coffee-beige rounded-brand overflow-hidden flex flex-col justify-between shadow-xs"
             >
               <div>
-                <div className="h-36 bg-[#E9E6D8] relative overflow-hidden border-b border-[#D5C6AD]">
+                <div className="h-36 bg-ivory relative overflow-hidden border-b border-coffee-beige">
                   {cat.image_url ? (
                     <img
                       src={cat.image_url}
@@ -227,12 +227,12 @@ export const AdminCategoriesPage: React.FC = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#8C7565]">
+                    <div className="w-full h-full flex items-center justify-center text-coffee-muted">
                       <FolderTree className="w-8 h-8 stroke-1" />
                     </div>
                   )}
                   <div className="absolute top-3 left-3 flex items-center gap-2">
-                    <span className="px-2.5 py-1 text-[10px] font-semibold bg-[#241914]/85 text-[#F7F5EF] rounded-brand">
+                    <span className="px-2.5 py-1 text-[10px] font-semibold bg-coffee-dark/85 text-ivory-light rounded-brand">
                       Thứ tự #{cat.sort_order}
                     </span>
                     <span
@@ -249,27 +249,27 @@ export const AdminCategoriesPage: React.FC = () => {
 
                 <div className="p-5">
                   <div className="flex items-baseline justify-between gap-2">
-                    <h3 className="font-serif text-xl font-semibold text-[#241914]">
+                    <h3 className="font-serif text-xl font-semibold text-coffee-dark">
                       {cat.name}
                     </h3>
-                    <span className="text-xs font-semibold text-[#4B2E24]">
+                    <span className="text-xs font-semibold text-coffee">
                       {count} món
                     </span>
                   </div>
-                  <p className="text-xs font-mono text-[#8C7565] mt-0.5">/{cat.slug}</p>
+                  <p className="text-xs font-mono text-coffee-muted mt-0.5">/{cat.slug}</p>
                   {cat.description && (
-                    <p className="text-xs text-[#8C7565] mt-2 leading-relaxed line-clamp-2">
+                    <p className="text-xs text-coffee-muted mt-2 leading-relaxed line-clamp-2">
                       {cat.description}
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="px-5 py-3 bg-[#F7F5EF] border-t border-[#D5C6AD] flex items-center justify-end gap-2">
+              <div className="px-5 py-3 bg-ivory-light border-t border-coffee-beige flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => openEditModal(cat)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#4B2E24] hover:bg-[#E9E6D8] rounded-brand transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-coffee hover:bg-ivory rounded-brand transition-colors"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                   <span>Sửa</span>
@@ -293,17 +293,17 @@ export const AdminCategoriesPage: React.FC = () => {
         <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
           <div
             onClick={() => setModalOpen(false)}
-            className="fixed inset-0 bg-[#241914]/60 backdrop-blur-[2px]"
+            className="fixed inset-0 bg-coffee-dark/60 backdrop-blur-[2px]"
           />
-          <div className="relative z-10 w-full max-w-lg bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand shadow-2xl overflow-hidden">
-            <div className="px-6 py-4 bg-[#E9E6D8] border-b border-[#D5C6AD] flex items-center justify-between">
-              <h3 className="font-serif text-xl font-semibold text-[#241914]">
+          <div className="relative z-10 w-full max-w-lg bg-ivory-light border border-coffee-beige rounded-brand shadow-2xl overflow-hidden">
+            <div className="px-6 py-4 bg-ivory border-b border-coffee-beige flex items-center justify-between">
+              <h3 className="font-serif text-xl font-semibold text-coffee-dark">
                 {editingCategory ? `Sửa danh mục: ${editingCategory.name}` : 'Thêm Danh Mục Mới'}
               </h3>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="p-1 text-[#8C7565] hover:text-[#241914]"
+                className="p-1 text-coffee-muted hover:text-coffee-dark"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -311,7 +311,7 @@ export const AdminCategoriesPage: React.FC = () => {
 
             <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                   Tên danh mục *
                 </label>
                 <input
@@ -324,7 +324,7 @@ export const AdminCategoriesPage: React.FC = () => {
                     },
                   })}
                   placeholder="VD: Trà Sữa Nguyên Lá"
-                  className="w-full px-3.5 py-2 text-sm bg-white border border-[#D5C6AD] rounded-brand"
+                  className="w-full px-3.5 py-2 text-sm bg-white border border-coffee-beige rounded-brand"
                 />
                 {form.formState.errors.name && (
                   <p className="text-xs text-red-700 mt-1">
@@ -335,40 +335,40 @@ export const AdminCategoriesPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                     Slug *
                   </label>
                   <input
                     type="text"
                     {...form.register('slug')}
-                    className="w-full px-3.5 py-2 text-sm bg-white border border-[#D5C6AD] rounded-brand font-mono"
+                    className="w-full px-3.5 py-2 text-sm bg-white border border-coffee-beige rounded-brand font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                     Thứ tự hiển thị
                   </label>
                   <input
                     type="number"
                     {...form.register('sort_order')}
-                    className="w-full px-3.5 py-2 text-sm bg-white border border-[#D5C6AD] rounded-brand"
+                    className="w-full px-3.5 py-2 text-sm bg-white border border-coffee-beige rounded-brand"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                   Mô tả ngắn
                 </label>
                 <textarea
                   rows={2}
                   {...form.register('description')}
-                  className="w-full px-3.5 py-2 text-sm bg-white border border-[#D5C6AD] rounded-brand"
+                  className="w-full px-3.5 py-2 text-sm bg-white border border-coffee-beige rounded-brand"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                   Ảnh đại diện danh mục
                 </label>
                 <div className="flex items-center gap-3">
@@ -376,7 +376,7 @@ export const AdminCategoriesPage: React.FC = () => {
                     <img
                       src={watchedImage}
                       alt="Preview"
-                      className="w-16 h-16 rounded-brand object-cover border border-[#D5C6AD]"
+                      className="w-16 h-16 rounded-brand object-cover border border-coffee-beige"
                     />
                   )}
                   <div className="flex-1 space-y-2">
@@ -384,12 +384,12 @@ export const AdminCategoriesPage: React.FC = () => {
                       type="text"
                       {...form.register('image_url')}
                       placeholder="https://..."
-                      className="w-full px-3 py-1.5 text-sm bg-white border border-[#D5C6AD] rounded-brand"
+                      className="w-full px-3 py-1.5 text-sm bg-white border border-coffee-beige rounded-brand"
                     />
                     <button
                       type="button"
                       onClick={() => setMediaPickerOpen(true)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#E9E6D8] text-[#241914] rounded-brand"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-ivory text-coffee-dark rounded-brand"
                     >
                       <ImageIcon className="w-3.5 h-3.5" />
                       <span>Chọn từ Media Library</span>
@@ -398,27 +398,27 @@ export const AdminCategoriesPage: React.FC = () => {
                 </div>
               </div>
 
-              <label className="flex items-center gap-2 text-xs font-semibold text-[#241914] pt-2">
+              <label className="flex items-center gap-2 text-xs font-semibold text-coffee-dark pt-2">
                 <input
                   type="checkbox"
                   {...form.register('is_active')}
-                  className="rounded border-[#D5C6AD]"
+                  className="rounded border-coffee-beige"
                 />
                 <span>Kích hoạt hiển thị danh mục trên Menu</span>
               </label>
 
-              <div className="pt-4 border-t border-[#D5C6AD] flex justify-end gap-3">
+              <div className="pt-4 border-t border-coffee-beige flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold uppercase tracking-wider border border-[#D5C6AD] rounded-brand"
+                  className="px-4 py-2 text-xs font-semibold uppercase tracking-wider border border-coffee-beige rounded-brand"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] rounded-brand"
+                  className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light rounded-brand"
                 >
                   {saving ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

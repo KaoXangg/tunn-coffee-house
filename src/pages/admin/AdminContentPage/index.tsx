@@ -334,23 +334,23 @@ export const AdminContentPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-serif text-3xl font-semibold text-[#241914]">
+        <h1 className="font-serif text-3xl font-semibold text-coffee-dark">
           Quản Lý Nội Dung Trang Chủ (Website Content)
         </h1>
-        <p className="text-sm text-[#8C7565] mt-1">
+        <p className="text-sm text-coffee-muted mt-1">
           Bật/tắt các phân khu, sắp xếp lại thứ tự hiển thị trên trang chủ, chỉnh sửa câu chuyện thương hiệu và thanh điều hướng.
         </p>
       </div>
 
       {/* Sub-navigation Tabs */}
-      <div className="flex border-b border-[#D5C6AD] gap-6 text-xs font-semibold uppercase tracking-wider">
+      <div className="flex border-b border-coffee-beige gap-6 text-xs font-semibold uppercase tracking-wider">
         <button
           type="button"
           onClick={() => setActiveTab('sections')}
           className={`pb-3 border-b-2 transition-colors ${
             activeTab === 'sections'
-              ? 'border-[#4B2E24] text-[#241914]'
-              : 'border-transparent text-[#8C7565] hover:text-[#241914]'
+              ? 'border-coffee text-coffee-dark'
+              : 'border-transparent text-coffee-muted hover:text-coffee-dark'
           }`}
         >
           1. Thứ Tự & Tiêu Đề Các Section
@@ -360,8 +360,8 @@ export const AdminContentPage: React.FC = () => {
           onClick={() => setActiveTab('about')}
           className={`pb-3 border-b-2 transition-colors ${
             activeTab === 'about'
-              ? 'border-[#4B2E24] text-[#241914]'
-              : 'border-transparent text-[#8C7565] hover:text-[#241914]'
+              ? 'border-coffee text-coffee-dark'
+              : 'border-transparent text-coffee-muted hover:text-coffee-dark'
           }`}
         >
           2. Câu Chuyện Thương Hiệu (About)
@@ -371,8 +371,8 @@ export const AdminContentPage: React.FC = () => {
           onClick={() => setActiveTab('navigation')}
           className={`pb-3 border-b-2 transition-colors ${
             activeTab === 'navigation'
-              ? 'border-[#4B2E24] text-[#241914]'
-              : 'border-transparent text-[#8C7565] hover:text-[#241914]'
+              ? 'border-coffee text-coffee-dark'
+              : 'border-transparent text-coffee-muted hover:text-coffee-dark'
           }`}
         >
           3. Menu Điều Hướng & Footer

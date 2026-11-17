@@ -28,17 +28,17 @@ export const ManagerTeamSection: React.FC<ManagerTeamSectionProps> = ({
 }) => {
   const user = currentUserId ? { id: currentUserId } : null;
   return (
-      <div className="bg-white border border-[#D5C6AD] rounded-brand p-6 space-y-4 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#D5C6AD]">
+      <div className="bg-white border border-coffee-beige rounded-brand p-6 space-y-4 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-coffee-beige">
           <div className="flex items-center gap-2.5">
-            <Users className="w-5 h-5 text-[#4B2E24]" />
+            <Users className="w-5 h-5 text-coffee" />
             <div>
-              <h2 className="font-serif text-xl font-semibold text-[#241914]">
+              <h2 className="font-serif text-xl font-semibold text-coffee-dark">
                 Danh Sách Ban Quản Trị & Phân Quyền ({allProfiles.length})
               </h2>
-              <p className="text-xs text-[#8C7565]">
+              <p className="text-xs text-coffee-muted">
                 Vai trò của bạn hiện tại:{' '}
-                <strong className="text-[#4B2E24]">
+                <strong className="text-coffee">
                   {isOwnerAdmin
                     ? 'ADMIN GỐC (Toàn quyền thêm, xóa & cấp mật khẩu cho Quản lý con)'
                     : 'QUẢN LÝ VIÊN (Không thể xóa hoặc đổi mật khẩu của người khác)'}
@@ -49,14 +49,14 @@ export const ManagerTeamSection: React.FC<ManagerTeamSectionProps> = ({
         </div>
 
         {loadingProfiles ? (
-          <div className="py-10 text-center text-xs text-[#8C7565]">
+          <div className="py-10 text-center text-xs text-coffee-muted">
             Đang tải danh sách tài khoản...
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[#E9E6D8] border-b border-[#D5C6AD] text-[11px] uppercase tracking-wider text-[#241914] font-semibold">
+                <tr className="bg-ivory border-b border-coffee-beige text-[11px] uppercase tracking-wider text-coffee-dark font-semibold">
                   <th className="py-3 px-4">Người dùng / Quản lý</th>
                   <th className="py-3 px-4">Cấp bậc</th>
                   <th className="py-3 px-4">Quyền vào Admin</th>
@@ -66,7 +66,7 @@ export const ManagerTeamSection: React.FC<ManagerTeamSectionProps> = ({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E9E6D8] text-sm">
+              <tbody className="divide-y divide-ivory text-sm">
                 {allProfiles.map((p) => {
                   const isRoot = isProfileRootOwner(p);
                   const isSelf = p.id === user?.id;
@@ -74,20 +74,20 @@ export const ManagerTeamSection: React.FC<ManagerTeamSectionProps> = ({
                   return (
                     <tr
                       key={p.id}
-                      className="hover:bg-[#F7F5EF]/60 transition-colors"
+                      className="hover:bg-ivory-light/60 transition-colors"
                     >
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-[#241914]">
+                          <span className="font-semibold text-coffee-dark">
                             {p.full_name || 'Quản lý viên'}
                           </span>
                           {isSelf && (
-                            <span className="px-2 py-0.5 text-[10px] font-semibold bg-[#E9E6D8] text-[#4B2E24] rounded">
+                            <span className="px-2 py-0.5 text-[10px] font-semibold bg-ivory text-coffee rounded">
                               Đang đăng nhập
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-[#8C7565]">{p.email}</p>
+                        <p className="text-xs text-coffee-muted">{p.email}</p>
                       </td>
 
                       <td className="py-3.5 px-4 whitespace-nowrap">
@@ -97,7 +97,7 @@ export const ManagerTeamSection: React.FC<ManagerTeamSectionProps> = ({
                             <span>Admin Gốc (Owner)</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-[#F7F5EF] text-[#241914] border border-[#D5C6AD] rounded-brand">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-ivory-light text-coffee-dark border border-coffee-beige rounded-brand">
                             <span>Quản lý con</span>
                           </span>
                         )}
@@ -134,13 +134,13 @@ export const ManagerTeamSection: React.FC<ManagerTeamSectionProps> = ({
                         )}
                       </td>
 
-                      <td className="py-3.5 px-4 text-xs text-[#8C7565] whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-xs text-coffee-muted whitespace-nowrap">
                         {formatDateVi(p.created_at)}
                       </td>
 
                       <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         {isRoot ? (
-                          <span className="text-xs text-[#8C7565] italic">
+                          <span className="text-xs text-coffee-muted italic">
                             Được bảo vệ
                           </span>
                         ) : isOwnerAdmin ? (
@@ -151,7 +151,7 @@ export const ManagerTeamSection: React.FC<ManagerTeamSectionProps> = ({
                                 setResetTarget(p);
                                 setResetPasswordValue('');
                               }}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-[#E9E6D8] text-[#241914] hover:bg-[#D5C6AD] rounded-brand transition-colors"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-ivory text-coffee-dark hover:bg-coffee-beige rounded-brand transition-colors"
                               title="Cấp mật khẩu mới cho quản lý này"
                             >
                               <KeyRound className="w-3.5 h-3.5" />
@@ -168,7 +168,7 @@ export const ManagerTeamSection: React.FC<ManagerTeamSectionProps> = ({
                             </button>
                           </div>
                         ) : (
-                          <span className="text-xs text-[#8C7565] italic">
+                          <span className="text-xs text-coffee-muted italic">
                             Chỉ Admin gốc được phép
                           </span>
                         )}

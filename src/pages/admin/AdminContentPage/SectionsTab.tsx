@@ -61,13 +61,13 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
   };
 
   return (
-        <div className="bg-white border border-[#D5C6AD] rounded-brand p-6 space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#D5C6AD]">
+        <div className="bg-white border border-coffee-beige rounded-brand p-6 space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-coffee-beige">
             <div>
-              <h2 className="font-serif text-xl font-semibold text-[#241914]">
+              <h2 className="font-serif text-xl font-semibold text-coffee-dark">
                 Bố Cục Các Phân Khu Trên Trang Chủ
               </h2>
-              <p className="text-xs text-[#8C7565]">
+              <p className="text-xs text-coffee-muted">
                 Sử dụng mũi tên Lên / Xuống để thay đổi thứ tự xuất hiện của từng phần trên trang khách hàng.
               </p>
             </div>
@@ -75,7 +75,7 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
               type="button"
               onClick={handleSaveSectionsOrder}
               disabled={savingOrder}
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand"
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand"
             >
               {savingOrder ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -92,7 +92,7 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                 key={sec.section_key}
                 className={`p-4 border rounded-brand flex flex-col md:flex-row md:items-center justify-between gap-4 ${
                   sec.is_enabled
-                    ? 'bg-[#F7F5EF] border-[#D5C6AD]'
+                    ? 'bg-ivory-light border-coffee-beige'
                     : 'bg-stone-100 border-stone-300 opacity-70'
                 }`}
               >
@@ -102,7 +102,7 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                       type="button"
                       disabled={idx === 0}
                       onClick={() => moveSection(idx, -1)}
-                      className="p-1 border border-[#D5C6AD] bg-white rounded disabled:opacity-30"
+                      className="p-1 border border-coffee-beige bg-white rounded disabled:opacity-30"
                       title="Đưa lên trên"
                     >
                       <ArrowUp className="w-3.5 h-3.5" />
@@ -111,7 +111,7 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                       type="button"
                       disabled={idx === orderedSections.length - 1}
                       onClick={() => moveSection(idx, 1)}
-                      className="p-1 border border-[#D5C6AD] bg-white rounded disabled:opacity-30"
+                      className="p-1 border border-coffee-beige bg-white rounded disabled:opacity-30"
                       title="Đưa xuống dưới"
                     >
                       <ArrowDown className="w-3.5 h-3.5" />
@@ -120,13 +120,13 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
 
                   <div className="flex-1 space-y-2.5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <span className="text-[11px] uppercase tracking-widest font-semibold text-[#4B2E24]">
+                      <span className="text-[11px] uppercase tracking-widest font-semibold text-coffee">
                         #{sec.sort_order} · {SECTION_LABELS[sec.section_key] || sec.section_key.toUpperCase()}
                       </span>
                       {SECTION_EDIT_LINKS[sec.section_key]?.to ? (
                         <Link
                           to={SECTION_EDIT_LINKS[sec.section_key]!.to!}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#4B2E24] hover:underline"
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-coffee hover:underline"
                         >
                           <span>{SECTION_EDIT_LINKS[sec.section_key]!.label}</span>
                           <ArrowUpRight className="w-3 h-3" />
@@ -135,7 +135,7 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                         <button
                           type="button"
                           onClick={() => setActiveTab('about')}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#4B2E24] hover:underline"
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-coffee hover:underline"
                         >
                           <span>{SECTION_EDIT_LINKS[sec.section_key]!.label}</span>
                           <ArrowUpRight className="w-3 h-3" />
@@ -144,7 +144,7 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-[10px] uppercase tracking-widest font-semibold text-[#8C7565]">
+                        <label className="block text-[10px] uppercase tracking-widest font-semibold text-coffee-muted">
                           Nhãn nhỏ phía trên (Eyebrow)
                         </label>
                         <input
@@ -158,11 +158,11 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                             updateSectionEyebrow(sec.section_key, e.target.value)
                           }
                           placeholder="VD: SEASONAL & ARTISANAL MENU"
-                          className="mt-1 w-full px-3 py-1.5 text-xs uppercase tracking-wider bg-white border border-[#D5C6AD] rounded-brand"
+                          className="mt-1 w-full px-3 py-1.5 text-xs uppercase tracking-wider bg-white border border-coffee-beige rounded-brand"
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] uppercase tracking-widest font-semibold text-[#4B2E24]">
+                        <label className="block text-[10px] uppercase tracking-widest font-semibold text-coffee">
                           Tiêu đề chính (Title)
                         </label>
                         <input
@@ -179,11 +179,11 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                               e.target.value
                             )
                           }
-                          className="mt-1 w-full px-3 py-1.5 text-sm font-semibold bg-white border border-[#D5C6AD] rounded-brand"
+                          className="mt-1 w-full px-3 py-1.5 text-sm font-semibold bg-white border border-coffee-beige rounded-brand"
                         />
                       </div>
                       <div>
-                        <label className="block text-[10px] uppercase tracking-widest font-semibold text-[#8C7565]">
+                        <label className="block text-[10px] uppercase tracking-widest font-semibold text-coffee-muted">
                           Mô tả phụ (Subtitle)
                         </label>
                         <input
@@ -202,13 +202,13 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                               e.target.value
                             )
                           }
-                          className="mt-1 w-full px-3 py-1.5 text-sm bg-white border border-[#D5C6AD] rounded-brand"
+                          className="mt-1 w-full px-3 py-1.5 text-sm bg-white border border-coffee-beige rounded-brand"
                         />
                       </div>
                     </div>
                     {sec.section_key === 'menu' && (
                       <div>
-                        <label className="block text-[10px] uppercase tracking-widest font-semibold text-[#8C7565]">
+                        <label className="block text-[10px] uppercase tracking-widest font-semibold text-coffee-muted">
                           Ghi chú cuối mục Thực đơn
                         </label>
                         <input
@@ -218,13 +218,13 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                             updateSectionContentValue('menu', 'note', e.target.value)
                           }
                           placeholder="VD: Tất cả đồ uống có thể tùy chỉnh mức đường và đá..."
-                          className="mt-1 w-full px-3 py-1.5 text-xs bg-white border border-[#D5C6AD] rounded-brand"
+                          className="mt-1 w-full px-3 py-1.5 text-xs bg-white border border-coffee-beige rounded-brand"
                         />
                       </div>
                     )}
                     {sec.section_key === 'contact' && (
-                      <div className="pt-2.5 mt-1 border-t border-[#D5C6AD]/60 space-y-2">
-                        <p className="text-[10px] uppercase tracking-widest font-semibold text-[#4B2E24]">
+                      <div className="pt-2.5 mt-1 border-t border-coffee-beige/60 space-y-2">
+                        <p className="text-[10px] uppercase tracking-widest font-semibold text-coffee">
                           Mục Cảm nhận Khách hàng (Hiển thị ngay phía trên Liên hệ)
                         </p>
                         <div className="grid grid-cols-1 lg:grid-cols-4 gap-2.5">
@@ -235,7 +235,7 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                               updateSectionContentValue('contact', 'reviews_eyebrow', e.target.value)
                             }
                             placeholder="Nhãn nhỏ (Eyebrow)"
-                            className="px-3 py-1.5 text-xs uppercase tracking-wider bg-white border border-[#D5C6AD] rounded-brand"
+                            className="px-3 py-1.5 text-xs uppercase tracking-wider bg-white border border-coffee-beige rounded-brand"
                           />
                           <input
                             type="text"
@@ -244,7 +244,7 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                               updateSectionContentValue('contact', 'reviews_title', e.target.value)
                             }
                             placeholder="Tiêu đề chính"
-                            className="px-3 py-1.5 text-sm font-semibold bg-white border border-[#D5C6AD] rounded-brand"
+                            className="px-3 py-1.5 text-sm font-semibold bg-white border border-coffee-beige rounded-brand"
                           />
                           <input
                             type="text"
@@ -256,7 +256,7 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                               updateSectionContentValue('contact', 'reviews_subtitle', e.target.value)
                             }
                             placeholder="Mô tả phụ"
-                            className="px-3 py-1.5 text-xs bg-white border border-[#D5C6AD] rounded-brand"
+                            className="px-3 py-1.5 text-xs bg-white border border-coffee-beige rounded-brand"
                           />
                           <input
                             type="text"
@@ -265,7 +265,7 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                               updateSectionContentValue('contact', 'reviews_cta_label', e.target.value)
                             }
                             placeholder="Chữ nút bấm"
-                            className="px-3 py-1.5 text-xs font-medium bg-white border border-[#D5C6AD] rounded-brand"
+                            className="px-3 py-1.5 text-xs font-medium bg-white border border-coffee-beige rounded-brand"
                           />
                         </div>
                       </div>

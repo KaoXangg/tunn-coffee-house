@@ -71,10 +71,10 @@ export const AdminContactPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-semibold text-[#241914]">
+          <h1 className="font-serif text-3xl font-semibold text-coffee-dark">
             Cài Đặt Thông Tin Liên Hệ & Cửa Hàng
           </h1>
-          <p className="text-sm text-[#8C7565] mt-1">
+          <p className="text-sm text-coffee-muted mt-1">
             Quản lý địa chỉ thực tế, hotline, giờ mở cửa, Google Maps và mạng xã hội chính thức của TUNN Coffee House.
           </p>
         </div>
@@ -83,7 +83,7 @@ export const AdminContactPage: React.FC = () => {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand"
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand"
         >
           {saving ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -98,26 +98,26 @@ export const AdminContactPage: React.FC = () => {
         onSubmit={handleSave}
         className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
       >
-        <div className="lg:col-span-7 bg-white border border-[#D5C6AD] rounded-brand p-6 space-y-5">
-          <h2 className="font-serif text-xl font-semibold text-[#241914] pb-3 border-b border-[#D5C6AD]">
+        <div className="lg:col-span-7 bg-white border border-coffee-beige rounded-brand p-6 space-y-5">
+          <h2 className="font-serif text-xl font-semibold text-coffee-dark pb-3 border-b border-coffee-beige">
             Thông Tin Quán
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Tên cửa hàng hiển thị
               </label>
               <input
                 type="text"
                 value={storeName}
                 onChange={(e) => setStoreName(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 <Clock className="w-3.5 h-3.5 inline mr-1" /> Giờ mở cửa
               </label>
               <input
@@ -125,13 +125,13 @@ export const AdminContactPage: React.FC = () => {
                 value={openingHours}
                 onChange={(e) => setOpeningHours(e.target.value)}
                 placeholder="07:30 — 22:30 (Mỗi ngày)"
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
               <MapPin className="w-3.5 h-3.5 inline mr-1" /> Địa chỉ chính thức của quán
             </label>
             <input
@@ -139,13 +139,13 @@ export const AdminContactPage: React.FC = () => {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="Nhập địa chỉ thực tế của TUNN Coffee House..."
-              className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+              className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 <Phone className="w-3.5 h-3.5 inline mr-1" /> Số điện thoại Hotline
               </label>
               <input
@@ -153,12 +153,12 @@ export const AdminContactPage: React.FC = () => {
                 value={hotline}
                 onChange={(e) => setHotline(e.target.value)}
                 placeholder="Nhập số điện thoại liên hệ..."
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 <Mail className="w-3.5 h-3.5 inline mr-1" /> Địa chỉ Email
               </label>
               <input
@@ -166,14 +166,14 @@ export const AdminContactPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="hello@tunncoffee.com"
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
           </div>
 
-          <div className="pt-4 border-t border-[#D5C6AD] space-y-4">
+          <div className="pt-4 border-t border-coffee-beige space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Link chỉ đường Google Maps (Mở ứng dụng bản đồ)
               </label>
               <input
@@ -181,12 +181,12 @@ export const AdminContactPage: React.FC = () => {
                 value={googleMapsUrl}
                 onChange={(e) => setGoogleMapsUrl(e.target.value)}
                 placeholder="https://maps.app.goo.gl/..."
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand font-mono"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand font-mono"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
                 Link Iframe Google Maps Embed (src=&quot;https://www.google.com/maps/embed?...&quot;)
               </label>
               <input
@@ -194,23 +194,23 @@ export const AdminContactPage: React.FC = () => {
                 value={googleMapsEmbed}
                 onChange={(e) => setGoogleMapsEmbed(e.target.value)}
                 placeholder="https://www.google.com/maps/embed?pb=..."
-                className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand font-mono"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand font-mono"
               />
             </div>
           </div>
         </div>
 
         {/* Social Media Links */}
-        <div className="lg:col-span-5 bg-white border border-[#D5C6AD] rounded-brand p-6 space-y-4">
-          <div className="flex items-center gap-2 pb-3 border-b border-[#D5C6AD]">
-            <Share2 className="w-4 h-4 text-[#4B2E24]" />
-            <h2 className="font-serif text-xl font-semibold text-[#241914]">
+        <div className="lg:col-span-5 bg-white border border-coffee-beige rounded-brand p-6 space-y-4">
+          <div className="flex items-center gap-2 pb-3 border-b border-coffee-beige">
+            <Share2 className="w-4 h-4 text-coffee" />
+            <h2 className="font-serif text-xl font-semibold text-coffee-dark">
               Mạng Xã Hội & Kênh Đặt Món
             </h2>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
               Facebook Fanpage URL
             </label>
             <input
@@ -218,12 +218,12 @@ export const AdminContactPage: React.FC = () => {
               value={facebookUrl}
               onChange={(e) => setFacebookUrl(e.target.value)}
               placeholder="https://facebook.com/tunncoffeehouse"
-              className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+              className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
               Instagram URL
             </label>
             <input
@@ -231,12 +231,12 @@ export const AdminContactPage: React.FC = () => {
               value={instagramUrl}
               onChange={(e) => setInstagramUrl(e.target.value)}
               placeholder="https://instagram.com/tunncoffeehouse"
-              className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+              className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
               TikTok URL
             </label>
             <input
@@ -244,12 +244,12 @@ export const AdminContactPage: React.FC = () => {
               value={tiktokUrl}
               onChange={(e) => setTiktokUrl(e.target.value)}
               placeholder="https://tiktok.com/@tunncoffeehouse"
-              className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+              className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#241914] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
               Đường dẫn nút &ldquo;Đặt Món&rdquo; (Zalo / Messenger / #menu)
             </label>
             <input
@@ -257,7 +257,7 @@ export const AdminContactPage: React.FC = () => {
               value={orderUrl}
               onChange={(e) => setOrderUrl(e.target.value)}
               placeholder="#menu"
-              className="w-full px-3.5 py-2 text-sm bg-[#F7F5EF] border border-[#D5C6AD] rounded-brand"
+              className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
             />
           </div>
         </div>

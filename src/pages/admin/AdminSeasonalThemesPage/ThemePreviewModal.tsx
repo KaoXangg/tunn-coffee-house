@@ -23,21 +23,21 @@ export const ThemePreviewModal: React.FC<ThemePreviewModalProps> = ({
 }) => {
   return (
         <div className="!mt-0 fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="bg-white border border-[#D5C6AD] rounded-brand shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#E9E6D8] flex flex-wrap lg:flex-nowrap items-center justify-between gap-3">
+          <div className="bg-white border border-coffee-beige rounded-brand shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden">
+            <div className="px-5 py-4 border-b border-ivory flex flex-wrap lg:flex-nowrap items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[#8C7565] font-semibold">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-coffee-muted font-semibold">
                   LIVE THEME PREVIEW
                 </p>
                 <h3
-                  className="font-serif text-lg sm:text-xl font-semibold text-[#241914] truncate"
+                  className="font-serif text-lg sm:text-xl font-semibold text-coffee-dark truncate"
                   title={previewModalTheme.name}
                 >
                   {previewModalTheme.name}
                 </h3>
               </div>
 
-              <div className="flex items-center gap-1.5 bg-[#F7F5EF] p-1 rounded-brand border border-[#E9E6D8] shrink-0">
+              <div className="flex items-center gap-1.5 bg-ivory-light p-1 rounded-brand border border-ivory shrink-0">
                 {(
                   [
                     { id: 'desktop', icon: Monitor, label: 'Desktop' },
@@ -53,8 +53,8 @@ export const ThemePreviewModal: React.FC<ThemePreviewModalProps> = ({
                       onClick={() => setPreviewViewport(vp.id)}
                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-brand transition-colors ${
                         previewViewport === vp.id
-                          ? 'bg-[#4B2E24] text-[#F7F5EF]'
-                          : 'text-[#8C7565] hover:text-[#241914]'
+                          ? 'bg-coffee text-ivory-light'
+                          : 'text-coffee-muted hover:text-coffee-dark'
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
@@ -68,7 +68,7 @@ export const ThemePreviewModal: React.FC<ThemePreviewModalProps> = ({
                 <button
                   type="button"
                   onClick={() => openFullSitePreview(previewModalTheme)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold border border-[#4B2E24] text-[#4B2E24] hover:bg-[#F7F5EF] rounded-brand"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold border border-coffee text-coffee hover:bg-ivory-light rounded-brand"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   <span>Mở Preview Toàn Trang</span>
@@ -79,7 +79,7 @@ export const ThemePreviewModal: React.FC<ThemePreviewModalProps> = ({
                     handleActivate(previewModalTheme);
                     onClose();
                   }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold bg-[#4B2E24] text-[#F7F5EF] hover:bg-[#241914] rounded-brand"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Kích hoạt ngay</span>
@@ -87,7 +87,7 @@ export const ThemePreviewModal: React.FC<ThemePreviewModalProps> = ({
                 <button
                   type="button"
                   onClick={() => onClose()}
-                  className="p-2 text-[#8C7565] hover:text-[#241914]"
+                  className="p-2 text-coffee-muted hover:text-coffee-dark"
                   aria-label="Đóng"
                 >
                   <X className="w-5 h-5" />
@@ -95,7 +95,7 @@ export const ThemePreviewModal: React.FC<ThemePreviewModalProps> = ({
               </div>
             </div>
 
-            <div className="flex-1 overflow-auto bg-[#E9E6D8] p-6 flex justify-center">
+            <div className="flex-1 overflow-auto bg-ivory p-6 flex justify-center">
               <div
                 style={{
                   width:

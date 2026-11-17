@@ -74,7 +74,7 @@ export function getImageDimensions(
 }
 
 /**
- * Resize large raster images (max 1600px), optionally remove edge-connected solid/white
+ * Resize large raster images (max 1200px), optionally remove edge-connected solid/white
  * background via BFS flood-fill, and compress to WebP (supporting alpha transparency).
  */
 async function optimizeImageToWebP(file: File, removeWhiteBg = false): Promise<File> {
@@ -88,7 +88,7 @@ async function optimizeImageToWebP(file: File, removeWhiteBg = false): Promise<F
 
     img.onload = () => {
       URL.revokeObjectURL(objectUrl);
-      const maxDim = removeWhiteBg ? 900 : 1600;
+      const maxDim = removeWhiteBg ? 900 : 1200;
       let targetW = img.naturalWidth;
       let targetH = img.naturalHeight;
 
@@ -127,7 +127,7 @@ async function optimizeImageToWebP(file: File, removeWhiteBg = false): Promise<F
           resolve(webpFile);
         },
         'image/webp',
-        0.88
+        0.85
       );
     };
 
