@@ -165,7 +165,7 @@ export const HeroSection: React.FC = () => {
 
             {/* Secondary Inset Frame */}
             {content.secondary_image_url && (
-              <div className="hidden sm:block absolute -top-5 -left-7 w-36 h-44 rounded-brand overflow-hidden border-4 border-ivory-light shadow-lg bg-ivory">
+              <div className="block absolute -top-3 left-1 sm:-top-5 sm:-left-7 w-24 h-32 sm:w-36 sm:h-44 rounded-brand overflow-hidden border-4 border-ivory-light shadow-lg bg-ivory">
                 <img
                   src={content.secondary_image_url}
                   alt="Nghệ thuật pha chế thủ công tại TUNN"

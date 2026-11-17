@@ -83,7 +83,7 @@ export const AboutSection: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-60px' }}
                 transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-                className="hidden sm:block w-48 aspect-square rounded-brand overflow-hidden border-4 border-ivory-light shadow-editorial-lg -mt-20 ml-auto mr-6 relative z-10 bg-ivory"
+                className="block w-32 sm:w-48 aspect-square rounded-brand overflow-hidden border-4 border-ivory-light shadow-editorial-lg -mt-12 sm:-mt-20 ml-auto mr-3 sm:mr-6 relative z-10 bg-ivory"
               >
                 <img
                   src={content.secondary_image_url}
