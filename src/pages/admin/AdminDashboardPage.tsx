@@ -84,10 +84,35 @@ export const AdminDashboardPage: React.FC = () => {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
+    const slotBuckets = [
+      { key: 'morning', label: 'Sáng (06h–12h)', count: 0 },
+      { key: 'noon', label: 'Trưa (12h–15h)', count: 0 },
+      { key: 'afternoon', label: 'Chiều (15h–18h)', count: 0 },
+      { key: 'evening', label: 'Tối (18h–24h)', count: 0 },
+      { key: 'night', label: 'Khuya (00h–06h)', count: 0 },
+    ];
+    totalQrScans.forEach((e) => {
+      const hour = new Date(e.created_at).getHours();
+      if (hour >= 6 && hour < 12) slotBuckets[0].count += 1;
+      else if (hour >= 12 && hour < 15) slotBuckets[1].count += 1;
+      else if (hour >= 15 && hour < 18) slotBuckets[2].count += 1;
+      else if (hour >= 18) slotBuckets[3].count += 1;
+      else slotBuckets[4].count += 1;
+    });
+    const qrTimeSlots = slotBuckets.filter(
+      (slot) => slot.key !== 'night' || slot.count > 0
+    );
+    const peakQrSlot =
+      totalQrScans.length > 0
+        ? [...qrTimeSlots].sort((a, b) => b.count - a.count)[0]
+        : null;
+
     return {
       todayQrCount: todayQrScans.length,
       totalQrCount: totalQrScans.length,
       activeTablesToday: Array.from(tableCounts.entries()).sort((a, b) => b[1] - a[1]),
+      qrTimeSlots,
+      peakQrSlot,
       totalProductViews: syncedProductViews.length,
       topProducts,
     };
@@ -424,6 +449,47 @@ export const AdminDashboardPage: React.FC = () => {
                 Chưa có lượt quét QR theo số bàn nào trong hôm nay (ví dụ: link có <code className="font-mono">?table=01</code>).
               </p>
             )}
+
+            <div className="mt-5 pt-4 border-t border-coffee-beige/70 space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-medium text-coffee-muted">
+                  Khung giờ đông khách (Tổng QR)
+                </p>
+                {analyticsSummary.peakQrSlot && analyticsSummary.peakQrSlot.count > 0 && (
+                  <span className="text-[11px] font-semibold text-coffee">
+                    Cao điểm: {analyticsSummary.peakQrSlot.label}
+                  </span>
+                )}
+              </div>
+              <div className="space-y-2">
+                {analyticsSummary.qrTimeSlots.map((slot) => {
+                  const maxSlot = Math.max(
+                    1,
+                    ...analyticsSummary.qrTimeSlots.map((s) => s.count)
+                  );
+                  const pct =
+                    analyticsSummary.totalQrCount > 0
+                      ? Math.round((slot.count / maxSlot) * 100)
+                      : 0;
+                  return (
+                    <div key={slot.key} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-coffee-dark">{slot.label}</span>
+                        <span className="text-coffee-muted font-semibold tabular-nums">
+                          {slot.count} lượt
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full bg-ivory rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-coffee rounded-full transition-all duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>

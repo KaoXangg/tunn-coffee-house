@@ -11,12 +11,14 @@ import {
   User,
   Mail,
   ShieldCheck,
+  Download,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { formatDateTimeVi } from '../../lib/utils';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { subscribeLiveSync } from '../../lib/liveSync';
+import { downloadStyledXlsx } from '../../lib/exportXlsx';
 import { Skeleton } from '../../components/common/Skeleton';
 import {
   fetchTableFeedback,
@@ -153,6 +155,39 @@ export const AdminFeedbackPage: React.FC = () => {
     });
   }, [items, ratingFilter, searchQuery]);
 
+  const handleExportExcel = () => {
+    if (filteredItems.length === 0) {
+      toast.info('Chưa có đánh giá nào để xuất');
+      return;
+    }
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+    downloadStyledXlsx({
+      filename: `danh-gia-tunn-${todayStr}.xlsx`,
+      sheetName: 'Danh gia khach hang',
+      title: 'TUNN Coffee House — Báo cáo Đánh giá Khách hàng',
+      subtitle: `Xuất ngày ${new Date().toLocaleDateString('vi-VN')} · Tổng ${filteredItems.length} đánh giá`,
+      columns: [
+        { header: 'Thời gian', width: 22 },
+        { header: 'Số sao', width: 10 },
+        { header: 'Số bàn', width: 12 },
+        { header: 'Khách hàng', width: 24 },
+        { header: 'Email', width: 30 },
+        { header: 'Nội dung góp ý', width: 48 },
+      ],
+      rows: filteredItems.map((item) => [
+        formatDateTimeVi(item.created_at),
+        Number(item.rating),
+        item.table_number ? `Bàn ${item.table_number}` : 'Khách chung',
+        item.customer_name || 'Khách ẩn danh',
+        item.customer_email || '',
+        item.comment || '',
+      ]),
+    });
+
+    toast.success(`Đã xuất ${filteredItems.length} đánh giá ra file Excel (.xlsx)`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -171,6 +206,15 @@ export const AdminFeedbackPage: React.FC = () => {
             <Database className="w-3.5 h-3.5 text-coffee-muted" />
             <span>{source === 'supabase' ? 'Dữ liệu Cloud' : 'Bộ nhớ cục bộ'}</span>
           </span>
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            disabled={loading || filteredItems.length === 0}
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold border border-coffee-beige bg-white text-coffee-dark hover:bg-ivory rounded-brand transition-colors disabled:opacity-50"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Xuất Excel</span>
+          </button>
           <button
             type="button"
             onClick={() => loadFeedback(false)}
