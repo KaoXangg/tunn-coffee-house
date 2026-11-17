@@ -11,6 +11,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useSiteData } from '../../../contexts/SiteDataContext';
 import { useToast } from '../../../contexts/ToastContext';
 import { IDLE_TIMEOUT_STORAGE_KEY } from '../../../lib/utils';
+import { evaluatePasswordStrength } from '../../../lib/passwordPolicy';
 import { ManagerTeamSection } from './ManagerTeamSection';
 import { ActivityAuditSection } from './ActivityAuditSection';
 import { AccountSecuritySection } from './AccountSecuritySection';
@@ -324,8 +325,9 @@ export const AdminSecurityPage: React.FC = () => {
       return;
     }
 
-    if (newPassword.length < 6) {
-      toast.error('Mật khẩu quá ngắn', 'Mật khẩu mới cần ít nhất 6 ký tự.');
+    const pwCheck = evaluatePasswordStrength(newPassword, user?.email);
+    if (!pwCheck.valid) {
+      toast.error('Mật khẩu chưa đạt chuẩn bảo mật', pwCheck.errorMessage || undefined);
       return;
     }
 
@@ -398,11 +400,17 @@ export const AdminSecurityPage: React.FC = () => {
       return;
     }
 
-    if (!newMgrName.trim() || !newMgrEmail.trim() || newMgrPassword.length < 6) {
+    if (!newMgrName.trim() || !newMgrEmail.trim()) {
       toast.error(
         'Thông tin chưa hợp lệ',
-        'Vui lòng nhập đầy đủ Họ tên, Email và Mật khẩu (ít nhất 6 ký tự).'
+        'Vui lòng nhập đầy đủ Họ tên và Email.'
       );
+      return;
+    }
+
+    const mgrPwCheck = evaluatePasswordStrength(newMgrPassword, newMgrEmail);
+    if (!mgrPwCheck.valid) {
+      toast.error('Mật khẩu chưa đạt chuẩn bảo mật', mgrPwCheck.errorMessage || undefined);
       return;
     }
 
@@ -442,7 +450,7 @@ export const AdminSecurityPage: React.FC = () => {
       }
 
       await logAdminActivity(
-        'Tạo tài khoản Quản lý con mới',
+        'Tạo tài khoản Quản lý mới',
         'profiles',
         newMgrEmail.trim().toLowerCase()
       );
@@ -473,7 +481,7 @@ export const AdminSecurityPage: React.FC = () => {
     if (!isOwnerAdmin) {
       toast.error(
         'Không đủ quyền hạn',
-        'Chỉ Admin gốc (Owner) mới có quyền thay đổi cấp bậc của các Quản lý con.'
+        'Chỉ Admin mới có quyền thay đổi cấp bậc của các Quản lý.'
       );
       return;
     }
@@ -481,7 +489,7 @@ export const AdminSecurityPage: React.FC = () => {
     if (isProfileRootOwner(targetProfile)) {
       toast.error(
         'Thao tác bị chặn',
-        'Không thể hạ quyền của tài khoản Admin gốc.'
+        'Không thể hạ quyền của tài khoản Admin.'
       );
       return;
     }
@@ -515,12 +523,13 @@ export const AdminSecurityPage: React.FC = () => {
     if (!resetTarget || !isSupabaseConfigured) return;
 
     if (!isOwnerAdmin) {
-      toast.error('Chỉ Admin gốc mới có quyền cấp mật khẩu mới.');
+      toast.error('Chỉ Admin mới có quyền cấp mật khẩu mới.');
       return;
     }
 
-    if (resetPasswordValue.length < 6) {
-      toast.error('Mật khẩu quá ngắn', 'Mật khẩu mới cần ít nhất 6 ký tự.');
+    const resetPwCheck = evaluatePasswordStrength(resetPasswordValue, resetTarget.email);
+    if (!resetPwCheck.valid) {
+      toast.error('Mật khẩu chưa đạt chuẩn bảo mật', resetPwCheck.errorMessage || undefined);
       return;
     }
 
@@ -540,7 +549,7 @@ export const AdminSecurityPage: React.FC = () => {
       }
 
       await logAdminActivity(
-        'Cấp mật khẩu mới cho Quản lý con',
+        'Cấp mật khẩu mới cho Quản lý',
         'profiles',
         resetTarget.email
       );
@@ -562,7 +571,7 @@ export const AdminSecurityPage: React.FC = () => {
     if (!deleteTarget || !isSupabaseConfigured) return;
 
     if (!isOwnerAdmin) {
-      toast.error('Chỉ Admin gốc mới có quyền xóa tài khoản Quản lý con.');
+      toast.error('Chỉ Admin mới có quyền xóa tài khoản Quản lý.');
       setDeleteTarget(null);
       return;
     }
@@ -584,12 +593,12 @@ export const AdminSecurityPage: React.FC = () => {
       }
 
       await logAdminActivity(
-        'Xóa tài khoản Quản lý con',
+        'Xóa tài khoản Quản lý',
         'profiles',
         deleteTarget.email
       );
       await fetchAllProfiles();
-      toast.success('Đã xóa tài khoản Quản lý con', deleteTarget.email);
+      toast.success('Đã xóa tài khoản Quản lý', deleteTarget.email);
       setDeleteTarget(null);
     } catch (err: unknown) {
       toast.error('Lỗi khi xóa tài khoản', err instanceof Error ? err.message : undefined);
@@ -624,7 +633,7 @@ export const AdminSecurityPage: React.FC = () => {
             Quản Lý Người Dùng & Bảo Mật Hệ Thống
           </h1>
           <p className="text-sm text-coffee-muted mt-1">
-            Thêm tài khoản Quản lý con để vào trang Admin. Chỉ Admin gốc (Owner) mới có quyền cấp mật khẩu mới hoặc xóa các Quản lý con.
+            Thêm tài khoản Quản lý để vào trang Admin. Chỉ Admin mới có quyền cấp mật khẩu mới hoặc xóa các Quản lý.
           </p>
         </div>
 

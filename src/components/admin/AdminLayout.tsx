@@ -320,22 +320,22 @@ export const AdminLayout: React.FC = () => {
     <div className="min-h-screen bg-ivory-light text-coffee-dark flex">
       {/* Desktop Collapsible Sidebar */}
       <aside
-        className={`hidden lg:flex flex-col fixed inset-y-0 left-0 h-screen bg-coffee-dark text-ivory-light border-r border-coffee transition-all duration-300 shrink-0 z-40 ${
-          collapsed ? 'w-20' : 'w-64'
+        className={`hidden lg:flex flex-col fixed inset-y-0 left-0 h-screen bg-white text-coffee-dark border-r border-coffee-beige/80 transition-all duration-300 shrink-0 z-40 ${
+          collapsed ? 'w-20' : 'w-[268px]'
         }`}
       >
         <div
-          className={`h-16 border-b border-coffee flex items-center shrink-0 ${
+          className={`h-16 border-b border-coffee-beige/70 flex items-center shrink-0 ${
             collapsed ? 'justify-center px-2' : 'justify-between px-4 gap-2'
           }`}
         >
           {!collapsed && (
-            <Link to="/admin/dashboard" className="overflow-hidden">
+            <Link to="/admin/dashboard" className="min-w-0 flex items-center gap-2.5">
               <BrandLogo
                 size="sm"
                 showText
-                subtitle="CMS STUDIO"
-                textClassName="text-ivory-light text-base"
+                subtitle="Admin CMS"
+                textClassName="text-coffee-dark text-[15px] whitespace-nowrap"
               />
             </Link>
           )}
@@ -343,8 +343,8 @@ export const AdminLayout: React.FC = () => {
             type="button"
             onClick={() => setCollapsed((c) => !c)}
             title={collapsed ? 'Mở rộng thanh công cụ' : 'Thu gọn thanh công cụ'}
-            className={`text-coffee-beige hover:text-white rounded-brand hover:bg-coffee/60 transition-colors flex items-center justify-center shrink-0 ${
-              collapsed ? 'w-10 h-10 bg-coffee/30' : 'p-1.5'
+            className={`text-coffee-muted hover:text-coffee-dark rounded-lg border border-coffee-beige/70 hover:bg-ivory-light transition-colors flex items-center justify-center shrink-0 ${
+              collapsed ? 'w-9 h-9 bg-ivory-light' : 'w-7 h-7'
             }`}
             aria-label={collapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
           >
@@ -356,10 +356,10 @@ export const AdminLayout: React.FC = () => {
           </button>
         </div>
 
-        <nav className="flex-1 py-4 px-2.5 space-y-4 overflow-y-auto">
+        <nav className="flex-1 py-4 px-3 space-y-5 overflow-y-auto">
           <div className="space-y-1">
             {!collapsed && (
-              <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-coffee-beige/50">
+              <p className="px-3 pb-1 text-[11px] font-medium text-coffee-muted">
                 Vận hành cơ bản
               </p>
             )}
@@ -371,30 +371,30 @@ export const AdminLayout: React.FC = () => {
                   key={item.to}
                   to={item.to}
                   title={collapsed ? item.label : undefined}
-                  className={`relative flex items-center rounded-brand text-xs font-medium tracking-wide transition-all duration-200 ${
+                  className={`relative flex items-center rounded-xl text-[13px] transition-all duration-200 ${
                     collapsed
                       ? 'justify-center py-2.5 px-0'
-                      : 'gap-3 px-3 py-2.5 hover:translate-x-0.5'
+                      : 'gap-3 px-3 py-2.5'
                   } ${
                     isItemActive
-                      ? 'text-ivory-light font-semibold'
-                      : 'text-coffee-beige/80 hover:bg-coffee/35 hover:text-white'
+                      ? 'text-ivory-light font-medium'
+                      : 'text-coffee-dark/80 hover:bg-ivory/75 hover:text-coffee-dark font-normal'
                   }`}
                 >
                   {isItemActive && (
                     <motion.span
                       layoutId="adminSidebarActivePill"
                       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                      className="absolute inset-0 bg-coffee rounded-brand shadow-sm -z-0"
+                      className="absolute inset-0 bg-coffee rounded-xl shadow-xs -z-0"
                     />
                   )}
-                  <Icon className="relative z-10 w-4 h-4 shrink-0" />
+                  <Icon className="relative z-10 w-[17px] h-[17px] shrink-0" />
                   {!collapsed && <span className="relative z-10 truncate">{item.label}</span>}
                   {item.to === '/admin/feedback' && feedbackBadge.unreadCount > 0 && (
                     collapsed ? (
                       <span
                         className={`absolute top-1.5 right-3.5 z-10 w-2 h-2 rounded-full ${
-                          feedbackBadge.hasLowRating ? 'bg-red-500 animate-pulse' : 'bg-amber-400'
+                          feedbackBadge.hasLowRating ? 'bg-red-500 animate-pulse' : 'bg-amber-500'
                         }`}
                         aria-label={`${feedbackBadge.unreadCount} đánh giá mới`}
                       />
@@ -408,7 +408,9 @@ export const AdminLayout: React.FC = () => {
                         className={`ml-auto relative z-10 px-1.5 min-w-[20px] h-5 inline-flex items-center justify-center rounded-full text-[10px] font-bold tabular-nums ${
                           feedbackBadge.hasLowRating
                             ? 'bg-red-600 text-white'
-                            : 'bg-amber-400 text-coffee-dark'
+                            : isItemActive
+                            ? 'bg-ivory-light text-coffee-dark'
+                            : 'bg-amber-100 text-amber-900 border border-amber-200'
                         }`}
                       >
                         {feedbackBadge.unreadCount > 99 ? '99+' : feedbackBadge.unreadCount}
@@ -421,11 +423,10 @@ export const AdminLayout: React.FC = () => {
           </div>
 
           {isOwnerAdmin && (
-            <div className="space-y-1 pt-2 border-t border-coffee/60">
+            <div className="space-y-1 pt-3 border-t border-coffee-beige/60">
               {!collapsed && (
-                <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-amber-300/80 flex items-center gap-1">
-                  <Crown className="w-3 h-3" />
-                  <span>Toàn quyền Admin Gốc</span>
+                <p className="px-3 pb-1 text-[11px] font-medium text-coffee-muted flex items-center gap-1.5">
+                  <span>Toàn quyền Admin</span>
                 </p>
               )}
               {ownerNavItems.map((item) => {
@@ -436,24 +437,24 @@ export const AdminLayout: React.FC = () => {
                     key={item.to}
                     to={item.to}
                     title={collapsed ? item.label : undefined}
-                    className={`relative flex items-center rounded-brand text-xs font-medium tracking-wide transition-all duration-200 ${
+                    className={`relative flex items-center rounded-xl text-[13px] transition-all duration-200 ${
                       collapsed
                         ? 'justify-center py-2.5 px-0'
-                        : 'gap-3 px-3 py-2.5 hover:translate-x-0.5'
+                        : 'gap-3 px-3 py-2.5'
                     } ${
                       isItemActive
-                        ? 'text-ivory-light font-semibold'
-                        : 'text-coffee-beige/80 hover:bg-coffee/35 hover:text-white'
+                        ? 'text-ivory-light font-medium'
+                        : 'text-coffee-dark/80 hover:bg-ivory/75 hover:text-coffee-dark font-normal'
                     }`}
                   >
                     {isItemActive && (
                       <motion.span
                         layoutId="adminSidebarActivePill"
                         transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                        className="absolute inset-0 bg-coffee rounded-brand shadow-sm -z-0"
+                        className="absolute inset-0 bg-coffee rounded-xl shadow-xs -z-0"
                       />
                     )}
-                    <Icon className="relative z-10 w-4 h-4 shrink-0" />
+                    <Icon className="relative z-10 w-[17px] h-[17px] shrink-0" />
                     {!collapsed && <span className="relative z-10 truncate">{item.label}</span>}
                   </NavLink>
                 );
@@ -462,31 +463,30 @@ export const AdminLayout: React.FC = () => {
           )}
         </nav>
 
-        <div className="p-3 border-t border-coffee space-y-2 shrink-0">
+        <div className="p-3 border-t border-coffee-beige/70 space-y-2 shrink-0 bg-ivory-light/50">
           {!collapsed && (
-            <div className="px-2 py-1.5 space-y-1">
-              <div className="flex items-center gap-1.5">
+            <div className="p-2.5 rounded-xl bg-white border border-coffee-beige/70 space-y-1">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-semibold text-coffee-dark truncate">
+                  {profile?.full_name || user?.email || 'Admin Mode'}
+                </p>
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded ${
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full shrink-0 ${
                     isOwnerAdmin
-                      ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30'
-                      : 'bg-coffee text-coffee-beige'
+                      ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                      : 'bg-ivory text-coffee-dark border border-coffee-beige'
                   }`}
                 >
                   {isOwnerAdmin ? (
                     <>
-                      <Crown className="w-3 h-3" />
-                      <span>Admin Gốc</span>
+                      <span>Admin</span>
                     </>
                   ) : (
-                    <span>Quản lý con (Cơ bản)</span>
+                    <span>Quản lý</span>
                   )}
                 </span>
               </div>
-              <p className="text-xs font-semibold text-ivory-light truncate">
-                {profile?.full_name || user?.email || 'Admin Mode'}
-              </p>
-              <p className="text-[11px] text-coffee-beige/70 truncate">
+              <p className="text-[11px] text-coffee-muted truncate">
                 {user?.email || 'Local Setup Preview'}
               </p>
             </div>
@@ -495,7 +495,7 @@ export const AdminLayout: React.FC = () => {
             type="button"
             onClick={handleLogout}
             title={collapsed ? 'Đăng xuất' : undefined}
-            className={`w-full flex items-center text-xs font-medium text-red-300 hover:text-red-200 hover:bg-red-950/40 rounded-brand transition-colors ${
+            className={`w-full flex items-center text-xs font-medium text-red-700 hover:text-red-800 hover:bg-red-50 rounded-xl transition-colors ${
               collapsed
                 ? 'justify-center py-2.5 px-0'
                 : 'justify-center lg:justify-start gap-2.5 px-3 py-2'
@@ -512,28 +512,28 @@ export const AdminLayout: React.FC = () => {
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
             onClick={() => setMobileDrawerOpen(false)}
-            className="fixed inset-0 bg-coffee-dark/60 backdrop-blur-xs"
+            className="fixed inset-0 bg-coffee-dark/50 backdrop-blur-xs"
           />
-          <aside className="relative z-10 w-72 max-w-[85vw] bg-coffee-dark text-ivory-light flex flex-col h-full shadow-2xl">
-            <div className="h-16 px-4 border-b border-coffee flex items-center justify-between">
+          <aside className="relative z-10 w-72 max-w-[85vw] bg-white text-coffee-dark flex flex-col h-full shadow-2xl border-r border-coffee-beige">
+            <div className="h-16 px-4 border-b border-coffee-beige/70 flex items-center justify-between">
               <BrandLogo
                 size="sm"
-                subtitle="CMS STUDIO"
-                textClassName="text-ivory-light"
+                subtitle="Admin CMS"
+                textClassName="text-coffee-dark text-[15px]"
               />
               <button
                 type="button"
                 onClick={() => setMobileDrawerOpen(false)}
-                className="p-1.5 text-coffee-beige hover:text-white"
+                className="p-1.5 rounded-lg text-coffee-muted hover:text-coffee-dark hover:bg-ivory-light"
                 aria-label="Đóng menu"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <nav className="flex-1 py-4 px-3 space-y-4 overflow-y-auto">
+            <nav className="flex-1 py-4 px-3 space-y-5 overflow-y-auto">
               <div className="space-y-1">
-                <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-coffee-beige/50">
+                <p className="px-3 pb-1 text-[11px] font-medium text-coffee-muted">
                   Vận hành cơ bản
                 </p>
                 {basicNavItems.map((item) => {
@@ -544,21 +544,21 @@ export const AdminLayout: React.FC = () => {
                       to={item.to}
                       onClick={() => setMobileDrawerOpen(false)}
                       className={({ isActive }) =>
-                        `flex items-center gap-3 px-3 py-2.5 rounded-brand text-xs font-medium ${
+                        `flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-colors ${
                           isActive
-                            ? 'bg-coffee text-ivory-light font-semibold'
-                            : 'text-coffee-beige/80 hover:bg-coffee/40 hover:text-white'
+                            ? 'bg-coffee text-ivory-light font-medium shadow-xs'
+                            : 'text-coffee-dark/80 hover:bg-ivory/75 hover:text-coffee-dark'
                         }`
                       }
                     >
-                      <Icon className="w-4 h-4 shrink-0" />
+                      <Icon className="w-[17px] h-[17px] shrink-0" />
                       <span className="flex-1 truncate">{item.label}</span>
                       {item.to === '/admin/feedback' && feedbackBadge.unreadCount > 0 && (
                         <span
                           className={`px-1.5 min-w-[20px] h-5 inline-flex items-center justify-center rounded-full text-[10px] font-bold tabular-nums ${
                             feedbackBadge.hasLowRating
                               ? 'bg-red-600 text-white'
-                              : 'bg-amber-400 text-coffee-dark'
+                              : 'bg-amber-100 text-amber-900 border border-amber-200'
                           }`}
                         >
                           {feedbackBadge.unreadCount > 99 ? '99+' : feedbackBadge.unreadCount}
@@ -570,10 +570,10 @@ export const AdminLayout: React.FC = () => {
               </div>
 
               {isOwnerAdmin && (
-                <div className="space-y-1 pt-2 border-t border-coffee/60">
-                  <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-amber-300/80 flex items-center gap-1">
-                    <Crown className="w-3 h-3" />
-                    <span>Toàn quyền Admin Gốc</span>
+                <div className="space-y-1 pt-3 border-t border-coffee-beige/60">
+                  <p className="px-3 pb-1 text-[11px] font-medium text-coffee-muted flex items-center gap-1.5">
+                    <Crown className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Toàn quyền Admin</span>
                   </p>
                   {ownerNavItems.map((item) => {
                     const Icon = item.icon;
@@ -583,14 +583,14 @@ export const AdminLayout: React.FC = () => {
                         to={item.to}
                         onClick={() => setMobileDrawerOpen(false)}
                         className={({ isActive }) =>
-                          `flex items-center gap-3 px-3 py-2.5 rounded-brand text-xs font-medium ${
+                          `flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-colors ${
                             isActive
-                              ? 'bg-coffee text-ivory-light font-semibold'
-                              : 'text-coffee-beige/80 hover:bg-coffee/40 hover:text-white'
+                              ? 'bg-coffee text-ivory-light font-medium shadow-xs'
+                              : 'text-coffee-dark/80 hover:bg-ivory/75 hover:text-coffee-dark'
                           }`
                         }
                       >
-                        <Icon className="w-4 h-4 shrink-0" />
+                        <Icon className="w-[17px] h-[17px] shrink-0" />
                         <span>{item.label}</span>
                       </NavLink>
                     );
@@ -599,11 +599,11 @@ export const AdminLayout: React.FC = () => {
               )}
             </nav>
 
-            <div className="p-4 border-t border-coffee">
+            <div className="p-4 border-t border-coffee-beige/70 bg-ivory-light/50">
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-red-300 hover:bg-red-950/40 rounded-brand"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-red-700 hover:bg-red-50 rounded-xl transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Đăng xuất</span>
@@ -616,7 +616,7 @@ export const AdminLayout: React.FC = () => {
       {/* Main Content Area */}
       <div
         className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
-          collapsed ? 'lg:pl-20' : 'lg:pl-64'
+          collapsed ? 'lg:pl-20' : 'lg:pl-[268px]'
         }`}
       >
         <header className="h-16 bg-white border-b border-coffee-beige px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-30">
@@ -685,13 +685,13 @@ export const AdminLayout: React.FC = () => {
                   <Lock className="w-6 h-6" />
                 </div>
                 <h2 className="font-serif text-2xl font-semibold text-coffee-dark">
-                  Chỉ Dành Cho Admin Gốc
+                  Chỉ Dành Cho Admin
                 </h2>
                 <p className="text-sm text-coffee-muted leading-relaxed">
-                  Tài khoản <strong>Quản lý con</strong> chỉ được phép truy cập các chức năng vận hành cơ bản (Dashboard, Sản phẩm, Danh mục, Khuyến mãi, Thư viện ảnh & Media).
+                  Tài khoản <strong>Quản lý</strong> chỉ được phép truy cập các chức năng vận hành cơ bản (Dashboard, Sản phẩm, Danh mục, Khuyến mãi, Thư viện ảnh & Media).
                 </p>
                 <p className="text-xs text-coffee-muted">
-                  Mục <strong>"{currentNav?.label}"</strong> thuộc quyền quản trị hệ thống của <strong>Admin Gốc (Chủ quán)</strong>.
+                  Mục <strong>"{currentNav?.label}"</strong> thuộc quyền quản trị hệ thống của <strong>Admin (Chủ quán)</strong>.
                 </p>
                 <div className="pt-2">
                   <Link

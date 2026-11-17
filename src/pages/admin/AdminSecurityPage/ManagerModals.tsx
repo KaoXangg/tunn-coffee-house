@@ -1,6 +1,7 @@
 import React from 'react';
 import { Check, KeyRound, Loader2, UserPlus, X } from 'lucide-react';
 import { ConfirmDialog } from '../../../components/common/ConfirmDialog';
+import { PasswordStrengthMeter } from '../../../components/admin/PasswordStrengthMeter';
 import type { Profile } from '../../../types/database';
 
 interface ManagerModalsProps {
@@ -75,7 +76,7 @@ export const ManagerModals: React.FC<ManagerModalsProps> = ({
 
             <form onSubmit={handleCreateSubManager} className="p-6 space-y-4">
               <p className="text-xs text-coffee-muted leading-relaxed">
-                Tạo tài khoản Quản lý con để nhân sự có thể đăng nhập vào trang <code className="font-mono">/admin</code> và phụ giúp bạn cập nhật món, hình ảnh.
+                Tạo tài khoản Quản lý để nhân sự có thể đăng nhập vào trang <code className="font-mono">/admin</code> và phụ giúp bạn cập nhật món, hình ảnh.
               </p>
 
               <div>
@@ -108,16 +109,22 @@ export const ManagerModals: React.FC<ManagerModalsProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
-                  Mật khẩu khởi tạo (Tối thiểu 6 ký tự) *
+                  Mật khẩu khởi tạo (Tối thiểu 12 ký tự) *
                 </label>
                 <input
-                  type="password"
+                  type="text"
                   required
-                  minLength={6}
+                  minLength={12}
                   value={newMgrPassword}
                   onChange={(e) => setNewMgrPassword(e.target.value)}
-                  placeholder="Nhập mật khẩu cấp cho quản lý..."
-                  className="w-full px-3.5 py-2 text-sm bg-white border border-coffee-beige rounded-brand"
+                  placeholder="Nhập hoặc tạo mật khẩu mạnh cho quản lý..."
+                  className="w-full px-3.5 py-2 text-sm bg-white border border-coffee-beige rounded-brand font-mono"
+                />
+                <PasswordStrengthMeter
+                  password={newMgrPassword}
+                  email={newMgrEmail}
+                  showCopy
+                  onGenerate={(generated) => setNewMgrPassword(generated)}
                 />
               </div>
 
@@ -181,16 +188,22 @@ export const ManagerModals: React.FC<ManagerModalsProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
-                  Nhập mật khẩu mới (Tối thiểu 6 ký tự) *
+                  Nhập mật khẩu mới (Tối thiểu 12 ký tự) *
                 </label>
                 <input
                   type="text"
                   required
-                  minLength={6}
+                  minLength={12}
                   value={resetPasswordValue}
                   onChange={(e) => setResetPasswordValue(e.target.value)}
-                  placeholder="Nhập mật khẩu mới để cấp cho quản lý..."
+                  placeholder="Nhập hoặc tạo mật khẩu mạnh để cấp cho quản lý..."
                   className="w-full px-3.5 py-2 text-sm bg-white border border-coffee-beige rounded-brand font-mono"
+                />
+                <PasswordStrengthMeter
+                  password={resetPasswordValue}
+                  email={resetTarget.email}
+                  showCopy
+                  onGenerate={(generated) => setResetPasswordValue(generated)}
                 />
               </div>
 
@@ -223,7 +236,7 @@ export const ManagerModals: React.FC<ManagerModalsProps> = ({
       {/* CONFIRM DIALOG: OWNER DELETES SUB-MANAGER */}
       <ConfirmDialog
         open={Boolean(deleteTarget)}
-        title="Xóa tài khoản Quản lý con?"
+        title="Xóa tài khoản Quản lý?"
         description={`Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản quản lý "${deleteTarget?.full_name}" (${deleteTarget?.email})? Người này sẽ lập tức mất quyền đăng nhập vào hệ thống Admin.`}
         confirmLabel="Xóa tài khoản này"
         loading={deletingMgr}

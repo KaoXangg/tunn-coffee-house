@@ -84,11 +84,11 @@ export const AdminLoginPage: React.FC = () => {
       if (error) {
         if (error === 'ACCOUNT_LOCKED') {
           setAccountLockedMessage(
-            'Tài khoản quản lý này đã bị khóa bởi Admin Gốc (Chủ quán). Vui lòng liên hệ Chủ quán để được mở khóa.'
+            'Tài khoản quản lý này đã bị khóa bởi Admin (Chủ quán). Vui lòng liên hệ Chủ quán để được mở khóa.'
           );
           toast.error(
             'Tài khoản đã bị khóa',
-            'Tài khoản của bạn hiện đang bị khóa quyền truy cập bởi Admin Gốc.'
+            'Tài khoản của bạn hiện đang bị khóa quyền truy cập bởi Admin.'
           );
           return;
         }

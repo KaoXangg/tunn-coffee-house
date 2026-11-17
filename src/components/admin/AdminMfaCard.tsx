@@ -169,7 +169,7 @@ export const AdminMfaCard: React.FC = () => {
               Xác Thực 2 Lớp (2FA — Google / Microsoft Authenticator)
             </h2>
             <p className="text-xs text-coffee-muted">
-              Bảo vệ tài khoản Admin Gốc bằng mã OTP 6 chữ số mỗi lần đăng nhập
+              Bảo vệ tài khoản Admin bằng mã OTP 6 chữ số mỗi lần đăng nhập
             </p>
           </div>
         </div>

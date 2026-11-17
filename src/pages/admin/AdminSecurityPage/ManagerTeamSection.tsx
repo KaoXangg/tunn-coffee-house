@@ -40,7 +40,7 @@ export const ManagerTeamSection: React.FC<ManagerTeamSectionProps> = ({
                 Vai trò của bạn hiện tại:{' '}
                 <strong className="text-coffee">
                   {isOwnerAdmin
-                    ? 'ADMIN GỐC (Toàn quyền thêm, xóa & cấp mật khẩu cho Quản lý con)'
+                    ? 'ADMIN (Toàn quyền thêm, xóa & cấp mật khẩu cho Quản lý)'
                     : 'QUẢN LÝ VIÊN (Không thể xóa hoặc đổi mật khẩu của người khác)'}
                 </strong>
               </p>
@@ -62,7 +62,7 @@ export const ManagerTeamSection: React.FC<ManagerTeamSectionProps> = ({
                   <th className="py-3 px-4">Quyền vào Admin</th>
                   <th className="py-3 px-4">Ngày tạo</th>
                   <th className="py-3 px-4 text-right">
-                    Thao tác (Chỉ Admin Gốc)
+                    Thao tác (Chỉ Admin)
                   </th>
                 </tr>
               </thead>
@@ -94,11 +94,11 @@ export const ManagerTeamSection: React.FC<ManagerTeamSectionProps> = ({
                         {isRoot ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 rounded-brand">
                             <Crown className="w-3.5 h-3.5 text-amber-700" />
-                            <span>Admin Gốc (Owner)</span>
+                            <span>Admin</span>
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-ivory-light text-coffee-dark border border-coffee-beige rounded-brand">
-                            <span>Quản lý con</span>
+                            <span>Quản lý</span>
                           </span>
                         )}
                       </td>
@@ -169,7 +169,7 @@ export const ManagerTeamSection: React.FC<ManagerTeamSectionProps> = ({
                           </div>
                         ) : (
                           <span className="text-xs text-coffee-muted italic">
-                            Chỉ Admin gốc được phép
+                            Chỉ Admin được phép
                           </span>
                         )}
                       </td>

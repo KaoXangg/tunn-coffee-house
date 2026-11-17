@@ -35,7 +35,7 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
             Tài Khoản Đã Bị Khóa
           </h2>
           <p className="text-sm text-coffee-muted mt-3 leading-relaxed">
-            Tài khoản <strong>{user.email}</strong> hiện đã bị tạm khóa quyền truy cập hệ thống quản trị bởi <strong>Admin Gốc (Chủ quán)</strong>.
+            Tài khoản <strong>{user.email}</strong> hiện đã bị tạm khóa quyền truy cập hệ thống quản trị bởi <strong>Admin (Chủ quán)</strong>.
           </p>
           <p className="text-xs text-coffee-muted mt-2">
             Vui lòng liên hệ trực tiếp với Chủ quán nếu bạn cần mở khóa lại tài khoản.

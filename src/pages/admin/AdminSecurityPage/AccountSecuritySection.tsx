@@ -1,6 +1,7 @@
-import React from 'react';
-import { Clock, KeyRound, Loader2, Lock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Clock, Eye, EyeOff, KeyRound, Loader2, Lock } from 'lucide-react';
 import { AdminMfaCard } from '../../../components/admin/AdminMfaCard';
+import { PasswordStrengthMeter } from '../../../components/admin/PasswordStrengthMeter';
 
 interface AccountSecuritySectionProps {
   userEmail?: string | null;
@@ -34,6 +35,8 @@ export const AccountSecuritySection: React.FC<AccountSecuritySectionProps> = ({
   onProfileSave: handleProfileSave,
 }) => {
   const user = userEmail ? { email: userEmail } : null;
+  const [showNewPw, setShowNewPw] = useState(false);
+
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -64,14 +67,34 @@ export const AccountSecuritySection: React.FC<AccountSecuritySectionProps> = ({
 
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
-                Mật khẩu mới (Tối thiểu 6 ký tự) *
+                Mật khẩu mới (Tối thiểu 12 ký tự, chuẩn OWASP) *
               </label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Nhập mật khẩu mới..."
-                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
+              <div className="relative">
+                <input
+                  type={showNewPw ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="VD: Tunn@Coffee2026!"
+                  className="w-full px-3.5 py-2 pr-10 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPw((prev) => !prev)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-coffee-muted hover:text-coffee-dark"
+                  aria-label={showNewPw ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {showNewPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <PasswordStrengthMeter
+                password={newPassword}
+                email={user?.email}
+                showCopy
+                onGenerate={(generated) => {
+                  setNewPassword(generated);
+                  setConfirmPassword(generated);
+                  setShowNewPw(true);
+                }}
               />
             </div>
 
