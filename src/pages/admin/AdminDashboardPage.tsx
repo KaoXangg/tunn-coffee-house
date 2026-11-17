@@ -58,17 +58,27 @@ export const AdminDashboardPage: React.FC = () => {
       }
     });
 
-    const productViewCounts = new Map<string, { name: string; count: number }>();
-    customerEvents
+    const productById = new Map(products.map((p) => [p.id, p]));
+    const productByName = new Map(products.map((p) => [p.name, p]));
+
+    const syncedProductViews = customerEvents
       .filter((e) => e.event_type === 'product_view' && e.product_name)
-      .forEach((e) => {
-        const key = e.product_id || e.product_name || 'unknown';
-        const prev = productViewCounts.get(key);
-        productViewCounts.set(key, {
-          name: e.product_name || 'Sản phẩm',
-          count: (prev?.count || 0) + 1,
-        });
+      .map((e) => {
+        const matched =
+          (e.product_id ? productById.get(e.product_id) : undefined) ||
+          (e.product_name ? productByName.get(e.product_name) : undefined);
+        return matched ? { event: e, product: matched } : null;
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+
+    const productViewCounts = new Map<string, { name: string; count: number }>();
+    syncedProductViews.forEach(({ product }) => {
+      const prev = productViewCounts.get(product.id);
+      productViewCounts.set(product.id, {
+        name: product.name,
+        count: (prev?.count || 0) + 1,
       });
+    });
 
     const topProducts = Array.from(productViewCounts.values())
       .sort((a, b) => b.count - a.count)
@@ -78,10 +88,10 @@ export const AdminDashboardPage: React.FC = () => {
       todayQrCount: todayQrScans.length,
       totalQrCount: totalQrScans.length,
       activeTablesToday: Array.from(tableCounts.entries()).sort((a, b) => b[1] - a[1]),
-      totalProductViews: customerEvents.filter((e) => e.event_type === 'product_view').length,
+      totalProductViews: syncedProductViews.length,
       topProducts,
     };
-  }, [customerEvents]);
+  }, [customerEvents, products]);
 
   const displayedLogs = isOwnerAdmin
     ? activityLogs.filter((l) => l.entity_type !== 'session_heartbeat')

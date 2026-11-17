@@ -33,6 +33,8 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
+import { fetchTableFeedback } from '../../lib/feedback';
+import { subscribeLiveSync } from '../../lib/liveSync';
 import { BrandLogo } from '../common/BrandLogo';
 import {
   formatDurationVi,
@@ -106,6 +108,67 @@ export const AdminLayout: React.FC = () => {
 
   const prevPageRef = useRef<{ path: string; label: string; enteredAt: number } | null>(null);
   const lastInteractionRef = useRef<number>(0);
+  const [feedbackBadge, setFeedbackBadge] = useState<{
+    unreadCount: number;
+    hasLowRating: boolean;
+  }>({ unreadCount: 0, hasLowRating: false });
+
+  const refreshFeedbackBadge = useCallback(async () => {
+    try {
+      const { items } = await fetchTableFeedback();
+      const rawLastSeen = localStorage.getItem('tunn_feedback_last_seen_at');
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      const cutoffMs = rawLastSeen ? Number(rawLastSeen) || startOfToday.getTime() : startOfToday.getTime();
+
+      const unreadItems = items.filter(
+        (item) => new Date(item.created_at).getTime() > cutoffMs
+      );
+      setFeedbackBadge({
+        unreadCount: unreadItems.length,
+        hasLowRating: unreadItems.some((item) => Number(item.rating) <= 3),
+      });
+    } catch {
+      // Non-critical badge fetch
+    }
+  }, []);
+
+  useEffect(() => {
+    if (location.pathname === '/admin/feedback') {
+      localStorage.setItem('tunn_feedback_last_seen_at', String(Date.now()));
+      const clearTimer = window.setTimeout(() => {
+        setFeedbackBadge({ unreadCount: 0, hasLowRating: false });
+      }, 0);
+      return () => window.clearTimeout(clearTimer);
+    }
+    const timer = window.setTimeout(() => {
+      void refreshFeedbackBadge();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [location.pathname, refreshFeedbackBadge]);
+
+  useEffect(() => {
+    const unsub = subscribeLiveSync((scope) => {
+      if (scope === 'feedback' || scope === 'all') {
+        if (location.pathname === '/admin/feedback') {
+          localStorage.setItem('tunn_feedback_last_seen_at', String(Date.now()));
+          setFeedbackBadge({ unreadCount: 0, hasLowRating: false });
+        } else {
+          void refreshFeedbackBadge();
+        }
+      }
+    });
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible' && location.pathname !== '/admin/feedback') {
+        void refreshFeedbackBadge();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      unsub();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [location.pathname, refreshFeedbackBadge]);
 
   const basicNavItems = CMS_NAV_ITEMS.filter((item) => !item.ownerOnly);
   const ownerNavItems = CMS_NAV_ITEMS.filter((item) => item.ownerOnly);
@@ -327,6 +390,31 @@ export const AdminLayout: React.FC = () => {
                   )}
                   <Icon className="relative z-10 w-4 h-4 shrink-0" />
                   {!collapsed && <span className="relative z-10 truncate">{item.label}</span>}
+                  {item.to === '/admin/feedback' && feedbackBadge.unreadCount > 0 && (
+                    collapsed ? (
+                      <span
+                        className={`absolute top-1.5 right-3.5 z-10 w-2 h-2 rounded-full ${
+                          feedbackBadge.hasLowRating ? 'bg-red-500 animate-pulse' : 'bg-amber-400'
+                        }`}
+                        aria-label={`${feedbackBadge.unreadCount} đánh giá mới`}
+                      />
+                    ) : (
+                      <span
+                        title={
+                          feedbackBadge.hasLowRating
+                            ? 'Có đánh giá mới (bao gồm 1–3 sao cần chú ý)'
+                            : 'Đánh giá mới chưa xem'
+                        }
+                        className={`ml-auto relative z-10 px-1.5 min-w-[20px] h-5 inline-flex items-center justify-center rounded-full text-[10px] font-bold tabular-nums ${
+                          feedbackBadge.hasLowRating
+                            ? 'bg-red-600 text-white'
+                            : 'bg-amber-400 text-coffee-dark'
+                        }`}
+                      >
+                        {feedbackBadge.unreadCount > 99 ? '99+' : feedbackBadge.unreadCount}
+                      </span>
+                    )
+                  )}
                 </NavLink>
               );
             })}
@@ -464,7 +552,18 @@ export const AdminLayout: React.FC = () => {
                       }
                     >
                       <Icon className="w-4 h-4 shrink-0" />
-                      <span>{item.label}</span>
+                      <span className="flex-1 truncate">{item.label}</span>
+                      {item.to === '/admin/feedback' && feedbackBadge.unreadCount > 0 && (
+                        <span
+                          className={`px-1.5 min-w-[20px] h-5 inline-flex items-center justify-center rounded-full text-[10px] font-bold tabular-nums ${
+                            feedbackBadge.hasLowRating
+                              ? 'bg-red-600 text-white'
+                              : 'bg-amber-400 text-coffee-dark'
+                          }`}
+                        >
+                          {feedbackBadge.unreadCount > 99 ? '99+' : feedbackBadge.unreadCount}
+                        </span>
+                      )}
                     </NavLink>
                   );
                 })}
