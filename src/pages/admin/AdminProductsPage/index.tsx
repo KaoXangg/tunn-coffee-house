@@ -15,8 +15,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
-  Zap,
-  LayoutList,
   DollarSign,
   Printer,
   ArrowUp,
@@ -58,9 +56,6 @@ export const AdminProductsPage: React.FC = () => {
     useSiteData();
   const showSkeleton = loading && !isLiveDatabase;
   const toast = useToast();
-
-  // View Mode: 'full' (Standard Table) | 'counter' (1-Tap Quick Counter Mode for Mobile/Tablet)
-  const [viewMode, setViewMode] = useState<'full' | 'counter'>('full');
 
   const [search, setSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
@@ -466,6 +461,48 @@ export const AdminProductsPage: React.FC = () => {
     }
   };
 
+  const handleCounterGroupAvailability = async (
+    targetList: Product[],
+    nextAvailable: boolean,
+    groupLabel: string
+  ) => {
+    const idsToUpdate = targetList
+      .filter((p) => p.is_available !== nextAvailable)
+      .map((p) => p.id);
+    if (idsToUpdate.length === 0) {
+      toast.info(
+        nextAvailable
+          ? 'Tất cả món trong nhóm đã ở trạng thái Còn món'
+          : 'Tất cả món trong nhóm đã ở trạng thái Tạm hết'
+      );
+      return;
+    }
+    if (!isSupabaseConfigured) {
+      toast.error('Chưa kết nối Supabase Database');
+      return;
+    }
+
+    setBulkProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ is_available: nextAvailable })
+        .in('id', idsToUpdate);
+
+      if (error) throw error;
+      const actionTitle = nextAvailable
+        ? `Mở bán lại ${groupLabel} (${idsToUpdate.length} món)`
+        : `Báo hết nhanh ${groupLabel} (${idsToUpdate.length} món)`;
+      await logAdminActivity(actionTitle, 'products', `${idsToUpdate.length} sản phẩm`);
+      await refreshAll();
+      toast.success(`Đã ${actionTitle.toLowerCase()}`);
+    } catch (err: unknown) {
+      toast.error('Không thể cập nhật nhóm món', err instanceof Error ? err.message : undefined);
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
   const handleBulkAdjustPrice = async () => {
     const rawVal = Number(bulkPriceInput);
     const discount = Math.abs(rawVal);
@@ -713,50 +750,22 @@ export const AdminProductsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header & Mode Switcher */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header & Primary Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl font-semibold text-coffee-dark">
             Quản Lý Thực Đơn & Sản Phẩm
           </h1>
           <p className="text-sm text-coffee-muted mt-1">
-            Chạm vào giá tiền để sửa nhanh tại chỗ, bấm Nhân bản để tạo món tương tự hoặc bật Chế độ Tại Quầy.
+            Chạm vào giá tiền để sửa nhanh tại chỗ, bấm Còn món / Hết món 1 chạm hoặc tích chọn để thao tác hàng loạt.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Counter Quick Mode Switch */}
-          <div className="inline-flex rounded-brand border border-coffee-beige bg-white p-1">
-            <button
-              type="button"
-              onClick={() => setViewMode('full')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-brand transition-colors ${
-                viewMode === 'full'
-                  ? 'bg-coffee text-ivory-light'
-                  : 'text-coffee-dark hover:bg-ivory'
-              }`}
-            >
-              <LayoutList className="w-3.5 h-3.5" />
-              <span>Bảng Đầy Đủ</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('counter')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-brand transition-colors ${
-                viewMode === 'counter'
-                  ? 'bg-coffee text-ivory-light'
-                  : 'text-coffee-dark hover:bg-ivory'
-              }`}
-            >
-              <Zap className="w-3.5 h-3.5" />
-              <span>Chế Độ Tại Quầy (1-Chạm)</span>
-            </button>
-          </div>
-
+        <div className="flex items-center gap-2.5 shrink-0">
           <button
             type="button"
             onClick={handlePrintMenuA4}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider bg-white border border-coffee-beige text-coffee-dark hover:bg-ivory rounded-brand transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider bg-white border border-coffee-beige text-coffee-dark hover:bg-ivory rounded-brand transition-colors whitespace-nowrap"
           >
             <Printer className="w-4 h-4" />
             <span>In Thực Đơn A4</span>
@@ -765,7 +774,7 @@ export const AdminProductsPage: React.FC = () => {
           <button
             type="button"
             onClick={openCreateModal}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand transition-colors whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             <span>Thêm Món Mới</span>
@@ -841,93 +850,65 @@ export const AdminProductsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* VIEW MODE 1: QUICK COUNTER MODE (1-TAP MOBILE/TABLET GRID) */}
-      {viewMode === 'counter' ? (
-        <div className="space-y-4">
-          <div className="p-3.5 bg-ivory border border-coffee-beige rounded-brand flex items-center justify-between text-xs text-coffee-dark">
-            <span className="inline-flex items-center gap-2">
-              <Zap className="w-4 h-4 text-coffee shrink-0" />
+      {/* Unified Table with Quick Store-wide Actions, Inline Price Edit & Duplicate */}
+      <div className="space-y-4">
+        {/* Quick Store-wide Selection, Status Summary & Restore Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const allIds = filteredProducts.map((p) => p.id);
+                const allSelected =
+                  allIds.length > 0 && allIds.every((id) => selectedIds.includes(id));
+                setSelectedIds(allSelected ? [] : allIds);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 font-semibold bg-white border border-coffee-beige text-coffee-dark hover:bg-ivory rounded-brand transition-colors"
+            >
               <span>
-                <strong>Chế độ Tại Quầy (1-Chạm):</strong> Chạm trực tiếp vào nút{' '}
-                <strong>CÒN MÓN / TẠM HẾT</strong> để cập nhật ngay lên website khách hàng.
+                {filteredProducts.length > 0 &&
+                filteredProducts.every((p) => selectedIds.includes(p.id))
+                  ? `Bỏ chọn tất cả (${filteredProducts.length} món)`
+                  : `Chọn tất cả món đang hiển thị (${filteredProducts.length} món)`}
               </span>
-            </span>
-            <span className="font-semibold">
-              {filteredProducts.filter((p) => p.is_available).length}/
-              {filteredProducts.length} món đang phục vụ
-            </span>
-          </div>
+            </button>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredProducts.map((prod) => (
-              <div
-                key={prod.id}
-                className={`p-4 rounded-brand border transition-all flex items-center justify-between gap-3 ${
-                  prod.is_available
-                    ? 'bg-white border-coffee-beige'
-                    : 'bg-red-50/60 border-red-200'
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <img
-                    src={prod.image_url}
-                    alt={prod.name}
-                    className={`w-14 h-14 rounded-brand object-cover border border-coffee-beige shrink-0 ${
-                      !prod.is_available ? 'grayscale opacity-70' : ''
-                    }`}
-                  />
-                  <div className="min-w-0">
-                    <p className="font-serif text-base font-bold text-coffee-dark truncate">
-                      {prod.name}
-                    </p>
-                    <p className="text-xs font-semibold text-coffee mt-0.5">
-                      {formatVND(prod.sale_price || prod.price)}
-                    </p>
-                    <p className="text-[10px] text-coffee-muted">
-                      {getCategoryName(prod.category_id)}
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleToggleQuickField(prod, 'is_available')}
-                  className={`px-4 py-3 rounded-brand text-xs font-bold uppercase tracking-wider shrink-0 transition-all shadow-xs ${
-                    prod.is_available
-                      ? 'bg-emerald-700 text-white hover:bg-emerald-800'
-                      : 'bg-red-700 text-white hover:bg-red-800'
-                  }`}
-                >
-                  {prod.is_available ? 'CÒN MÓN' : 'TẠM HẾT'}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        /* VIEW MODE 2: FULL TABLE WITH INLINE PRICE EDIT & DUPLICATE */
-        <div className="space-y-4">
-          {/* Quick Store-wide Selection & Restore Original Price Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs">
-            <div className="flex flex-wrap items-center gap-2">
+            {(search.trim() !== '' || filterCategory !== 'all' || filterStatus !== 'all') && (
               <button
                 type="button"
                 onClick={() => {
-                  const allIds = filteredProducts.map((p) => p.id);
-                  const allSelected =
-                    allIds.length > 0 && allIds.every((id) => selectedIds.includes(id));
-                  setSelectedIds(allSelected ? [] : allIds);
+                  setSearch('');
+                  setFilterCategory('all');
+                  setFilterStatus('all');
+                  setPage(1);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 font-semibold bg-white border border-coffee-beige text-coffee-dark hover:bg-ivory rounded-brand transition-colors"
+                className="inline-flex items-center gap-1 px-3 py-1.5 font-semibold bg-ivory border border-coffee-beige text-coffee hover:bg-coffee hover:text-ivory-light rounded-brand transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Xóa bộ lọc (Xem đủ {products.length} món)</span>
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {products.some((p) => !p.is_available) && (
+              <button
+                type="button"
+                disabled={bulkProcessing}
+                onClick={() =>
+                  handleCounterGroupAvailability(
+                    products,
+                    true,
+                    'toàn bộ thực đơn cửa hàng'
+                  )
+                }
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 font-semibold bg-emerald-50 border border-emerald-300 text-emerald-900 hover:bg-emerald-100 rounded-brand transition-colors disabled:opacity-50"
               >
                 <span>
-                  {filteredProducts.length > 0 &&
-                  filteredProducts.every((p) => selectedIds.includes(p.id))
-                    ? `Bỏ chọn tất cả (${filteredProducts.length} món)`
-                    : `Chọn tất cả món trong cửa hàng (${filteredProducts.length} món)`}
+                  Mở bán lại tất cả ({products.filter((p) => !p.is_available).length} món đang hết)
                 </span>
               </button>
-            </div>
+            )}
 
             {products.some((p) => p.sale_price !== null && Number(p.sale_price) > 0) && (
               <button
@@ -942,6 +923,7 @@ export const AdminProductsPage: React.FC = () => {
               </button>
             )}
           </div>
+        </div>
 
           {selectedIds.length > 0 && (
             <div className="p-3.5 bg-coffee-dark text-ivory-light rounded-brand flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-sm">
@@ -1284,10 +1266,10 @@ export const AdminProductsPage: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => handleToggleQuickField(prod, 'is_available')}
-                            className={`px-2.5 py-1 text-[10px] uppercase tracking-wider font-semibold rounded-brand ${
+                            className={`px-3 py-1.5 text-[11px] uppercase tracking-wider font-bold rounded-brand transition-all active:scale-95 ${
                               prod.is_available
-                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                : 'bg-red-50 text-red-800 border border-red-200'
+                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
+                                : 'bg-red-50 text-red-800 border border-red-200 hover:bg-red-100'
                             }`}
                           >
                             {prod.is_available ? 'Còn món' : 'Hết món'}
@@ -1376,9 +1358,7 @@ export const AdminProductsPage: React.FC = () => {
             </div>
           )}
         </div>
-        </div>
-      )}
-
+      </div>
 
       <ProductFormModal
         open={modalOpen}

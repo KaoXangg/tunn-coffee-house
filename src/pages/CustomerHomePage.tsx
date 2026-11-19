@@ -52,9 +52,10 @@ const StorefrontSkeleton: React.FC = () => (
 );
 
 export const CustomerHomePage: React.FC = () => {
-  const { sections, loading, settings, themeMode } = useSiteData();
+  const { sections, products, loading, settings, themeMode } = useSiteData();
   const { effectiveTheme } = useSeasonalTheme();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [dismissedProductParam, setDismissedProductParam] = useState<string | null>(null);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [hasOrderNote, setHasOrderNote] = useState<boolean>(() => {
     try {
@@ -66,8 +67,30 @@ export const CustomerHomePage: React.FC = () => {
       return false;
     }
   });
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const tableNumber = searchParams.get('table');
+  const sharedProductParam = searchParams.get('product');
+
+  const deepLinkedProduct = useMemo(() => {
+    if (!sharedProductParam || dismissedProductParam === sharedProductParam) return null;
+    return (
+      products.find(
+        (p) => p.is_visible && (p.slug === sharedProductParam || p.id === sharedProductParam)
+      ) || null
+    );
+  }, [products, sharedProductParam, dismissedProductParam]);
+
+  const activeModalProduct = selectedProduct ?? deepLinkedProduct;
+
+  const handleCloseProductModal = () => {
+    setSelectedProduct(null);
+    if (sharedProductParam) {
+      setDismissedProductParam(sharedProductParam);
+      const next = new URLSearchParams(searchParams);
+      next.delete('product');
+      setSearchParams(next, { replace: true });
+    }
+  };
 
   useEffect(() => {
     const syncOrderNoteStatus = () => {
@@ -319,8 +342,8 @@ export const CustomerHomePage: React.FC = () => {
       <SeasonalPreviewBar />
 
       <ProductDetailModal
-        product={selectedProduct}
-        onClose={() => setSelectedProduct(null)}
+        product={activeModalProduct}
+        onClose={handleCloseProductModal}
       />
 
       <TableFeedbackModal

@@ -10,6 +10,10 @@ import {
   Minus,
   ClipboardList,
   Trash2,
+  Maximize2,
+  Minimize2,
+  MessageSquareText,
+  Clock,
 } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
@@ -22,10 +26,41 @@ interface MenuSectionProps {
 }
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc';
-type QuickTagFilter = 'all' | 'bestseller' | 'promo';
+type QuickTagFilter = 'all' | 'bestseller' | 'refreshing' | 'creamy' | 'bold' | 'promo';
 
 const ITEMS_PER_PAGE = 8;
 const DRINK_NOTE_OPTIONS = ['Bình thường', 'Ít ngọt', 'Không đường', 'Ít đá', 'Riêng đá', 'Nóng'];
+const TABLE_NOTE_SUGGESTIONS = ['Cho thêm nước lọc', 'Mang ra cùng lúc', 'Ít ngọt cả bàn'];
+
+function getDrinkFlavorProfile(product: Product): {
+  key: 'refreshing' | 'creamy' | 'bold';
+  label: string;
+} {
+  const text = `${product.name} ${product.description} ${product.badge || ''}`.toLowerCase();
+  if (
+    text.includes('đào') ||
+    text.includes('nhãn') ||
+    text.includes('hạt sen') ||
+    text.includes('trái cây') ||
+    text.includes('cam') ||
+    text.includes('thanh mát') ||
+    text.includes('hoa hồng') ||
+    text.includes('dâu') ||
+    text.includes('vải')
+  ) {
+    return { key: 'refreshing', label: 'Thanh mát · Ít cafein' };
+  }
+  if (
+    text.includes('espresso') ||
+    text.includes('cold brew') ||
+    text.includes('cà phê') ||
+    text.includes('shan tuyết') ||
+    text.includes('đậm')
+  ) {
+    return { key: 'bold', label: 'Đậm vị · Tỉnh táo' };
+  }
+  return { key: 'creamy', label: 'Béo thơm · Kem mịn' };
+}
 
 export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => {
   const { categories, products, getSection, loading, isLiveDatabase } = useSiteData();
@@ -39,6 +74,22 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [orderNoteOpen, setOrderNoteOpen] = useState<boolean>(false);
+  const [staffViewMode, setStaffViewMode] = useState<boolean>(false);
+  const [tableGeneralNote, setTableGeneralNote] = useState<string>(() => {
+    try {
+      return localStorage.getItem('tunn_table_order_general_note_v1') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem('tunn_recently_viewed_v1');
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
+  });
   const [orderNote, setOrderNote] = useState<Record<string, number>>(() => {
     try {
       const saved = localStorage.getItem('tunn_table_order_note_v1');
@@ -87,9 +138,43 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
         // Ignore storage errors
       }
     };
+    const syncRecentlyViewed = () => {
+      try {
+        const raw = localStorage.getItem('tunn_recently_viewed_v1');
+        setRecentlyViewedIds(raw ? (JSON.parse(raw) as string[]) : []);
+      } catch {
+        // Ignore storage errors
+      }
+    };
     window.addEventListener('tunn-order-note-updated', syncFromStorage);
-    return () => window.removeEventListener('tunn-order-note-updated', syncFromStorage);
+    window.addEventListener('tunn-recently-viewed-updated', syncRecentlyViewed);
+    return () => {
+      window.removeEventListener('tunn-order-note-updated', syncFromStorage);
+      window.removeEventListener('tunn-recently-viewed-updated', syncRecentlyViewed);
+    };
   }, []);
+
+  const updateTableGeneralNote = (nextNote: string) => {
+    setTableGeneralNote(nextNote);
+    try {
+      if (nextNote.trim()) {
+        localStorage.setItem('tunn_table_order_general_note_v1', nextNote);
+      } else {
+        localStorage.removeItem('tunn_table_order_general_note_v1');
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  };
+
+  const clearRecentlyViewed = () => {
+    setRecentlyViewedIds([]);
+    try {
+      localStorage.removeItem('tunn_recently_viewed_v1');
+    } catch {
+      // Ignore storage errors
+    }
+  };
 
   const updateOrderNoteQty = (productId: string, delta: number) => {
     setOrderNote((prev) => {
@@ -112,14 +197,24 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
   const clearOrderNote = () => {
     setOrderNote({});
     setOrderCustomizations({});
+    setTableGeneralNote('');
+    setStaffViewMode(false);
     setOrderNoteOpen(false);
     try {
       localStorage.removeItem('tunn_table_order_note_v1');
       localStorage.removeItem('tunn_table_order_custom_v1');
+      localStorage.removeItem('tunn_table_order_general_note_v1');
     } catch {
       // Ignore storage errors
     }
+    window.dispatchEvent(new Event('tunn-order-note-updated'));
   };
+
+  const recentlyViewedProducts = useMemo(() => {
+    return recentlyViewedIds
+      .map((id) => products.find((p) => p.id === id && p.is_visible))
+      .filter((p): p is Product => Boolean(p));
+  }, [recentlyViewedIds, products]);
 
   const notedItems = useMemo(() => {
     return Object.entries(orderNote)
@@ -197,6 +292,13 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
         !(p.sale_price && Number(p.sale_price) > 0 && Number(p.sale_price) < Number(p.price))
       ) {
         return false;
+      }
+      if (
+        quickFilter === 'refreshing' ||
+        quickFilter === 'creamy' ||
+        quickFilter === 'bold'
+      ) {
+        if (getDrinkFlavorProfile(p).key !== quickFilter) return false;
       }
       if (q) {
         const matchName = p.name.toLowerCase().includes(q);
@@ -481,17 +583,20 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
               )}
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
               {[
                 { key: 'all', label: 'Mọi dòng vị' },
                 { key: 'bestseller', label: 'Được yêu thích' },
+                { key: 'refreshing', label: 'Thanh mát · Ít cafein' },
+                { key: 'creamy', label: 'Béo thơm · Kem mịn' },
+                { key: 'bold', label: 'Đậm vị · Tỉnh táo' },
                 { key: 'promo', label: 'Giá ưu đãi' },
               ].map((f) => (
                 <button
                   key={f.key}
                   type="button"
                   onClick={() => setQuickFilter(f.key as QuickTagFilter)}
-                  className={`px-3 py-2 text-[11px] uppercase tracking-wider font-semibold rounded-brand border transition-colors ${
+                  className={`px-3 py-2 text-[11px] font-semibold rounded-brand border transition-colors ${
                     quickFilter === f.key
                       ? 'bg-ivory border-coffee text-coffee'
                       : 'bg-transparent border-coffee-beige/70 text-coffee-muted hover:text-coffee-dark'
@@ -521,6 +626,75 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
             </select>
           </div>
         </div>
+
+        {/* Recently Viewed Strip */}
+        {recentlyViewedProducts.length > 0 && (
+          <div className="mb-8 p-3.5 sm:p-4 rounded-xl bg-ivory/45 dark:bg-white/[0.03] border border-coffee-beige/60 dark:border-white/[0.06]">
+            <div className="flex items-center justify-between gap-2 mb-2.5">
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-coffee">
+                <Clock className="w-3.5 h-3.5" />
+                <span>Món bạn vừa xem</span>
+              </div>
+              <button
+                type="button"
+                onClick={clearRecentlyViewed}
+                className="text-[11px] text-coffee-muted hover:text-coffee-dark transition-colors"
+              >
+                Ẩn
+              </button>
+            </div>
+            <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar pb-0.5">
+              {recentlyViewedProducts.map((recent) => {
+                const recentHasSale =
+                  recent.sale_price !== null &&
+                  recent.sale_price !== undefined &&
+                  Number(recent.sale_price) > 0 &&
+                  Number(recent.sale_price) < Number(recent.price);
+                const recentQty = orderNote[recent.id] || 0;
+                return (
+                  <div
+                    key={`recent-${recent.id}`}
+                    className="inline-flex items-center gap-2.5 pl-1.5 pr-2.5 py-1.5 rounded-xl bg-ivory-light dark:bg-white/[0.05] border border-coffee-beige/70 dark:border-white/[0.08] shrink-0"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => onSelectProduct?.(recent)}
+                      className="inline-flex items-center gap-2 text-left min-w-0"
+                    >
+                      <img
+                        src={recent.image_url}
+                        alt={recent.name}
+                        className="w-9 h-9 rounded-lg object-cover shrink-0"
+                      />
+                      <div className="max-w-[140px]">
+                        <p className="font-serif text-xs font-semibold text-coffee-dark truncate">
+                          {recent.name}
+                        </p>
+                        <p className="text-[11px] font-medium text-coffee tabular-nums">
+                          {formatVND(recentHasSale ? recent.sale_price : recent.price)}
+                        </p>
+                      </div>
+                    </button>
+                    {recent.is_available && (
+                      <button
+                        type="button"
+                        onClick={() => updateOrderNoteQty(recent.id, 1)}
+                        className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-[11px] font-bold transition-colors shrink-0 ${
+                          recentQty > 0
+                            ? 'bg-coffee text-ivory-light'
+                            : 'bg-ivory dark:bg-white/[0.08] text-coffee hover:bg-coffee hover:text-ivory-light'
+                        }`}
+                        title="Thêm vào Sổ ghi món"
+                      >
+                        {recentQty > 0 ? recentQty : <Plus className="w-3 h-3" />}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Editorial Menu List / 2-Column Tasting Index */}
         <div ref={menuGridRef} />
@@ -611,21 +785,22 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                         </div>
                       </div>
 
-                      {/* Badges */}
-                      {(item.badge || item.is_best_seller || !item.is_available) && (
-                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                          {item.badge && (
-                            <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-ivory text-coffee border border-coffee-beige/70 dark:border-white/[0.1] rounded-brand">
-                              {item.badge}
-                            </span>
-                          )}
-                          {item.is_best_seller && item.badge !== 'Best Seller' && (
-                            <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-coffee text-ivory-light rounded-brand">
-                              Bán chạy
-                            </span>
-                          )}
-                        </div>
-                      )}
+                      {/* Badges & Flavor Tasting Note */}
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                        {item.badge && (
+                          <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-ivory text-coffee border border-coffee-beige/70 dark:border-white/[0.1] rounded-brand">
+                            {item.badge}
+                          </span>
+                        )}
+                        {item.is_best_seller && item.badge !== 'Best Seller' && (
+                          <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold bg-coffee text-ivory-light rounded-brand">
+                            Bán chạy
+                          </span>
+                        )}
+                        <span className="inline-block px-2 py-0.5 text-[10px] font-medium bg-coffee/[0.07] dark:bg-white/[0.05] text-coffee-muted rounded-brand">
+                          {getDrinkFlavorProfile(item).label}
+                        </span>
+                      </div>
 
                       <p className="text-xs sm:text-sm text-coffee-muted mt-2 line-clamp-2 leading-relaxed">
                         {item.description}
@@ -819,7 +994,9 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 24, scale: 0.98 }}
                 transition={{ type: 'spring', stiffness: 340, damping: 30 }}
-                className="relative z-10 w-full sm:max-w-[500px] bg-[#FAF8F3] dark:bg-[#18120E] text-coffee-dark border-t sm:border border-[#E6DFCE] dark:border-white/[0.08] rounded-t-[24px] sm:rounded-2xl shadow-[0_28px_70px_-16px_rgba(0,0,0,0.6)] overflow-hidden max-h-[86vh] sm:max-h-[82vh] flex flex-col overscroll-contain"
+                className={`relative z-10 w-full ${
+                  staffViewMode ? 'sm:max-w-[580px]' : 'sm:max-w-[500px]'
+                } bg-[#FAF8F3] dark:bg-[#18120E] text-coffee-dark border-t sm:border border-[#E6DFCE] dark:border-white/[0.08] rounded-t-[24px] sm:rounded-2xl shadow-[0_28px_70px_-16px_rgba(0,0,0,0.6)] overflow-hidden max-h-[88vh] sm:max-h-[85vh] flex flex-col overscroll-contain transition-all duration-200`}
               >
                 {/* Mobile drag handle */}
                 <div className="pt-2.5 pb-0.5 sm:hidden flex justify-center">
@@ -831,7 +1008,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] font-medium text-coffee">
-                        Phiếu gọi món tại bàn
+                        {staffViewMode ? 'Chế độ đọc đơn tại bàn' : 'Phiếu gọi món tại bàn'}
                       </span>
                       <span className="text-coffee-muted/50">·</span>
                       <span className="text-[11px] font-semibold text-coffee">
@@ -842,114 +1019,256 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                       id="table-order-note-title"
                       className="font-serif text-xl sm:text-[22px] font-semibold text-coffee-dark leading-snug mt-0.5"
                     >
-                      Sổ ghi món của bàn
+                      {staffViewMode ? 'Đưa màn hình cho Nhân viên' : 'Sổ ghi món của bàn'}
                     </h3>
                     <p className="text-xs text-coffee-muted mt-0.5">
-                      Đưa màn hình này hoặc đọc danh sách cho nhân viên khi gọi món
+                      {staffViewMode
+                        ? 'Chữ phóng to rõ nét để nhân viên nhìn từ xa nhập máy POS'
+                        : 'Đưa màn hình này hoặc đọc danh sách cho nhân viên khi gọi món'}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setOrderNoteOpen(false)}
-                    className="w-8 h-8 rounded-full bg-[#EFECE2] dark:bg-white/[0.06] text-coffee-muted hover:text-coffee-dark hover:bg-[#E5E0D0] dark:hover:bg-white/[0.12] inline-flex items-center justify-center transition-colors shrink-0 mt-0.5"
-                    aria-label="Đóng sổ ghi món"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+
+                  <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setStaffViewMode((prev) => !prev)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                        staffViewMode
+                          ? 'bg-coffee text-ivory-light'
+                          : 'bg-[#EFECE2] dark:bg-white/[0.07] text-coffee-dark hover:bg-[#E5E0D0] dark:hover:bg-white/[0.12]'
+                      }`}
+                      title={
+                        staffViewMode
+                          ? 'Quay lại chế độ chỉnh sửa'
+                          : 'Phóng to chữ để đưa nhân viên xem'
+                      }
+                    >
+                      {staffViewMode ? (
+                        <>
+                          <Minimize2 className="w-3.5 h-3.5" />
+                          <span>Sửa món</span>
+                        </>
+                      ) : (
+                        <>
+                          <Maximize2 className="w-3.5 h-3.5" />
+                          <span>Đưa NV xem</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOrderNoteOpen(false)}
+                      className="w-8 h-8 rounded-full bg-[#EFECE2] dark:bg-white/[0.06] text-coffee-muted hover:text-coffee-dark hover:bg-[#E5E0D0] dark:hover:bg-white/[0.12] inline-flex items-center justify-center transition-colors"
+                      aria-label="Đóng sổ ghi món"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Drink Cards List */}
                 <div className="px-4 sm:px-5 py-3.5 overflow-y-auto overscroll-contain touch-pan-y space-y-2.5 flex-1">
-                  <AnimatePresence initial={false}>
-                    {notedItems.map(({ product, qty }) => {
-                      const unitPrice =
-                        product.sale_price &&
-                        Number(product.sale_price) > 0 &&
-                        Number(product.sale_price) < Number(product.price)
-                          ? Number(product.sale_price)
-                          : Number(product.price);
-                      const selectedNotes = orderCustomizations[product.id] || [];
-                      return (
-                        <m.div
-                          layout
-                          key={product.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.96 }}
-                          transition={{ duration: 0.18 }}
-                          className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-[#211914] border border-[#ECE6D6] dark:border-white/[0.05] shadow-[0_2px_8px_rgba(36,25,20,0.03)] dark:shadow-none"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex items-start gap-3 min-w-0">
-                              <img
-                                src={product.image_url}
-                                alt={product.name}
-                                className="w-14 h-14 rounded-xl object-cover bg-ivory shrink-0"
-                              />
-                              <div className="min-w-0 pt-0.5">
-                                <p className="font-serif text-[15px] sm:text-base font-semibold text-coffee-dark leading-snug line-clamp-2">
+                  {staffViewMode ? (
+                    /* LARGE-PRINT STAFF READING MODE */
+                    <div className="space-y-2.5">
+                      {notedItems.map(({ product, qty }, idx) => {
+                        const selectedNotes = orderCustomizations[product.id] || [];
+                        return (
+                          <div
+                            key={`staff-${product.id}`}
+                            className="p-4 rounded-2xl bg-white dark:bg-[#211914] border border-[#ECE6D6] dark:border-white/[0.07] flex items-center justify-between gap-4"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-semibold text-coffee-muted tabular-nums">
+                                  #{idx + 1}
+                                </span>
+                                <p className="font-serif text-lg sm:text-xl font-bold text-coffee-dark leading-snug">
                                   {product.name}
                                 </p>
-                                <div className="flex items-baseline gap-1.5 mt-1">
-                                  <span className="font-serif text-sm font-bold text-coffee tabular-nums">
-                                    {formatVND(unitPrice * qty)}
-                                  </span>
-                                  {qty > 1 && (
-                                    <span className="text-[11px] text-coffee-muted tabular-nums">
-                                      ({formatVND(unitPrice)} / ly)
+                              </div>
+                              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                                {selectedNotes.length > 0 ? (
+                                  selectedNotes.map((note) => (
+                                    <span
+                                      key={note}
+                                      className="px-2.5 py-1 rounded-lg bg-coffee text-ivory-light text-xs sm:text-sm font-semibold"
+                                    >
+                                      {note}
                                     </span>
-                                  )}
-                                </div>
+                                  ))
+                                ) : (
+                                  <span className="px-2.5 py-0.5 rounded-lg bg-[#F4F0E6] dark:bg-white/[0.06] text-coffee-muted text-xs font-medium">
+                                    Mặc định (Bình thường)
+                                  </span>
+                                )}
                               </div>
                             </div>
 
-                            <div className="inline-flex items-center gap-1 bg-[#F3EFE4] dark:bg-white/[0.06] rounded-full p-1 text-xs font-semibold shrink-0">
-                              <button
-                                type="button"
-                                onClick={() => updateOrderNoteQty(product.id, -1)}
-                                className="w-7 h-7 rounded-full inline-flex items-center justify-center text-coffee-dark hover:bg-white dark:hover:bg-white/[0.12] active:scale-90 transition-all"
-                                aria-label="Giảm số lượng"
-                              >
-                                <Minus className="w-3.5 h-3.5" />
-                              </button>
-                              <span className="min-w-[20px] text-center tabular-nums text-coffee-dark">
-                                {qty}
+                            <div className="min-w-[60px] h-14 px-3 rounded-2xl bg-coffee/12 dark:bg-coffee/15 border border-coffee/30 flex flex-col items-center justify-center shrink-0">
+                              <span className="font-serif text-2xl sm:text-3xl font-bold text-coffee tabular-nums leading-none">
+                                {qty}×
                               </span>
-                              <button
-                                type="button"
-                                onClick={() => updateOrderNoteQty(product.id, 1)}
-                                className="w-7 h-7 rounded-full inline-flex items-center justify-center text-coffee-dark hover:bg-white dark:hover:bg-white/[0.12] active:scale-90 transition-all"
-                                aria-label="Tăng số lượng"
-                              >
-                                <Plus className="w-3.5 h-3.5" />
-                              </button>
                             </div>
                           </div>
+                        );
+                      })}
 
-                          {/* Soft Borderless Taste Customization Pills */}
-                          <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                            {DRINK_NOTE_OPTIONS.map((opt) => {
-                              const isSelected = selectedNotes.includes(opt);
-                              return (
-                                <button
-                                  key={opt}
-                                  type="button"
-                                  onClick={() => toggleOrderCustomization(product.id, opt)}
-                                  className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-150 active:scale-95 ${
-                                    isSelected
-                                      ? 'bg-coffee text-ivory-light shadow-2xs'
-                                      : 'bg-[#F4F0E6] dark:bg-white/[0.05] text-coffee-muted hover:text-coffee-dark hover:bg-[#EAE4D3] dark:hover:bg-white/[0.1]'
-                                  }`}
-                                >
-                                  {opt}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </m.div>
-                      );
-                    })}
-                  </AnimatePresence>
+                      {tableGeneralNote.trim() && (
+                        <div className="p-4 rounded-2xl bg-coffee/10 dark:bg-white/[0.06] border border-coffee/30">
+                          <p className="text-xs font-semibold text-coffee uppercase tracking-wider">
+                            Ghi chú thêm của bàn
+                          </p>
+                          <p className="text-base sm:text-lg font-semibold text-coffee-dark mt-1 leading-snug">
+                            “{tableGeneralNote.trim()}”
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* NORMAL EDITABLE CUSTOMER MODE */
+                    <>
+                      <AnimatePresence initial={false}>
+                        {notedItems.map(({ product, qty }) => {
+                          const unitPrice =
+                            product.sale_price &&
+                            Number(product.sale_price) > 0 &&
+                            Number(product.sale_price) < Number(product.price)
+                              ? Number(product.sale_price)
+                              : Number(product.price);
+                          const selectedNotes = orderCustomizations[product.id] || [];
+                          return (
+                            <m.div
+                              layout
+                              key={product.id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, scale: 0.96 }}
+                              transition={{ duration: 0.18 }}
+                              className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-[#211914] border border-[#ECE6D6] dark:border-white/[0.05] shadow-[0_2px_8px_rgba(36,25,20,0.03)] dark:shadow-none"
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-start gap-3 min-w-0">
+                                  <img
+                                    src={product.image_url}
+                                    alt={product.name}
+                                    className="w-14 h-14 rounded-xl object-cover bg-ivory shrink-0"
+                                  />
+                                  <div className="min-w-0 pt-0.5">
+                                    <p className="font-serif text-[15px] sm:text-base font-semibold text-coffee-dark leading-snug line-clamp-2">
+                                      {product.name}
+                                    </p>
+                                    <div className="flex items-baseline gap-1.5 mt-1">
+                                      <span className="font-serif text-sm font-bold text-coffee tabular-nums">
+                                        {formatVND(unitPrice * qty)}
+                                      </span>
+                                      {qty > 1 && (
+                                        <span className="text-[11px] text-coffee-muted tabular-nums">
+                                          ({formatVND(unitPrice)} / ly)
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="inline-flex items-center gap-1 bg-[#F3EFE4] dark:bg-white/[0.06] rounded-full p-1 text-xs font-semibold shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => updateOrderNoteQty(product.id, -1)}
+                                    className="w-7 h-7 rounded-full inline-flex items-center justify-center text-coffee-dark hover:bg-white dark:hover:bg-white/[0.12] active:scale-90 transition-all"
+                                    aria-label="Giảm số lượng"
+                                  >
+                                    <Minus className="w-3.5 h-3.5" />
+                                  </button>
+                                  <span className="min-w-[20px] text-center tabular-nums text-coffee-dark">
+                                    {qty}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateOrderNoteQty(product.id, 1)}
+                                    className="w-7 h-7 rounded-full inline-flex items-center justify-center text-coffee-dark hover:bg-white dark:hover:bg-white/[0.12] active:scale-90 transition-all"
+                                    aria-label="Tăng số lượng"
+                                  >
+                                    <Plus className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Soft Borderless Taste Customization Pills */}
+                              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                                {DRINK_NOTE_OPTIONS.map((opt) => {
+                                  const isSelected = selectedNotes.includes(opt);
+                                  return (
+                                    <button
+                                      key={opt}
+                                      type="button"
+                                      onClick={() => toggleOrderCustomization(product.id, opt)}
+                                      className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-150 active:scale-95 ${
+                                        isSelected
+                                          ? 'bg-coffee text-ivory-light shadow-2xs'
+                                          : 'bg-[#F4F0E6] dark:bg-white/[0.05] text-coffee-muted hover:text-coffee-dark hover:bg-[#EAE4D3] dark:hover:bg-white/[0.1]'
+                                      }`}
+                                    >
+                                      {opt}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </m.div>
+                          );
+                        })}
+                      </AnimatePresence>
+
+                      {/* Free-text General Note for the Table */}
+                      <div className="p-3.5 rounded-2xl bg-white dark:bg-[#211914] border border-[#ECE6D6] dark:border-white/[0.05] space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <label
+                            htmlFor="table-general-note-input"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-coffee-dark"
+                          >
+                            <MessageSquareText className="w-3.5 h-3.5 text-coffee" />
+                            <span>Ghi chú chung cho cả bàn</span>
+                          </label>
+                          {tableGeneralNote && (
+                            <button
+                              type="button"
+                              onClick={() => updateTableGeneralNote('')}
+                              className="text-[11px] text-coffee-muted hover:text-coffee-dark"
+                            >
+                              Xóa ghi chú
+                            </button>
+                          )}
+                        </div>
+                        <input
+                          id="table-general-note-input"
+                          type="text"
+                          value={tableGeneralNote}
+                          onChange={(e) => updateTableGeneralNote(e.target.value)}
+                          placeholder="Ví dụ: Cho thêm 2 ly nước lọc, mang ra cùng lúc..."
+                          className="w-full px-3 py-2 text-xs rounded-xl bg-[#FAF8F3] dark:bg-white/[0.04] border border-[#E6DFCE] dark:border-white/[0.08] text-coffee-dark placeholder:text-coffee-muted focus:outline-none focus:border-coffee"
+                        />
+                        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                          {TABLE_NOTE_SUGGESTIONS.map((sug) => (
+                            <button
+                              key={sug}
+                              type="button"
+                              onClick={() => {
+                                const next = tableGeneralNote.includes(sug)
+                                  ? tableGeneralNote
+                                  : tableGeneralNote.trim()
+                                  ? `${tableGeneralNote.trim()}, ${sug.toLowerCase()}`
+                                  : sug;
+                                updateTableGeneralNote(next);
+                              }}
+                              className="px-2.5 py-1 rounded-full text-[11px] bg-[#F4F0E6] dark:bg-white/[0.05] text-coffee-muted hover:text-coffee-dark transition-colors"
+                            >
+                              + {sug}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Clean Summary Footer */}
