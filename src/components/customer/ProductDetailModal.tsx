@@ -56,11 +56,20 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   useEffect(() => {
     if (!product) return;
     trackProductView(product.id, product.name);
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = prevBodyOverflow;
+      document.documentElement.style.overflow = prevHtmlOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
   }, [product, onClose]);
 
   if (!product) return null;

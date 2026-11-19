@@ -135,6 +135,27 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
     [notedItems]
   );
 
+  const isOrderModalOpen = orderNoteOpen && notedItems.length > 0;
+
+  useEffect(() => {
+    if (!isOrderModalOpen) return;
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOrderNoteOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevBodyOverflow;
+      document.documentElement.style.overflow = prevHtmlOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isOrderModalOpen]);
+
   const totalNotePrice = useMemo(
     () =>
       notedItems.reduce((sum, { product, qty }) => {
@@ -551,12 +572,12 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                         onSelectProduct?.(item);
                       }
                     }}
-                    className={`group cursor-pointer flex items-start gap-4 sm:gap-5 p-3.5 sm:p-4 rounded-xl bg-ivory/40 hover:bg-ivory/85 dark:bg-white/[0.03] dark:hover:bg-white/[0.06] border border-coffee-beige/50 dark:border-white/[0.06] hover:border-coffee/40 dark:hover:border-coffee/40 hover:-translate-y-0.5 hover:shadow-editorial transition-all duration-300 ${
+                    className={`group cursor-pointer h-full flex items-stretch gap-4 sm:gap-5 p-3.5 sm:p-4 rounded-xl bg-ivory/40 hover:bg-ivory/85 dark:bg-white/[0.03] dark:hover:bg-white/[0.06] border border-coffee-beige/50 dark:border-white/[0.06] hover:border-coffee/40 dark:hover:border-coffee/40 hover:-translate-y-0.5 hover:shadow-editorial transition-all duration-300 ${
                       !item.is_available ? 'opacity-65' : ''
                     }`}
                   >
                     {/* Thumbnail */}
-                    <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden shrink-0 border border-coffee-beige/60 dark:border-white/[0.08] bg-ivory">
+                    <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden shrink-0 border border-coffee-beige/60 dark:border-white/[0.08] bg-ivory self-start">
                       <img
                         src={item.image_url}
                         alt={item.name}
@@ -573,7 +594,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                     </div>
 
                     {/* Text & Price */}
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 flex flex-col">
                       <div className="flex items-start justify-between gap-3">
                         <h3 className="font-serif text-xl sm:text-2xl font-semibold text-coffee-dark group-hover:text-coffee transition-colors leading-snug">
                           {item.name}
@@ -612,16 +633,16 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
 
                       {item.is_available && (
                         <div
-                          className="mt-3 flex items-center justify-end"
+                          className="mt-auto pt-3 flex items-center justify-end"
                           onClick={(e) => e.stopPropagation()}
                           onKeyDown={(e) => e.stopPropagation()}
                         >
                           {(orderNote[item.id] || 0) > 0 ? (
-                            <div className="inline-flex items-center gap-1 bg-coffee text-ivory-light rounded-full px-1.5 py-0.5 text-xs font-semibold shadow-xs">
+                            <div className="h-7 inline-flex items-center gap-1 bg-coffee text-ivory-light rounded-full px-1 text-xs font-semibold shadow-xs">
                               <button
                                 type="button"
                                 onClick={() => updateOrderNoteQty(item.id, -1)}
-                                className="w-6 h-6 rounded-full inline-flex items-center justify-center hover:bg-white/15 transition-colors"
+                                className="w-5 h-5 rounded-full inline-flex items-center justify-center hover:bg-white/15 transition-colors"
                                 aria-label="Giảm số lượng"
                               >
                                 <Minus className="w-3 h-3" />
@@ -632,7 +653,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                               <button
                                 type="button"
                                 onClick={() => updateOrderNoteQty(item.id, 1)}
-                                className="w-6 h-6 rounded-full inline-flex items-center justify-center hover:bg-white/15 transition-colors"
+                                className="w-5 h-5 rounded-full inline-flex items-center justify-center hover:bg-white/15 transition-colors"
                                 aria-label="Tăng số lượng"
                               >
                                 <Plus className="w-3 h-3" />
@@ -642,7 +663,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                             <button
                               type="button"
                               onClick={() => updateOrderNoteQty(item.id, 1)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-ivory dark:bg-white/[0.06] text-coffee border border-coffee-beige/80 dark:border-white/[0.1] hover:bg-coffee hover:text-ivory-light hover:border-coffee transition-colors"
+                              className="h-7 inline-flex items-center gap-1 px-3 rounded-full text-xs font-medium bg-ivory dark:bg-white/[0.06] text-coffee border border-coffee-beige/80 dark:border-white/[0.1] hover:bg-coffee hover:text-ivory-light hover:border-coffee transition-colors"
                             >
                               <Plus className="w-3 h-3" />
                               <span>Đánh dấu món</span>
@@ -750,25 +771,25 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
               <button
                 type="button"
                 onClick={() => setOrderNoteOpen(true)}
-                className="group w-full sm:w-auto flex items-center justify-between gap-3.5 pl-2.5 pr-3 py-2 rounded-2xl bg-[#241914]/95 dark:bg-[#221914]/95 backdrop-blur-md text-[#F7F5EF] border border-[#4B2E24]/80 dark:border-[#D4A574]/30 shadow-[0_14px_34px_-10px_rgba(20,14,10,0.5)] dark:shadow-[0_16px_40px_-10px_rgba(0,0,0,0.8)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200"
+                className="group w-full sm:w-auto flex items-center justify-between gap-3.5 pl-2.5 pr-3 py-2 rounded-2xl bg-coffee text-ivory-light border border-coffee-beige/40 shadow-editorial-lg hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="h-9 px-2.5 rounded-xl bg-[#3A2820] dark:bg-[#D4A574]/15 border border-[#D4A574]/30 text-[#E8C69E] dark:text-[#D4A574] inline-flex items-center justify-center gap-1.5 shrink-0">
+                  <span className="h-9 px-2.5 rounded-xl bg-ivory-light/15 border border-ivory-light/25 text-ivory-light inline-flex items-center justify-center gap-1.5 shrink-0">
                     <ClipboardList className="w-3.5 h-3.5" />
                     <span className="font-serif text-sm font-bold tabular-nums">
                       {totalNoteCount}
                     </span>
                   </span>
                   <div className="text-left min-w-0 pr-1">
-                    <p className="text-xs font-semibold text-[#F7F5EF] leading-tight truncate">
+                    <p className="text-xs font-bold text-ivory-light leading-tight truncate">
                       Sổ ghi món tại bàn
                     </p>
-                    <p className="text-xs font-serif font-semibold text-[#E8C69E] dark:text-[#D4A574] mt-0.5 tabular-nums">
+                    <p className="text-xs font-serif font-bold text-ivory-light/90 mt-0.5 tabular-nums">
                       {formatVND(totalNotePrice)}
                     </p>
                   </div>
                 </div>
-                <span className="px-3 py-1.5 rounded-xl bg-[#F7F5EF] dark:bg-[#D4A574] text-[#241914] dark:text-[#140F0C] text-xs font-semibold shrink-0 group-hover:bg-[#E9E6D8] dark:group-hover:bg-[#E2B887] transition-colors">
+                <span className="px-3.5 py-1.5 rounded-xl bg-ivory-light text-coffee text-xs font-bold shrink-0 group-hover:opacity-90 transition-opacity">
                   Mở sổ
                 </span>
               </button>
@@ -778,9 +799,9 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
 
         {/* Table Order Note Modal */}
         <AnimatePresence>
-          {orderNoteOpen && notedItems.length > 0 && (
+          {isOrderModalOpen && (
             <div
-              className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4"
+              className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 overscroll-contain"
               role="dialog"
               aria-modal="true"
               aria-labelledby="table-order-note-title"
@@ -791,14 +812,14 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
                 onClick={() => setOrderNoteOpen(false)}
-                className="fixed inset-0 bg-black/60 backdrop-blur-[3px]"
+                className="fixed inset-0 bg-black/60 backdrop-blur-[3px] touch-none"
               />
               <m.div
                 initial={{ opacity: 0, y: 28, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 24, scale: 0.98 }}
                 transition={{ type: 'spring', stiffness: 340, damping: 30 }}
-                className="relative z-10 w-full sm:max-w-[500px] bg-[#FAF8F3] dark:bg-[#18120E] text-coffee-dark border-t sm:border border-[#E6DFCE] dark:border-white/[0.08] rounded-t-[24px] sm:rounded-2xl shadow-[0_28px_70px_-16px_rgba(0,0,0,0.6)] overflow-hidden max-h-[86vh] sm:max-h-[82vh] flex flex-col"
+                className="relative z-10 w-full sm:max-w-[500px] bg-[#FAF8F3] dark:bg-[#18120E] text-coffee-dark border-t sm:border border-[#E6DFCE] dark:border-white/[0.08] rounded-t-[24px] sm:rounded-2xl shadow-[0_28px_70px_-16px_rgba(0,0,0,0.6)] overflow-hidden max-h-[86vh] sm:max-h-[82vh] flex flex-col overscroll-contain"
               >
                 {/* Mobile drag handle */}
                 <div className="pt-2.5 pb-0.5 sm:hidden flex justify-center">
@@ -838,7 +859,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                 </div>
 
                 {/* Drink Cards List */}
-                <div className="px-4 sm:px-5 py-3.5 overflow-y-auto space-y-2.5 flex-1">
+                <div className="px-4 sm:px-5 py-3.5 overflow-y-auto overscroll-contain touch-pan-y space-y-2.5 flex-1">
                   <AnimatePresence initial={false}>
                     {notedItems.map(({ product, qty }) => {
                       const unitPrice =
