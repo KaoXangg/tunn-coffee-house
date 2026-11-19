@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { X, CheckCircle2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, CheckCircle2, Plus, Minus, ClipboardList } from 'lucide-react';
 import { AnimatePresence, m } from 'framer-motion';
 import { formatVND } from '../../lib/utils';
 import { trackProductView } from '../../lib/analytics';
@@ -16,6 +16,42 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   onClose,
 }) => {
   const { categories, settings } = useSiteData();
+  const [noteQty, setNoteQty] = useState<number>(0);
+
+  useEffect(() => {
+    if (!product) return;
+    const syncQty = () => {
+      try {
+        const raw = localStorage.getItem('tunn_table_order_note_v1');
+        const map = raw ? (JSON.parse(raw) as Record<string, number>) : {};
+        setNoteQty(map[product.id] || 0);
+      } catch {
+        setNoteQty(0);
+      }
+    };
+    syncQty();
+    window.addEventListener('tunn-order-note-updated', syncQty);
+    return () => window.removeEventListener('tunn-order-note-updated', syncQty);
+  }, [product]);
+
+  const updateModalNoteQty = (delta: number) => {
+    if (!product) return;
+    try {
+      const raw = localStorage.getItem('tunn_table_order_note_v1');
+      const map = raw ? (JSON.parse(raw) as Record<string, number>) : {};
+      const nextQty = Math.max(0, (map[product.id] || 0) + delta);
+      if (nextQty === 0) {
+        delete map[product.id];
+      } else {
+        map[product.id] = nextQty;
+      }
+      localStorage.setItem('tunn_table_order_note_v1', JSON.stringify(map));
+      setNoteQty(nextQty);
+      window.dispatchEvent(new Event('tunn-order-note-updated'));
+    } catch {
+      // Ignore storage errors
+    }
+  };
 
   useEffect(() => {
     if (!product) return;
@@ -122,13 +158,51 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 </div>
               </div>
 
-              <div className="mt-8 pt-4 border-t border-coffee-beige/60 flex items-center justify-between gap-3">
+              <div className="mt-8 pt-4 border-t border-coffee-beige/60 space-y-2.5">
+                {product.is_available && (
+                  noteQty > 0 ? (
+                    <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-ivory border border-coffee-beige rounded-brand">
+                      <span className="inline-flex items-center gap-2 text-xs font-semibold text-coffee-dark">
+                        <ClipboardList className="w-4 h-4 text-coffee" />
+                        <span>Đã có trong Sổ ghi món</span>
+                      </span>
+                      <div className="inline-flex items-center gap-1.5 bg-coffee text-ivory-light rounded-full px-2 py-0.5 text-xs font-semibold">
+                        <button
+                          type="button"
+                          onClick={() => updateModalNoteQty(-1)}
+                          className="w-6 h-6 rounded-full inline-flex items-center justify-center hover:bg-white/15"
+                          aria-label="Giảm số lượng"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <span className="min-w-[22px] text-center tabular-nums">{noteQty}</span>
+                        <button
+                          type="button"
+                          onClick={() => updateModalNoteQty(1)}
+                          className="w-6 h-6 rounded-full inline-flex items-center justify-center hover:bg-white/15"
+                          aria-label="Tăng số lượng"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => updateModalNoteQty(1)}
+                      className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-xs font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-colors rounded-brand"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Thêm vào Sổ ghi món tại bàn</span>
+                    </button>
+                  )
+                )}
                 <a
                   href="#contact"
                   onClick={onClose}
-                  className="w-full text-center px-5 py-3 text-xs uppercase tracking-[0.18em] font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-colors rounded-brand"
+                  className="block w-full text-center px-5 py-2.5 text-xs font-medium border border-coffee-beige text-coffee-dark hover:bg-ivory transition-colors rounded-brand"
                 >
-                  {settings.hotline ? `Đặt món · ${settings.hotline}` : 'Ghé quán thưởng thức'}
+                  {settings.hotline ? `Liên hệ quán · ${settings.hotline}` : 'Xem địa chỉ & giờ mở cửa'}
                 </a>
               </div>
             </div>

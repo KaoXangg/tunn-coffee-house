@@ -19,6 +19,8 @@ import {
   LayoutList,
   DollarSign,
   Printer,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../../lib/supabase';
 import { useSiteData } from '../../../contexts/SiteDataContext';
@@ -306,6 +308,36 @@ export const AdminProductsPage: React.FC = () => {
       toast.error('Lỗi lưu sản phẩm', err instanceof Error ? err.message : 'Không thể lưu vào database');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleMoveProductOrder = async (prod: Product, direction: 'up' | 'down') => {
+    if (!isSupabaseConfigured) {
+      toast.info('Chưa kết nối Supabase');
+      return;
+    }
+
+    const sorted = [...products].sort((a, b) => a.sort_order - b.sort_order);
+    const currentIdx = sorted.findIndex((p) => p.id === prod.id);
+    const targetIdx = direction === 'up' ? currentIdx - 1 : currentIdx + 1;
+    if (currentIdx === -1 || targetIdx < 0 || targetIdx >= sorted.length) return;
+
+    const neighbor = sorted[targetIdx];
+    const currentOrder =
+      prod.sort_order !== neighbor.sort_order ? neighbor.sort_order : targetIdx + 1;
+    const neighborOrder =
+      prod.sort_order !== neighbor.sort_order ? prod.sort_order : currentIdx + 1;
+
+    try {
+      const [res1, res2] = await Promise.all([
+        supabase.from('products').update({ sort_order: currentOrder }).eq('id', prod.id),
+        supabase.from('products').update({ sort_order: neighborOrder }).eq('id', neighbor.id),
+      ]);
+      if (res1.error) throw res1.error;
+      if (res2.error) throw res2.error;
+      await refreshAll();
+    } catch (err: unknown) {
+      toast.error('Không thể đổi thứ tự món', err instanceof Error ? err.message : undefined);
     }
   };
 
@@ -1116,10 +1148,30 @@ export const AdminProductsPage: React.FC = () => {
                               <p className="font-semibold text-coffee-dark truncate">
                                 {prod.name}
                               </p>
-                              <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="text-[11px] text-coffee-muted">
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="px-2 py-0.5 text-[11px] font-semibold bg-ivory border border-coffee-beige/70 rounded text-coffee-dark tabular-nums">
                                   #{prod.sort_order}
                                 </span>
+                                <div className="inline-flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleMoveProductOrder(prod, 'up')}
+                                    className="w-7 h-7 inline-flex items-center justify-center rounded-brand bg-ivory-light border border-coffee-beige text-coffee-dark hover:bg-coffee hover:text-ivory-light hover:border-coffee active:scale-95 transition-all"
+                                    title="Đẩy thứ tự lên trên"
+                                    aria-label="Đẩy lên"
+                                  >
+                                    <ArrowUp className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleMoveProductOrder(prod, 'down')}
+                                    className="w-7 h-7 inline-flex items-center justify-center rounded-brand bg-ivory-light border border-coffee-beige text-coffee-dark hover:bg-coffee hover:text-ivory-light hover:border-coffee active:scale-95 transition-all"
+                                    title="Đẩy thứ tự xuống dưới"
+                                    aria-label="Đẩy xuống"
+                                  >
+                                    <ArrowDown className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
                                 {prod.badge && (
                                   <span className="px-1.5 py-0.5 text-[10px] bg-ivory text-coffee rounded font-semibold">
                                     {prod.badge}

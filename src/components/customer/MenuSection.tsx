@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Search,
   SlidersHorizontal,
@@ -77,6 +77,19 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
       return next;
     });
   };
+
+  useEffect(() => {
+    const syncFromStorage = () => {
+      try {
+        const saved = localStorage.getItem('tunn_table_order_note_v1');
+        setOrderNote(saved ? (JSON.parse(saved) as Record<string, number>) : {});
+      } catch {
+        // Ignore storage errors
+      }
+    };
+    window.addEventListener('tunn-order-note-updated', syncFromStorage);
+    return () => window.removeEventListener('tunn-order-note-updated', syncFromStorage);
+  }, []);
 
   const updateOrderNoteQty = (productId: string, delta: number) => {
     setOrderNote((prev) => {
@@ -723,29 +736,32 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
           </p>
         )}
 
-        {/* Floating Table Order Note Pill */}
+        {/* Floating Table Order Note Pill (Left-aligned on mobile to clear Back-to-Top button on right) */}
         {totalNoteCount > 0 && (
-          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 w-[92vw] max-w-md">
+          <div className="fixed bottom-5 left-4 right-[68px] sm:right-auto sm:left-6 z-40 sm:w-auto max-w-sm">
             <button
               type="button"
               onClick={() => setOrderNoteOpen(true)}
-              className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-coffee-dark text-ivory-light border border-coffee-beige/40 shadow-editorial-lg hover:bg-coffee transition-all"
+              className="w-full sm:w-auto flex items-center justify-between gap-3 pl-3 pr-3.5 py-2.5 rounded-2xl bg-coffee-dark text-ivory-light border border-coffee-beige/30 shadow-editorial-lg hover:bg-coffee active:scale-[0.98] transition-all"
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="w-8 h-8 rounded-xl bg-coffee text-ivory-light inline-flex items-center justify-center shrink-0">
+                <span className="w-8 h-8 rounded-xl bg-coffee text-ivory-light inline-flex items-center justify-center shrink-0 relative">
                   <ClipboardList className="w-4 h-4" />
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-400 text-coffee-dark text-[10px] font-bold inline-flex items-center justify-center tabular-nums">
+                    {totalNoteCount}
+                  </span>
                 </span>
                 <div className="text-left min-w-0">
-                  <p className="text-xs font-semibold truncate">
-                    Sổ ghi món tại bàn ({totalNoteCount} ly)
+                  <p className="text-xs font-semibold leading-tight truncate">
+                    Sổ ghi món tại bàn
                   </p>
-                  <p className="text-[11px] text-coffee-beige/85 truncate">
-                    Tạm tính: {formatVND(totalNotePrice)} · Chạm để xem danh sách
+                  <p className="text-xs font-serif font-bold text-amber-300 mt-0.5 tabular-nums">
+                    {formatVND(totalNotePrice)}
                   </p>
                 </div>
               </div>
               <span className="px-3 py-1.5 rounded-xl bg-ivory-light text-coffee-dark text-xs font-semibold shrink-0">
-                Xem món
+                Xem sổ
               </span>
             </button>
           </div>
@@ -753,35 +769,47 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
 
         {/* Table Order Note Modal */}
         {orderNoteOpen && notedItems.length > 0 && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4">
             <div
               onClick={() => setOrderNoteOpen(false)}
-              className="fixed inset-0 bg-coffee-dark/60 backdrop-blur-xs"
+              className="fixed inset-0 bg-black/55 backdrop-blur-[2px]"
             />
-            <div className="relative z-10 w-full sm:max-w-lg bg-ivory-light text-coffee-dark border-t sm:border border-coffee-beige rounded-t-2xl sm:rounded-2xl shadow-editorial-lg overflow-hidden max-h-[85vh] flex flex-col">
-              <div className="px-5 py-4 bg-ivory border-b border-coffee-beige flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <ClipboardList className="w-5 h-5 text-coffee" />
-                  <div>
-                    <h3 className="font-serif text-lg font-semibold text-coffee-dark">
-                      Sổ Ghi Món Tại Bàn ({totalNoteCount} ly)
-                    </h3>
-                    <p className="text-[11px] text-coffee-muted">
-                      Đưa màn hình này hoặc đọc danh sách cho nhân viên khi gọi món
+            <div className="relative z-10 w-full sm:max-w-lg bg-white dark:bg-[#1D1511] text-coffee-dark border-t sm:border border-coffee-beige rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
+              {/* Mobile drag handle */}
+              <div className="pt-2.5 pb-1 sm:hidden flex justify-center bg-white dark:bg-[#1D1511]">
+                <span className="w-10 h-1 rounded-full bg-coffee-beige/80" />
+              </div>
+
+              <div className="px-5 py-3.5 sm:py-4 border-b border-coffee-beige/70 flex items-center justify-between gap-3 bg-white dark:bg-[#1D1511]">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="w-9 h-9 rounded-xl bg-coffee text-ivory-light inline-flex items-center justify-center shrink-0">
+                    <ClipboardList className="w-4 h-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-serif text-lg font-semibold text-coffee-dark">
+                        Sổ ghi món tại bàn
+                      </h3>
+                      <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-ivory text-coffee border border-coffee-beige">
+                        {totalNoteCount} ly
+                      </span>
+                    </div>
+                    <p className="text-xs text-coffee-muted truncate">
+                      Đưa màn hình này hoặc đọc cho nhân viên khi gọi món
                     </p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setOrderNoteOpen(false)}
-                  className="p-1.5 rounded-lg text-coffee-muted hover:text-coffee-dark hover:bg-ivory-light"
+                  className="w-8 h-8 rounded-xl inline-flex items-center justify-center text-coffee-muted hover:text-coffee-dark hover:bg-ivory transition-colors shrink-0"
                   aria-label="Đóng sổ ghi món"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="p-5 overflow-y-auto divide-y divide-coffee-beige/60 space-y-3">
+              <div className="p-4 sm:p-5 overflow-y-auto space-y-3 bg-ivory-light/75 dark:bg-[#140F0C]">
                 {notedItems.map(({ product, qty }) => {
                   const unitPrice =
                     product.sale_price &&
@@ -793,48 +821,53 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                   return (
                     <div
                       key={product.id}
-                      className="pt-3 first:pt-0 space-y-2"
+                      className="p-3.5 rounded-2xl bg-white dark:bg-[#1D1511] border border-coffee-beige/80 shadow-2xs space-y-3"
                     >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3 min-w-0">
                           <img
                             src={product.image_url}
                             alt={product.name}
-                            className="w-12 h-12 rounded-lg object-cover border border-coffee-beige shrink-0"
+                            className="w-14 h-14 rounded-xl object-cover border border-coffee-beige/70 shrink-0"
                           />
                           <div className="min-w-0">
-                            <p className="font-serif text-base font-semibold text-coffee-dark truncate">
+                            <p className="font-serif text-[15px] font-semibold text-coffee-dark leading-snug line-clamp-2">
                               {product.name}
                             </p>
-                            <p className="text-xs text-coffee font-medium">
+                            <p className="text-xs text-coffee-muted mt-1 tabular-nums">
                               {formatVND(unitPrice)} × {qty} ={' '}
-                              <strong>{formatVND(unitPrice * qty)}</strong>
+                              <strong className="text-coffee font-semibold">
+                                {formatVND(unitPrice * qty)}
+                              </strong>
                             </p>
                           </div>
                         </div>
 
-                        <div className="inline-flex items-center gap-1 bg-ivory border border-coffee-beige rounded-full px-1.5 py-0.5 text-xs font-semibold shrink-0">
+                        <div className="inline-flex items-center gap-1 bg-ivory-light border border-coffee-beige rounded-xl p-0.5 text-xs font-semibold shrink-0">
                           <button
                             type="button"
                             onClick={() => updateOrderNoteQty(product.id, -1)}
-                            className="w-6 h-6 rounded-full inline-flex items-center justify-center hover:bg-coffee-beige/50"
+                            className="w-7 h-7 rounded-lg inline-flex items-center justify-center text-coffee-dark hover:bg-ivory transition-colors"
                             aria-label="Giảm"
                           >
-                            <Minus className="w-3 h-3" />
+                            <Minus className="w-3.5 h-3.5" />
                           </button>
-                          <span className="min-w-[20px] text-center tabular-nums">{qty}</span>
+                          <span className="min-w-[22px] text-center tabular-nums text-coffee-dark">
+                            {qty}
+                          </span>
                           <button
                             type="button"
                             onClick={() => updateOrderNoteQty(product.id, 1)}
-                            className="w-6 h-6 rounded-full inline-flex items-center justify-center hover:bg-coffee-beige/50"
+                            className="w-7 h-7 rounded-lg inline-flex items-center justify-center text-coffee-dark hover:bg-ivory transition-colors"
                             aria-label="Tăng"
                           >
-                            <Plus className="w-3 h-3" />
+                            <Plus className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-1.5 pl-15">
+                      <div className="pt-2.5 border-t border-coffee-beige/50 flex flex-wrap items-center gap-1.5">
+                        <span className="text-[11px] text-coffee-muted mr-0.5">Tùy chọn:</span>
                         {DRINK_NOTE_OPTIONS.map((opt) => {
                           const isSelected = selectedNotes.includes(opt);
                           return (
@@ -842,10 +875,10 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                               key={opt}
                               type="button"
                               onClick={() => toggleOrderCustomization(product.id, opt)}
-                              className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
                                 isSelected
-                                  ? 'bg-coffee text-ivory-light'
-                                  : 'bg-ivory text-coffee-dark/80 border border-coffee-beige/80 hover:border-coffee'
+                                  ? 'bg-coffee text-ivory-light shadow-2xs'
+                                  : 'bg-ivory-light text-coffee-dark/80 border border-coffee-beige/70 hover:border-coffee'
                               }`}
                             >
                               {opt}
@@ -858,10 +891,12 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                 })}
               </div>
 
-              <div className="px-5 py-4 bg-ivory border-t border-coffee-beige flex items-center justify-between gap-3">
+              <div className="px-5 py-4 bg-white dark:bg-[#1D1511] border-t border-coffee-beige/80 flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs text-coffee-muted">Tổng tạm tính ({totalNoteCount} ly)</p>
-                  <p className="font-serif text-xl font-bold text-coffee">
+                  <p className="text-[11px] text-coffee-muted">
+                    Tổng tạm tính ({totalNoteCount} ly)
+                  </p>
+                  <p className="font-serif text-2xl font-bold text-coffee tabular-nums leading-tight">
                     {formatVND(totalNotePrice)}
                   </p>
                 </div>
@@ -869,7 +904,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                   <button
                     type="button"
                     onClick={clearOrderNote}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-red-700 hover:bg-red-50 border border-red-200 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-red-700 hover:bg-red-50 border border-red-200 transition-colors"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     <span>Xóa hết</span>
@@ -877,7 +912,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                   <button
                     type="button"
                     onClick={() => setOrderNoteOpen(false)}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-colors"
+                    className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-colors"
                   >
                     Đóng
                   </button>
