@@ -45,6 +45,9 @@ function lazyWithRetry<T extends ComponentType<Record<string, unknown>>>(
 const AdminLoginPage = lazyWithRetry(() =>
   import('./pages/admin/AdminLoginPage').then((m) => ({ default: m.AdminLoginPage }))
 );
+const AdminQrApprovePage = lazyWithRetry(() =>
+  import('./pages/admin/AdminQrApprovePage').then((m) => ({ default: m.AdminQrApprovePage }))
+);
 const AdminDashboardPage = lazyWithRetry(() =>
   import('./pages/admin/AdminDashboardPage').then((m) => ({
     default: m.AdminDashboardPage,
@@ -143,6 +146,7 @@ export function App() {
 
                 {/* Admin Authentication */}
                 <Route path="/admin/login" element={<AdminLoginPage />} />
+                <Route path="/admin/qr-approve" element={<AdminQrApprovePage />} />
 
                 {/* Protected Admin CMS */}
                 <Route
