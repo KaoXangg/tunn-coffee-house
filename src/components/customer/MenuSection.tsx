@@ -1,5 +1,16 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { Search, SlidersHorizontal, X, Coffee, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Search,
+  SlidersHorizontal,
+  X,
+  Coffee,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Minus,
+  ClipboardList,
+  Trash2,
+} from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { formatVND } from '../../lib/utils';
@@ -14,6 +25,7 @@ type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc';
 type QuickTagFilter = 'all' | 'bestseller' | 'promo';
 
 const ITEMS_PER_PAGE = 8;
+const DRINK_NOTE_OPTIONS = ['Bình thường', 'Ít ngọt', 'Không đường', 'Ít đá', 'Riêng đá', 'Nóng'];
 
 export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => {
   const { categories, products, getSection, loading, isLiveDatabase } = useSiteData();
@@ -26,6 +38,101 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [orderNoteOpen, setOrderNoteOpen] = useState<boolean>(false);
+  const [orderNote, setOrderNote] = useState<Record<string, number>>(() => {
+    try {
+      const saved = localStorage.getItem('tunn_table_order_note_v1');
+      return saved ? (JSON.parse(saved) as Record<string, number>) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [orderCustomizations, setOrderCustomizations] = useState<Record<string, string[]>>(() => {
+    try {
+      const saved = localStorage.getItem('tunn_table_order_custom_v1');
+      return saved ? (JSON.parse(saved) as Record<string, string[]>) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const toggleOrderCustomization = (productId: string, option: string) => {
+    setOrderCustomizations((prev) => {
+      const current = prev[productId] || [];
+      let nextList: string[];
+      if (option === 'Bình thường') {
+        nextList = current.includes('Bình thường') ? [] : ['Bình thường'];
+      } else {
+        const withoutDefault = current.filter((o) => o !== 'Bình thường');
+        nextList = withoutDefault.includes(option)
+          ? withoutDefault.filter((o) => o !== option)
+          : [...withoutDefault, option];
+      }
+      const next = { ...prev, [productId]: nextList };
+      try {
+        localStorage.setItem('tunn_table_order_custom_v1', JSON.stringify(next));
+      } catch {
+        // Ignore storage errors
+      }
+      return next;
+    });
+  };
+
+  const updateOrderNoteQty = (productId: string, delta: number) => {
+    setOrderNote((prev) => {
+      const nextQty = Math.max(0, (prev[productId] || 0) + delta);
+      const next = { ...prev };
+      if (nextQty === 0) {
+        delete next[productId];
+      } else {
+        next[productId] = nextQty;
+      }
+      try {
+        localStorage.setItem('tunn_table_order_note_v1', JSON.stringify(next));
+      } catch {
+        // Ignore storage quota errors
+      }
+      return next;
+    });
+  };
+
+  const clearOrderNote = () => {
+    setOrderNote({});
+    setOrderCustomizations({});
+    setOrderNoteOpen(false);
+    try {
+      localStorage.removeItem('tunn_table_order_note_v1');
+      localStorage.removeItem('tunn_table_order_custom_v1');
+    } catch {
+      // Ignore storage errors
+    }
+  };
+
+  const notedItems = useMemo(() => {
+    return Object.entries(orderNote)
+      .map(([id, qty]) => {
+        const product = products.find((p) => p.id === id && p.is_visible);
+        return product && qty > 0 ? { product, qty } : null;
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+  }, [orderNote, products]);
+
+  const totalNoteCount = useMemo(
+    () => notedItems.reduce((sum, entry) => sum + entry.qty, 0),
+    [notedItems]
+  );
+
+  const totalNotePrice = useMemo(
+    () =>
+      notedItems.reduce((sum, { product, qty }) => {
+        const unit =
+          product.sale_price && Number(product.sale_price) > 0 && Number(product.sale_price) < Number(product.price)
+            ? Number(product.sale_price)
+            : Number(product.price);
+        return sum + unit * qty;
+      }, 0),
+    [notedItems]
+  );
 
   const activeCategories = useMemo(
     () =>
@@ -489,6 +596,47 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                       <p className="text-xs sm:text-sm text-coffee-muted mt-2 line-clamp-2 leading-relaxed">
                         {item.description}
                       </p>
+
+                      {item.is_available && (
+                        <div
+                          className="mt-3 flex items-center justify-end"
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => e.stopPropagation()}
+                        >
+                          {(orderNote[item.id] || 0) > 0 ? (
+                            <div className="inline-flex items-center gap-1 bg-coffee text-ivory-light rounded-full px-1.5 py-0.5 text-xs font-semibold shadow-xs">
+                              <button
+                                type="button"
+                                onClick={() => updateOrderNoteQty(item.id, -1)}
+                                className="w-6 h-6 rounded-full inline-flex items-center justify-center hover:bg-white/15 transition-colors"
+                                aria-label="Giảm số lượng"
+                              >
+                                <Minus className="w-3 h-3" />
+                              </button>
+                              <span className="min-w-[20px] text-center tabular-nums">
+                                {orderNote[item.id]}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => updateOrderNoteQty(item.id, 1)}
+                                className="w-6 h-6 rounded-full inline-flex items-center justify-center hover:bg-white/15 transition-colors"
+                                aria-label="Tăng số lượng"
+                              >
+                                <Plus className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => updateOrderNoteQty(item.id, 1)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-ivory dark:bg-white/[0.06] text-coffee border border-coffee-beige/80 dark:border-white/[0.1] hover:bg-coffee hover:text-ivory-light hover:border-coffee transition-colors"
+                            >
+                              <Plus className="w-3 h-3" />
+                              <span>Đánh dấu món</span>
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </m.div>
                 );
@@ -573,6 +721,170 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
           <p className="mt-12 text-center text-xs italic text-coffee-muted">
             * {String(section?.content?.note)}
           </p>
+        )}
+
+        {/* Floating Table Order Note Pill */}
+        {totalNoteCount > 0 && (
+          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 w-[92vw] max-w-md">
+            <button
+              type="button"
+              onClick={() => setOrderNoteOpen(true)}
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-coffee-dark text-ivory-light border border-coffee-beige/40 shadow-editorial-lg hover:bg-coffee transition-all"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="w-8 h-8 rounded-xl bg-coffee text-ivory-light inline-flex items-center justify-center shrink-0">
+                  <ClipboardList className="w-4 h-4" />
+                </span>
+                <div className="text-left min-w-0">
+                  <p className="text-xs font-semibold truncate">
+                    Sổ ghi món tại bàn ({totalNoteCount} ly)
+                  </p>
+                  <p className="text-[11px] text-coffee-beige/85 truncate">
+                    Tạm tính: {formatVND(totalNotePrice)} · Chạm để xem danh sách
+                  </p>
+                </div>
+              </div>
+              <span className="px-3 py-1.5 rounded-xl bg-ivory-light text-coffee-dark text-xs font-semibold shrink-0">
+                Xem món
+              </span>
+            </button>
+          </div>
+        )}
+
+        {/* Table Order Note Modal */}
+        {orderNoteOpen && notedItems.length > 0 && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <div
+              onClick={() => setOrderNoteOpen(false)}
+              className="fixed inset-0 bg-coffee-dark/60 backdrop-blur-xs"
+            />
+            <div className="relative z-10 w-full sm:max-w-lg bg-ivory-light text-coffee-dark border-t sm:border border-coffee-beige rounded-t-2xl sm:rounded-2xl shadow-editorial-lg overflow-hidden max-h-[85vh] flex flex-col">
+              <div className="px-5 py-4 bg-ivory border-b border-coffee-beige flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <ClipboardList className="w-5 h-5 text-coffee" />
+                  <div>
+                    <h3 className="font-serif text-lg font-semibold text-coffee-dark">
+                      Sổ Ghi Món Tại Bàn ({totalNoteCount} ly)
+                    </h3>
+                    <p className="text-[11px] text-coffee-muted">
+                      Đưa màn hình này hoặc đọc danh sách cho nhân viên khi gọi món
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setOrderNoteOpen(false)}
+                  className="p-1.5 rounded-lg text-coffee-muted hover:text-coffee-dark hover:bg-ivory-light"
+                  aria-label="Đóng sổ ghi món"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-5 overflow-y-auto divide-y divide-coffee-beige/60 space-y-3">
+                {notedItems.map(({ product, qty }) => {
+                  const unitPrice =
+                    product.sale_price &&
+                    Number(product.sale_price) > 0 &&
+                    Number(product.sale_price) < Number(product.price)
+                      ? Number(product.sale_price)
+                      : Number(product.price);
+                  const selectedNotes = orderCustomizations[product.id] || [];
+                  return (
+                    <div
+                      key={product.id}
+                      className="pt-3 first:pt-0 space-y-2"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="w-12 h-12 rounded-lg object-cover border border-coffee-beige shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <p className="font-serif text-base font-semibold text-coffee-dark truncate">
+                              {product.name}
+                            </p>
+                            <p className="text-xs text-coffee font-medium">
+                              {formatVND(unitPrice)} × {qty} ={' '}
+                              <strong>{formatVND(unitPrice * qty)}</strong>
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="inline-flex items-center gap-1 bg-ivory border border-coffee-beige rounded-full px-1.5 py-0.5 text-xs font-semibold shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => updateOrderNoteQty(product.id, -1)}
+                            className="w-6 h-6 rounded-full inline-flex items-center justify-center hover:bg-coffee-beige/50"
+                            aria-label="Giảm"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="min-w-[20px] text-center tabular-nums">{qty}</span>
+                          <button
+                            type="button"
+                            onClick={() => updateOrderNoteQty(product.id, 1)}
+                            className="w-6 h-6 rounded-full inline-flex items-center justify-center hover:bg-coffee-beige/50"
+                            aria-label="Tăng"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-1.5 pl-15">
+                        {DRINK_NOTE_OPTIONS.map((opt) => {
+                          const isSelected = selectedNotes.includes(opt);
+                          return (
+                            <button
+                              key={opt}
+                              type="button"
+                              onClick={() => toggleOrderCustomization(product.id, opt)}
+                              className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                                isSelected
+                                  ? 'bg-coffee text-ivory-light'
+                                  : 'bg-ivory text-coffee-dark/80 border border-coffee-beige/80 hover:border-coffee'
+                              }`}
+                            >
+                              {opt}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="px-5 py-4 bg-ivory border-t border-coffee-beige flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs text-coffee-muted">Tổng tạm tính ({totalNoteCount} ly)</p>
+                  <p className="font-serif text-xl font-bold text-coffee">
+                    {formatVND(totalNotePrice)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={clearOrderNote}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-red-700 hover:bg-red-50 border border-red-200 transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Xóa hết</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOrderNoteOpen(false)}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-colors"
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </section>

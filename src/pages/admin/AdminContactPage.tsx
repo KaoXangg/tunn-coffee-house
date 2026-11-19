@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Save, Loader2, MapPin, Phone, Mail, Clock, Share2 } from 'lucide-react';
+import { Save, Loader2, MapPin, Phone, Mail, Clock, Share2, Megaphone } from 'lucide-react';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
 
 export const AdminContactPage: React.FC = () => {
-  const { settings, updateSiteSettings } = useSiteData();
+  const { settings, updateSiteSettings, getSection, updatePageSection } = useSiteData();
+  const contactSection = getSection('contact');
   const toast = useToast();
 
   const [storeName, setStoreName] = useState(settings.store_name);
@@ -18,6 +19,12 @@ export const AdminContactPage: React.FC = () => {
   const [instagramUrl, setInstagramUrl] = useState(settings.instagram_url);
   const [tiktokUrl, setTiktokUrl] = useState(settings.tiktok_url);
   const [orderUrl, setOrderUrl] = useState(settings.order_url);
+  const [announcementEnabled, setAnnouncementEnabled] = useState(
+    Boolean(contactSection?.content?.announcement_enabled)
+  );
+  const [announcementText, setAnnouncementText] = useState(
+    String(contactSection?.content?.announcement_text || '')
+  );
   const [saving, setSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
@@ -39,31 +46,52 @@ export const AdminContactPage: React.FC = () => {
     }
   }
 
+  const remoteAnnEnabled = Boolean(contactSection?.content?.announcement_enabled);
+  const remoteAnnText = String(contactSection?.content?.announcement_text || '');
+  const [prevAnnKey, setPrevAnnKey] = useState(`${remoteAnnEnabled}\0${remoteAnnText}`);
+  const currentAnnKey = `${remoteAnnEnabled}\0${remoteAnnText}`;
+  if (currentAnnKey !== prevAnnKey) {
+    setPrevAnnKey(currentAnnKey);
+    if (!isDirty) {
+      setAnnouncementEnabled(remoteAnnEnabled);
+      setAnnouncementText(remoteAnnText);
+    }
+  }
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
-      const { error } = await updateSiteSettings({
-        store_name: storeName.trim(),
-        address: address.trim(),
-        hotline: hotline.trim(),
-        email: email.trim(),
-        opening_hours: openingHours.trim(),
-        google_maps_url: googleMapsUrl.trim(),
-        google_maps_embed: googleMapsEmbed.trim(),
-        facebook_url: facebookUrl.trim(),
-        instagram_url: instagramUrl.trim(),
-        tiktok_url: tiktokUrl.trim(),
-        order_url: orderUrl.trim() || '#menu',
-      });
+      const [{ error }, sectionRes] = await Promise.all([
+        updateSiteSettings({
+          store_name: storeName.trim(),
+          address: address.trim(),
+          hotline: hotline.trim(),
+          email: email.trim(),
+          opening_hours: openingHours.trim(),
+          google_maps_url: googleMapsUrl.trim(),
+          google_maps_embed: googleMapsEmbed.trim(),
+          facebook_url: facebookUrl.trim(),
+          instagram_url: instagramUrl.trim(),
+          tiktok_url: tiktokUrl.trim(),
+          order_url: orderUrl.trim() || '#menu',
+        }),
+        updatePageSection('contact', {
+          content: {
+            ...(contactSection?.content || {}),
+            announcement_enabled: announcementEnabled,
+            announcement_text: announcementText.trim(),
+          },
+        }),
+      ]);
 
-      if (error) {
-        toast.info('Đã cập nhật tạm thời', error);
+      if (error || sectionRes.error) {
+        toast.info('Đã cập nhật tạm thời', error || sectionRes.error || undefined);
       } else {
         setIsDirty(false);
         toast.success(
           'Đã lưu Thông tin Liên hệ!',
-          'Mọi thông tin địa chỉ, hotline và mạng xã hội đã đồng bộ với trang khách hàng.'
+          'Mọi thông tin địa chỉ, thanh thông báo, hotline và mạng xã hội đã đồng bộ với trang khách hàng.'
         );
       }
     } finally {
@@ -199,6 +227,41 @@ export const AdminContactPage: React.FC = () => {
                 onChange={(e) => setGoogleMapsEmbed(e.target.value)}
                 placeholder="https://www.google.com/maps/embed?pb=..."
                 className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-coffee-beige space-y-3">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2 text-coffee-dark">
+                <Megaphone className="w-4 h-4 text-coffee" />
+                <h3 className="text-sm font-semibold">
+                  Thanh Thông Báo Nhanh Đầu Trang (Announcement Bar)
+                </h3>
+              </div>
+              <label className="inline-flex items-center gap-2 text-xs font-semibold text-coffee-dark cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={announcementEnabled}
+                  onChange={(e) => {
+                    setIsDirty(true);
+                    setAnnouncementEnabled(e.target.checked);
+                  }}
+                  className="rounded border-coffee-beige text-coffee"
+                />
+                <span>Hiện trên đầu trang khách</span>
+              </label>
+            </div>
+            <div>
+              <input
+                type="text"
+                value={announcementText}
+                onChange={(e) => {
+                  setIsDirty(true);
+                  setAnnouncementText(e.target.value);
+                }}
+                placeholder="VD: Hôm nay quán mở cửa từ 09:00 · Ưu đãi khung giờ vàng 14h–17h"
+                className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
               />
             </div>
           </div>

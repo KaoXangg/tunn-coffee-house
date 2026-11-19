@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, ArrowUpRight, ShieldCheck, Clock, Phone, Sun, Moon } from 'lucide-react';
+import { Menu, X, ArrowUpRight, ShieldCheck, Clock, Phone, Sun, Moon, Megaphone } from 'lucide-react';
 import { AnimatePresence, m } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -9,7 +9,11 @@ import { ScrollProgressBar, TUNN_EASE } from '../common/MotionPrimitives';
 import { getStoreOpenStatus, sanitizeUrl } from '../../lib/utils';
 
 export const CustomerHeader: React.FC = () => {
-  const { settings, themeMode, toggleTheme } = useSiteData();
+  const { settings, themeMode, toggleTheme, getSection } = useSiteData();
+  const contactSection = getSection('contact');
+  const announcementEnabled = Boolean(contactSection?.content?.announcement_enabled);
+  const announcementText = String(contactSection?.content?.announcement_text || '').trim();
+  const [announcementDismissed, setAnnouncementDismissed] = useState(false);
   const { isAdmin } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -96,6 +100,24 @@ export const CustomerHeader: React.FC = () => {
             : 'bg-ivory-light border-b border-coffee-beige/50 dark:border-white/[0.06]'
         }`}
       >
+      {announcementEnabled && announcementText && !announcementDismissed && (
+        <div className="bg-coffee text-ivory-light px-4 py-1.5 text-xs border-b border-coffee-dark/30">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+            <div className="flex items-center justify-center gap-2 flex-1 text-center">
+              <Megaphone className="w-3.5 h-3.5 shrink-0" />
+              <span className="font-medium leading-snug">{announcementText}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setAnnouncementDismissed(true)}
+              className="p-0.5 rounded hover:bg-white/15 transition-colors shrink-0"
+              aria-label="Đóng thông báo"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
       {/* Top Editorial Utility Strip (collapses on scroll) */}
       <div
         className={`hidden lg:block bg-[#241914] text-[#E9E6D8] overflow-hidden transition-all duration-300 ${

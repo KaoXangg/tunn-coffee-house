@@ -152,39 +152,32 @@ export const AdminProductsPage: React.FC = () => {
     setModalOpen(true);
   };
 
-  // Duplicate Product (1-Click Clone)
-  const handleDuplicateProduct = async (prod: Product) => {
-    if (!isSupabaseConfigured) {
-      toast.error('Chưa kết nối Supabase');
-      return;
-    }
+  // Duplicate Product (Open Create Modal pre-filled with existing product data)
+  const handleDuplicateProduct = (prod: Product) => {
+    const newName = `${prod.name} (Mới)`;
+    const newSlug = `${slugify(prod.name)}-moi-${Math.random().toString(36).slice(2, 5)}`;
 
-    const newName = `${prod.name} (Bản sao)`;
-    const newSlug = `${prod.slug}-copy-${Math.random().toString(36).slice(2, 6)}`;
-
-    const { error } = await supabase.from('products').insert({
+    setEditingProduct(null);
+    form.reset({
       name: newName,
       slug: newSlug,
       description: prod.description,
       image_url: prod.image_url,
       price: prod.price,
-      sale_price: prod.sale_price,
-      category_id: prod.category_id,
-      badge: prod.badge,
+      sale_price: prod.sale_price ?? '',
+      category_id: prod.category_id || '',
+      badge: prod.badge || '',
       is_featured: false,
       is_best_seller: false,
       is_available: prod.is_available,
       is_visible: prod.is_visible,
       sort_order: products.length + 1,
     });
-
-    if (error) {
-      toast.error('Không thể nhân bản món', error.message);
-    } else {
-      await logAdminActivity('Nhân bản sản phẩm', 'products', newName);
-      await refreshAll();
-      toast.success('Đã nhân bản món thành công!', newName);
-    }
+    setModalOpen(true);
+    toast.info(
+      'Đã sao chép thông tin món',
+      'Bạn chỉ cần đổi tên, giá hoặc hình ảnh rồi bấm Lưu.'
+    );
   };
 
   // Start Inline Price Edit
@@ -442,9 +435,10 @@ export const AdminProductsPage: React.FC = () => {
   };
 
   const handleBulkAdjustPrice = async () => {
-    const delta = Number(bulkPriceInput);
-    if (!bulkPriceInput.trim() || isNaN(delta) || delta === 0) {
-      toast.error('Vui lòng nhập mức điều chỉnh giá hợp lệ (VD: 10 hoặc -5000)');
+    const rawVal = Number(bulkPriceInput);
+    const discount = Math.abs(rawVal);
+    if (!bulkPriceInput.trim() || isNaN(discount) || discount <= 0) {
+      toast.error('Vui lòng nhập mức giảm giá hợp lệ (VD: 10 cho 10% hoặc 5000 cho 5.000đ)');
       return;
     }
     if (selectedIds.length === 0 || !isSupabaseConfigured) return;
@@ -453,41 +447,72 @@ export const AdminProductsPage: React.FC = () => {
     try {
       const targets = products.filter((p) => selectedIds.includes(p.id));
       for (const prod of targets) {
-        const nextPrice =
+        const basePrice = Number(prod.price);
+        const computedSale =
           bulkPriceUnit === 'percent'
-            ? Math.max(0, Math.round((Number(prod.price) * (1 + delta / 100)) / 1000) * 1000)
-            : Math.max(0, Number(prod.price) + delta);
-
-        const nextSalePrice =
-          prod.sale_price && Number(prod.sale_price) > 0
-            ? bulkPriceUnit === 'percent'
-              ? Math.max(
-                  0,
-                  Math.round((Number(prod.sale_price) * (1 + delta / 100)) / 1000) * 1000
-                )
-              : Math.max(0, Number(prod.sale_price) + delta)
-            : null;
+            ? Math.max(1000, Math.round((basePrice * (1 - discount / 100)) / 1000) * 1000)
+            : Math.max(1000, basePrice - discount);
+        const nextSalePrice = computedSale < basePrice ? computedSale : null;
 
         const { error } = await supabase
           .from('products')
-          .update({ price: nextPrice, sale_price: nextSalePrice })
+          .update({ sale_price: nextSalePrice })
           .eq('id', prod.id);
         if (error) throw error;
       }
 
       await logAdminActivity(
-        `Điều chỉnh giá hàng loạt (${delta > 0 ? '+' : ''}${delta}${
+        `Áp dụng giảm giá hàng loạt (-${discount}${
           bulkPriceUnit === 'percent' ? '%' : 'đ'
         })`,
         'products',
         `${targets.length} sản phẩm`
       );
       await refreshAll();
-      toast.success(`Đã cập nhật giá cho ${targets.length} món`);
+      toast.success(
+        `Đã giảm giá ${targets.length} món (Giá gốc vẫn được giữ nguyên)`
+      );
       setBulkPriceInput('');
       setSelectedIds([]);
     } catch (err: unknown) {
       toast.error('Lỗi cập nhật giá hàng loạt', err instanceof Error ? err.message : undefined);
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
+  const handleRestoreOriginalPrices = async (targetIds?: string[]) => {
+    if (!isSupabaseConfigured) return;
+    const idsToRestore =
+      targetIds && targetIds.length > 0
+        ? targetIds
+        : products
+            .filter((p) => p.sale_price !== null && Number(p.sale_price) > 0)
+            .map((p) => p.id);
+
+    if (idsToRestore.length === 0) {
+      toast.info('Tất cả các món đã ở giá gốc.');
+      return;
+    }
+
+    setBulkProcessing(true);
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ sale_price: null })
+        .in('id', idsToRestore);
+      if (error) throw error;
+
+      await logAdminActivity(
+        'Khôi phục về giá gốc',
+        'products',
+        `${idsToRestore.length} sản phẩm`
+      );
+      await refreshAll();
+      toast.success(`Đã đưa ${idsToRestore.length} món về lại giá gốc!`);
+      setSelectedIds([]);
+    } catch (err: unknown) {
+      toast.error('Không thể khôi phục giá gốc', err instanceof Error ? err.message : undefined);
     } finally {
       setBulkProcessing(false);
     }
@@ -850,12 +875,57 @@ export const AdminProductsPage: React.FC = () => {
       ) : (
         /* VIEW MODE 2: FULL TABLE WITH INLINE PRICE EDIT & DUPLICATE */
         <div className="space-y-4">
+          {/* Quick Store-wide Selection & Restore Original Price Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const allIds = filteredProducts.map((p) => p.id);
+                  const allSelected =
+                    allIds.length > 0 && allIds.every((id) => selectedIds.includes(id));
+                  setSelectedIds(allSelected ? [] : allIds);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 font-semibold bg-white border border-coffee-beige text-coffee-dark hover:bg-ivory rounded-brand transition-colors"
+              >
+                <span>
+                  {filteredProducts.length > 0 &&
+                  filteredProducts.every((p) => selectedIds.includes(p.id))
+                    ? `Bỏ chọn tất cả (${filteredProducts.length} món)`
+                    : `Chọn tất cả món trong cửa hàng (${filteredProducts.length} món)`}
+                </span>
+              </button>
+            </div>
+
+            {products.some((p) => p.sale_price !== null && Number(p.sale_price) > 0) && (
+              <button
+                type="button"
+                disabled={bulkProcessing}
+                onClick={() => handleRestoreOriginalPrices()}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 font-semibold bg-amber-50 border border-amber-300 text-amber-900 hover:bg-amber-100 rounded-brand transition-colors disabled:opacity-50"
+              >
+                <span>
+                  Về giá gốc tất cả ({products.filter((p) => p.sale_price && Number(p.sale_price) > 0).length} món đang giảm)
+                </span>
+              </button>
+            )}
+          </div>
+
           {selectedIds.length > 0 && (
             <div className="p-3.5 bg-coffee-dark text-ivory-light rounded-brand flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-sm">
-              <div className="flex items-center gap-3 text-xs">
+              <div className="flex items-center gap-3 text-xs flex-wrap">
                 <span className="font-semibold">
                   Đã chọn {selectedIds.length} món
                 </span>
+                {selectedIds.length < filteredProducts.length && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedIds(filteredProducts.map((p) => p.id))}
+                    className="text-amber-300 hover:text-white underline font-medium"
+                  >
+                    Chọn hết {filteredProducts.length} món toàn quán
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => setSelectedIds([])}
@@ -907,13 +977,13 @@ export const AdminProductsPage: React.FC = () => {
                   Hiện trên Web
                 </button>
 
-                <div className="flex items-center gap-1.5 pl-2 border-l border-coffee">
+                <div className="flex flex-wrap items-center gap-1.5 pl-2 border-l border-coffee">
                   <input
                     type="number"
                     value={bulkPriceInput}
                     onChange={(e) => setBulkPriceInput(e.target.value)}
-                    placeholder="+10 hoặc -5000"
-                    className="w-28 px-2.5 py-1 text-xs bg-white text-coffee-dark rounded-brand"
+                    placeholder="Giảm 10 hoặc 5000"
+                    className="w-32 px-2.5 py-1 text-xs bg-white text-coffee-dark rounded-brand"
                   />
                   <select
                     value={bulkPriceUnit}
@@ -929,7 +999,15 @@ export const AdminProductsPage: React.FC = () => {
                     onClick={handleBulkAdjustPrice}
                     className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider bg-coffee-beige text-coffee-dark hover:bg-white rounded-brand disabled:opacity-50"
                   >
-                    Đổi giá
+                    Giảm giá
+                  </button>
+                  <button
+                    type="button"
+                    disabled={bulkProcessing}
+                    onClick={() => handleRestoreOriginalPrices(selectedIds)}
+                    className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider bg-amber-200 text-coffee-dark hover:bg-white rounded-brand disabled:opacity-50"
+                  >
+                    Về giá gốc
                   </button>
                 </div>
               </div>
@@ -1099,22 +1177,35 @@ export const AdminProductsPage: React.FC = () => {
                               </button>
                             </div>
                           ) : (
-                            <button
-                              type="button"
-                              onClick={() => startInlinePriceEdit(prod)}
-                              className="group text-left hover:bg-ivory/70 px-2 py-1 -mx-2 rounded transition-colors"
-                              title="Nhấn để sửa nhanh giá tiền"
-                            >
-                              <span className="font-semibold text-coffee inline-flex items-center gap-1">
-                                {formatVND(prod.sale_price || prod.price)}
-                                <DollarSign className="w-3 h-3 opacity-0 group-hover:opacity-100 text-coffee-muted" />
-                              </span>
-                              {prod.sale_price && prod.sale_price < prod.price && (
-                                <span className="block text-[11px] text-coffee-muted line-through">
-                                  {formatVND(prod.price)}
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => startInlinePriceEdit(prod)}
+                                className="group text-left hover:bg-ivory/70 px-2 py-1 -mx-2 rounded transition-colors"
+                                title="Nhấn để sửa nhanh giá tiền"
+                              >
+                                <span className="font-semibold text-coffee inline-flex items-center gap-1">
+                                  {formatVND(prod.sale_price || prod.price)}
+                                  <DollarSign className="w-3 h-3 opacity-0 group-hover:opacity-100 text-coffee-muted" />
                                 </span>
+                                {prod.sale_price && prod.sale_price < prod.price && (
+                                  <span className="block text-[11px] text-coffee-muted line-through">
+                                    {formatVND(prod.price)}
+                                  </span>
+                                )}
+                              </button>
+                              {prod.sale_price && prod.sale_price < prod.price && (
+                                <button
+                                  type="button"
+                                  disabled={bulkProcessing}
+                                  onClick={() => handleRestoreOriginalPrices([prod.id])}
+                                  className="px-2 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100 rounded transition-colors"
+                                  title="Đưa món này về lại giá gốc"
+                                >
+                                  Về giá gốc
+                                </button>
                               )}
-                            </button>
+                            </div>
                           )}
                         </td>
 
