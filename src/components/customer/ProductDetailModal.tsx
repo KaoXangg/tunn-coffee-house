@@ -153,18 +153,18 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
-            className="relative z-10 w-full max-w-3xl bg-ivory-light border border-coffee-beige rounded-2xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-12"
+            className="relative z-10 w-full max-w-[350px] sm:max-w-md md:max-w-3xl max-h-[85vh] overflow-y-auto overscroll-contain bg-ivory-light border border-coffee-beige rounded-2xl shadow-2xl grid grid-cols-1 md:grid-cols-12"
           >
             <button
               type="button"
               onClick={onClose}
-              className="absolute top-3.5 right-3.5 z-20 p-2 bg-ivory-light/90 text-coffee-dark rounded-full hover:bg-ivory transition-colors"
+              className="absolute top-3 right-3 z-20 w-8 h-8 inline-flex items-center justify-center bg-ivory-light/90 backdrop-blur-xs text-coffee-dark rounded-full shadow-xs hover:bg-ivory transition-colors"
               aria-label="Đóng"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="md:col-span-5 aspect-square md:aspect-auto bg-ivory overflow-hidden">
+            <div className="md:col-span-5 h-48 sm:h-60 md:h-auto bg-ivory overflow-hidden">
               <img
                 src={product.image_url}
                 alt={product.name}
@@ -172,7 +172,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               />
             </div>
 
-            <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
+            <div className="md:col-span-7 p-4 sm:p-6 md:p-8 flex flex-col justify-between">
               <div>
                 <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-coffee font-semibold border-b border-coffee-beige pb-1">
                   <span>{categoryName}</span>
@@ -180,29 +180,29 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
                 <h3
                   id="product-modal-title"
-                  className="font-serif text-2xl sm:text-3xl font-semibold text-coffee-dark mt-2.5"
+                  className="font-serif text-xl sm:text-2xl md:text-3xl font-semibold text-coffee-dark mt-2 leading-snug"
                 >
                   {product.name}
                 </h3>
 
-                <div className="mt-3 flex items-baseline gap-2.5">
-                  <span className="font-serif text-2xl font-bold text-coffee">
+                <div className="mt-2 sm:mt-3 flex items-baseline gap-2.5">
+                  <span className="font-serif text-xl sm:text-2xl font-bold text-coffee">
                     {formatVND(hasDiscount ? product.sale_price : product.price)}
                   </span>
                   {hasDiscount && (
-                    <span className="text-sm text-coffee-muted line-through">
+                    <span className="text-xs sm:text-sm text-coffee-muted line-through">
                       {formatVND(product.price)}
                     </span>
                   )}
                 </div>
 
-                <p className="text-sm text-coffee-muted mt-4 leading-relaxed">
+                <p className="text-xs sm:text-sm text-coffee-muted mt-2.5 sm:mt-4 leading-relaxed">
                   {product.description}
                 </p>
 
-                <div className="mt-5 pt-4 border-t border-coffee-beige/60 space-y-2 text-xs text-coffee-dark/80">
+                <div className="mt-3.5 sm:mt-5 pt-3 sm:pt-4 border-t border-coffee-beige/60 space-y-1.5 sm:space-y-2 text-xs text-coffee-dark/80">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-coffee" />
+                    <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-coffee shrink-0" />
                     <span>
                       Trạng thái:{' '}
                       <strong>
@@ -211,21 +211,21 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-coffee" />
+                    <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-coffee shrink-0" />
                     <span>Tùy chỉnh mức đường &amp; đá theo sở thích riêng</span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-7 pt-4 border-t border-coffee-beige/60 space-y-2.5">
+              <div className="mt-4 sm:mt-7 pt-3.5 sm:pt-4 border-t border-coffee-beige/60 space-y-2">
                 {product.is_available && (
                   noteQty > 0 ? (
-                    <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-ivory border border-coffee-beige rounded-xl">
-                      <span className="inline-flex items-center gap-2 text-xs font-semibold text-coffee-dark whitespace-nowrap">
-                        <ClipboardList className="w-4 h-4 text-coffee shrink-0" />
+                    <div className="flex items-center justify-between gap-2 px-3.5 py-2 bg-ivory border border-coffee-beige rounded-xl">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-coffee-dark whitespace-nowrap">
+                        <ClipboardList className="w-3.5 h-3.5 text-coffee shrink-0" />
                         <span>Đã có trong Sổ ghi món</span>
                       </span>
-                      <div className="inline-flex items-center gap-1.5 bg-coffee text-ivory-light rounded-full px-2 py-0.5 text-xs font-semibold shrink-0">
+                      <div className="inline-flex items-center gap-1 bg-coffee text-ivory-light rounded-full px-1.5 py-0.5 text-xs font-semibold shrink-0">
                         <button
                           type="button"
                           onClick={() => updateModalNoteQty(-1)}
@@ -234,7 +234,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                         >
                           <Minus className="w-3.5 h-3.5" />
                         </button>
-                        <span className="min-w-[22px] text-center tabular-nums">{noteQty}</span>
+                        <span className="min-w-[20px] text-center tabular-nums">{noteQty}</span>
                         <button
                           type="button"
                           onClick={() => updateModalNoteQty(1)}
@@ -249,39 +249,39 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                     <button
                       type="button"
                       onClick={() => updateModalNoteQty(1)}
-                      className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-xs font-semibold bg-coffee text-ivory-light hover:opacity-95 transition-opacity rounded-xl"
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold bg-coffee text-ivory-light hover:opacity-95 transition-opacity rounded-xl"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Thêm vào Sổ ghi món tại bàn</span>
                     </button>
                   )
                 )}
-                <div className="flex flex-col sm:flex-row items-stretch gap-2.5">
+                <div className="flex flex-row items-stretch gap-2">
                   <button
                     type="button"
                     onClick={handleShareProduct}
-                    className="sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-medium border border-coffee-beige text-coffee-dark hover:bg-ivory transition-colors rounded-xl whitespace-nowrap"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium border border-coffee-beige text-coffee-dark hover:bg-ivory transition-colors rounded-xl whitespace-nowrap shrink-0"
                   >
                     {shareCopied ? (
                       <>
                         <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span className="text-emerald-700 dark:text-emerald-400 font-semibold">
-                          Đã chép link món
+                          Đã chép link
                         </span>
                       </>
                     ) : (
                       <>
                         <Share2 className="w-3.5 h-3.5 text-coffee shrink-0" />
-                        <span>Chia sẻ món này</span>
+                        <span>Chia sẻ món</span>
                       </>
                     )}
                   </button>
                   <a
                     href="#contact"
                     onClick={onClose}
-                    className="flex-1 inline-flex items-center justify-center px-4 py-2.5 text-xs font-medium border border-coffee-beige text-coffee-dark hover:bg-ivory transition-colors rounded-xl whitespace-nowrap"
+                    className="flex-1 inline-flex items-center justify-center px-3 py-2 text-xs font-medium border border-coffee-beige text-coffee-dark hover:bg-ivory transition-colors rounded-xl whitespace-nowrap"
                   >
-                    {settings.hotline ? `Liên hệ quán · ${settings.hotline}` : 'Xem địa chỉ & giờ mở cửa'}
+                    {settings.hotline ? `Liên hệ · ${settings.hotline}` : 'Địa chỉ & giờ mở cửa'}
                   </a>
                 </div>
               </div>
