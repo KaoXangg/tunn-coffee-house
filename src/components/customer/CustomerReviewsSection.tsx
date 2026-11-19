@@ -22,8 +22,14 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
   onOpenFeedback,
   refreshTrigger = 0,
 }) => {
-  const { getSection } = useSiteData();
+  const { getSection, settings } = useSiteData();
   const contactContent = (getSection('contact')?.content || {}) as Record<string, unknown>;
+  const reviewReplies = useMemo(() => {
+    const raw = contactContent.review_replies;
+    return raw && typeof raw === 'object'
+      ? (raw as Record<string, { text: string; updated_at: string }>)
+      : {};
+  }, [contactContent.review_replies]);
   const [liveReviews, setLiveReviews] = useState<PublicReviewRecord[]>([]);
   const liveReviewsRef = useRef<PublicReviewRecord[]>([]);
   const [newlyAddedId, setNewlyAddedId] = useState<string | null>(null);
@@ -365,6 +371,17 @@ export const CustomerReviewsSection: React.FC<CustomerReviewsSectionProps> = ({
                                   {tag}
                                 </span>
                               ))}
+                            </div>
+                          )}
+
+                          {reviewReplies[rev.id]?.text && (
+                            <div className="mt-2.5 p-2.5 rounded-xl bg-ivory-light/90 dark:bg-white/[0.04] border-l-2 border-coffee text-xs space-y-0.5">
+                              <p className="text-[10px] font-bold uppercase tracking-wider text-coffee">
+                                Phản hồi từ {settings.brand_name || 'TUNN Coffee House'}
+                              </p>
+                              <p className="text-coffee-dark/90 leading-snug line-clamp-2">
+                                {reviewReplies[rev.id].text}
+                              </p>
                             </div>
                           )}
                         </div>

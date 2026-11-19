@@ -14,16 +14,19 @@ export const AdminSeoPage: React.FC = () => {
   const [ogImageUrl, setOgImageUrl] = useState(settings.og_image_url);
   const [faviconUrl, setFaviconUrl] = useState(settings.favicon_url);
   const [saving, setSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<'og' | 'favicon' | null>(null);
 
   const [prevSettings, setPrevSettings] = useState(settings);
   if (settings !== prevSettings) {
     setPrevSettings(settings);
-    setSeoTitle(settings.seo_title);
-    setSeoDescription(settings.seo_description);
-    setSeoKeywords(settings.seo_keywords);
-    setOgImageUrl(settings.og_image_url);
-    setFaviconUrl(settings.favicon_url);
+    if (!isDirty) {
+      setSeoTitle(settings.seo_title);
+      setSeoDescription(settings.seo_description);
+      setSeoKeywords(settings.seo_keywords);
+      setOgImageUrl(settings.og_image_url);
+      setFaviconUrl(settings.favicon_url);
+    }
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -41,6 +44,7 @@ export const AdminSeoPage: React.FC = () => {
       if (error) {
         toast.info('Đã cập nhật thẻ SEO trên trình duyệt', error);
       } else {
+        setIsDirty(false);
         toast.success(
           'Đã lưu cấu hình SEO & Open Graph!',
           'Thẻ meta title, description và ảnh chia sẻ mạng xã hội đã được cập nhật.'
@@ -52,7 +56,11 @@ export const AdminSeoPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div
+      className="space-y-6"
+      onInputCapture={() => setIsDirty(true)}
+      onChangeCapture={() => setIsDirty(true)}
+    >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl font-semibold text-coffee-dark">

@@ -19,11 +19,13 @@ import {
   Printer,
   ArrowUp,
   ArrowDown,
+  Download,
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../../lib/supabase';
 import { useSiteData } from '../../../contexts/SiteDataContext';
 import { useToast } from '../../../contexts/ToastContext';
 import { formatVND, slugify } from '../../../lib/utils';
+import { downloadStyledXlsx } from '../../../lib/exportXlsx';
 import { ConfirmDialog } from '../../../components/common/ConfirmDialog';
 import { Skeleton } from '../../../components/common/Skeleton';
 import { ProductFormModal } from './ProductFormModal';
@@ -587,6 +589,41 @@ export const AdminProductsPage: React.FC = () => {
     }
   };
 
+  const handleExportProductsExcel = () => {
+    if (filteredProducts.length === 0) {
+      toast.info('Chưa có món nào để xuất');
+      return;
+    }
+    const todayStr = new Date().toISOString().slice(0, 10);
+    downloadStyledXlsx({
+      filename: `thuc-don-tunn-${todayStr}.xlsx`,
+      sheetName: 'Thuc don TUNN',
+      title: `${settings.brand_name || 'TUNN Coffee House'} — Danh sách Thực đơn`,
+      subtitle: `Xuất ngày ${new Date().toLocaleDateString('vi-VN')} · Tổng ${filteredProducts.length} món`,
+      columns: [
+        { header: 'Thứ tự', width: 10 },
+        { header: 'Tên món đồ uống', width: 34 },
+        { header: 'Danh mục', width: 22 },
+        { header: 'Giá gốc (VNĐ)', width: 16 },
+        { header: 'Giá KM (VNĐ)', width: 16 },
+        { header: 'Tình trạng', width: 14 },
+        { header: 'Hiển thị Web', width: 14 },
+        { header: 'Nhãn', width: 14 },
+      ],
+      rows: filteredProducts.map((p) => [
+        Number(p.sort_order),
+        p.name,
+        getCategoryName(p.category_id),
+        Number(p.price),
+        p.sale_price && Number(p.sale_price) > 0 ? Number(p.sale_price) : '',
+        p.is_available ? 'Còn món' : 'Tạm hết',
+        p.is_visible ? 'Đang hiện' : 'Đang ẩn',
+        p.badge || '',
+      ]),
+    });
+    toast.success(`Đã xuất ${filteredProducts.length} món ra file Excel (.xlsx)`);
+  };
+
   const handlePrintMenuA4 = () => {
     const visibleItems = products
       .filter((p) => p.is_visible)
@@ -761,7 +798,16 @@ export const AdminProductsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={handleExportProductsExcel}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider bg-white border border-coffee-beige text-coffee-dark hover:bg-ivory rounded-brand transition-colors whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" />
+            <span>Xuất Excel</span>
+          </button>
+
           <button
             type="button"
             onClick={handlePrintMenuA4}

@@ -12,12 +12,16 @@ import {
   Mail,
   ShieldCheck,
   Download,
+  Reply,
+  Check,
+  X,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSiteData } from '../../contexts/SiteDataContext';
 import { useToast } from '../../contexts/ToastContext';
 import { formatDateTimeVi } from '../../lib/utils';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
-import { subscribeLiveSync } from '../../lib/liveSync';
+import { subscribeLiveSync, broadcastLiveSync } from '../../lib/liveSync';
 import { downloadStyledXlsx } from '../../lib/exportXlsx';
 import { Skeleton } from '../../components/common/Skeleton';
 import {
@@ -26,9 +30,61 @@ import {
   type TableFeedbackRecord,
 } from '../../lib/feedback';
 
+const QUICK_REPLY_TEMPLATES = [
+  'Cảm ơn bạn đã ghé TUNN Coffee House, hẹn gặp lại bạn nhé!',
+  'Tụi mình rất vui vì bạn hợp vị đồ uống của quán. Chúc bạn ngày mới thật vui!',
+  'TUNN đã ghi nhận góp ý của bạn để phục vụ chu đáo hơn. Cảm ơn bạn rất nhiều!',
+];
+
 export const AdminFeedbackPage: React.FC = () => {
   const { isOwnerAdmin } = useAuth();
+  const { getSection, updatePageSection } = useSiteData();
   const toast = useToast();
+
+  const contactSection = getSection('contact');
+  const reviewReplies = useMemo(() => {
+    const raw = contactSection?.content?.review_replies;
+    return raw && typeof raw === 'object'
+      ? (raw as Record<string, { text: string; updated_at: string }>)
+      : {};
+  }, [contactSection?.content?.review_replies]);
+
+  const [replyingId, setReplyingId] = useState<string | null>(null);
+  const [replyDraft, setReplyDraft] = useState<string>('');
+  const [savingReply, setSavingReply] = useState<boolean>(false);
+
+  const handleSaveReply = async (feedbackId: string, textToSave: string) => {
+    setSavingReply(true);
+    try {
+      const clean = textToSave.trim();
+      const nextReplies = { ...reviewReplies };
+      if (clean) {
+        nextReplies[feedbackId] = {
+          text: clean,
+          updated_at: new Date().toISOString(),
+        };
+      } else {
+        delete nextReplies[feedbackId];
+      }
+
+      const { error } = await updatePageSection('contact', {
+        content: {
+          ...(contactSection?.content || {}),
+          review_replies: nextReplies,
+        },
+      });
+      if (error) {
+        toast.info('Đã lưu tạm phản hồi', error);
+      } else {
+        broadcastLiveSync('cms');
+        toast.success(clean ? 'Đã đăng phản hồi của quán!' : 'Đã xóa phản hồi của quán.');
+      }
+      setReplyingId(null);
+      setReplyDraft('');
+    } finally {
+      setSavingReply(false);
+    }
+  };
 
   const [items, setItems] = useState<TableFeedbackRecord[]>([]);
   const [source, setSource] = useState<'supabase' | 'local'>('local');
@@ -472,6 +528,98 @@ export const AdminFeedbackPage: React.FC = () => {
                     Không có lời nhắn kèm theo.
                   </p>
                 )}
+
+                {/* Store Reply Section */}
+                <div className="mt-3 pt-2.5 border-t border-ivory">
+                  {replyingId === fb.id ? (
+                    <div className="space-y-2 bg-ivory-light p-2.5 rounded-brand border border-coffee-beige">
+                      <textarea
+                        rows={2}
+                        value={replyDraft}
+                        onChange={(e) => setReplyDraft(e.target.value)}
+                        placeholder="Nhập lời cảm ơn hoặc phản hồi từ TUNN Coffee House..."
+                        className="w-full px-2.5 py-1.5 text-xs bg-white border border-coffee-beige rounded-brand text-coffee-dark focus:outline-none focus:border-coffee"
+                      />
+                      <div className="flex flex-wrap gap-1">
+                        {QUICK_REPLY_TEMPLATES.map((tpl, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setReplyDraft(tpl)}
+                            className="px-2 py-0.5 text-[10px] bg-white border border-coffee-beige rounded text-coffee-muted hover:text-coffee-dark hover:border-coffee transition-colors text-left truncate max-w-full"
+                          >
+                            + Mẫu {idx + 1}: {tpl.slice(0, 34)}...
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-end gap-1.5 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReplyingId(null);
+                            setReplyDraft('');
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-coffee-muted hover:text-coffee-dark"
+                        >
+                          <X className="w-3 h-3" />
+                          <span>Hủy</span>
+                        </button>
+                        <button
+                          type="button"
+                          disabled={savingReply}
+                          onClick={() => handleSaveReply(fb.id, replyDraft)}
+                          className="inline-flex items-center gap-1 px-3 py-1 text-[11px] font-semibold bg-coffee text-ivory-light rounded-brand hover:bg-coffee-dark disabled:opacity-50"
+                        >
+                          <Check className="w-3 h-3" />
+                          <span>Lưu phản hồi</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : reviewReplies[fb.id]?.text ? (
+                    <div className="p-2.5 bg-ivory/70 border-l-2 border-coffee rounded-r-brand space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-coffee">
+                          Phản hồi từ TUNN Coffee House
+                        </span>
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setReplyingId(fb.id);
+                              setReplyDraft(reviewReplies[fb.id].text);
+                            }}
+                            className="text-[11px] font-semibold text-coffee hover:underline"
+                          >
+                            Sửa
+                          </button>
+                          <button
+                            type="button"
+                            disabled={savingReply}
+                            onClick={() => handleSaveReply(fb.id, '')}
+                            className="text-[11px] text-red-700 hover:underline"
+                          >
+                            Xóa
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-xs text-coffee-dark leading-relaxed">
+                        {reviewReplies[fb.id].text}
+                      </p>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReplyingId(fb.id);
+                        setReplyDraft(QUICK_REPLY_TEMPLATES[0]);
+                      }}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-coffee hover:underline"
+                    >
+                      <Reply className="w-3.5 h-3.5" />
+                      <span>Viết phản hồi của quán</span>
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="pt-3 border-t border-ivory flex items-center justify-between text-[11px] text-coffee-muted">

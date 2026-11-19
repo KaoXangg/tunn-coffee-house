@@ -12,8 +12,8 @@ import {
   Trash2,
   Maximize2,
   Minimize2,
-  MessageSquareText,
-  Clock,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
@@ -29,8 +29,36 @@ type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc';
 type QuickTagFilter = 'all' | 'bestseller' | 'refreshing' | 'creamy' | 'bold' | 'promo';
 
 const ITEMS_PER_PAGE = 8;
-const DRINK_NOTE_OPTIONS = ['Bình thường', 'Ít ngọt', 'Không đường', 'Ít đá', 'Riêng đá', 'Nóng'];
-const TABLE_NOTE_SUGGESTIONS = ['Cho thêm nước lọc', 'Mang ra cùng lúc', 'Ít ngọt cả bàn'];
+const DEFAULT_DRINK_NOTE_OPTIONS = ['Bình thường', 'Ít ngọt', 'Không đường', 'Ít đá', 'Riêng đá', 'Nóng'];
+const DEFAULT_SIZE_OPTIONS = ['Size M', 'Size L (+10k)'];
+const DEFAULT_TOPPING_OPTIONS = [
+  'Kem Phô Mai',
+  'Trân châu trắng',
+  'Hạt sen tươi',
+  'Dừa nướng giòn',
+];
+const TABLE_NOTE_SUGGESTIONS = ['Thêm nước lọc', 'Mang ra cùng lúc', 'Ít ngọt cả bàn'];
+
+function parseCsvList(raw: unknown, fallback: string[]): string[] {
+  if (typeof raw !== 'string') return fallback;
+  const parsed = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return parsed.length > 0 ? parsed : fallback;
+}
+
+function parseOptionExtraVnd(optionLabel: string): number {
+  const matchK = optionLabel.match(/\+\s*(\d+)\s*k\b/i);
+  if (matchK) return Number(matchK[1]) * 1000;
+  const matchVnd = optionLabel.match(/\+\s*([\d.]+)\s*(?:đ|vnd)?/i);
+  if (matchVnd) {
+    const digits = matchVnd[1].replace(/\./g, '');
+    const val = Number(digits);
+    if (!isNaN(val) && val >= 1000) return val;
+  }
+  return 0;
+}
 
 function getDrinkFlavorProfile(product: Product): {
   key: 'refreshing' | 'creamy' | 'bold';
@@ -75,6 +103,55 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [orderNoteOpen, setOrderNoteOpen] = useState<boolean>(false);
   const [staffViewMode, setStaffViewMode] = useState<boolean>(false);
+  const [orderCopied, setOrderCopied] = useState<boolean>(false);
+  const [splitOpen, setSplitOpen] = useState<boolean>(false);
+  const [splitPeople, setSplitPeople] = useState<number>(1);
+
+  const sizeOptions = useMemo(
+    () => parseCsvList(section?.content?.size_options, DEFAULT_SIZE_OPTIONS),
+    [section?.content?.size_options]
+  );
+  const toppingOptions = useMemo(
+    () => parseCsvList(section?.content?.topping_options, DEFAULT_TOPPING_OPTIONS),
+    [section?.content?.topping_options]
+  );
+  const drinkNoteOptions = useMemo(
+    () => parseCsvList(section?.content?.drink_note_options, DEFAULT_DRINK_NOTE_OPTIONS),
+    [section?.content?.drink_note_options]
+  );
+
+  const timeOfDayGreeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 11) {
+      return {
+        period: 'Gợi ý buổi sáng',
+        text: String(
+          section?.content?.greeting_morning ??
+            'Khởi đầu ngày mới tỉnh táo với Cà phê thủ công & Matcha Uji'
+        ).trim(),
+      };
+    }
+    if (hour >= 11 && hour < 17) {
+      return {
+        period: 'Gợi ý buổi chiều',
+        text: String(
+          section?.content?.greeting_afternoon ??
+            'Giải nhiệt buổi chiều với Trà trái cây tươi & Ô Long kem phô mai'
+        ).trim(),
+      };
+    }
+    return {
+      period: 'Gợi ý buổi tối',
+      text: String(
+        section?.content?.greeting_evening ??
+          'Thư giãn buổi tối với các dòng Trà thanh mát, ít cafein'
+      ).trim(),
+    };
+  }, [
+    section?.content?.greeting_morning,
+    section?.content?.greeting_afternoon,
+    section?.content?.greeting_evening,
+  ]);
   const [tableGeneralNote, setTableGeneralNote] = useState<string>(() => {
     try {
       return localStorage.getItem('tunn_table_order_general_note_v1') || '';
@@ -111,8 +188,16 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
     setOrderCustomizations((prev) => {
       const current = prev[productId] || [];
       let nextList: string[];
-      if (option === 'Bình thường') {
-        nextList = current.includes('Bình thường') ? [] : ['Bình thường'];
+      if (sizeOptions.includes(option)) {
+        const withoutSizes = current.filter((o) => !sizeOptions.includes(o));
+        nextList = current.includes(option) ? withoutSizes : [option, ...withoutSizes];
+      } else if (option === 'Bình thường') {
+        const onlySizesAndToppings = current.filter(
+          (o) => sizeOptions.includes(o) || toppingOptions.includes(o)
+        );
+        nextList = current.includes('Bình thường')
+          ? onlySizesAndToppings
+          : [...onlySizesAndToppings, 'Bình thường'];
       } else {
         const withoutDefault = current.filter((o) => o !== 'Bình thường');
         nextList = withoutDefault.includes(option)
@@ -134,6 +219,10 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
       try {
         const saved = localStorage.getItem('tunn_table_order_note_v1');
         setOrderNote(saved ? (JSON.parse(saved) as Record<string, number>) : {});
+        const savedCustom = localStorage.getItem('tunn_table_order_custom_v1');
+        setOrderCustomizations(
+          savedCustom ? (JSON.parse(savedCustom) as Record<string, string[]>) : {}
+        );
       } catch {
         // Ignore storage errors
       }
@@ -177,21 +266,32 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
   };
 
   const updateOrderNoteQty = (productId: string, delta: number) => {
-    setOrderNote((prev) => {
-      const nextQty = Math.max(0, (prev[productId] || 0) + delta);
-      const next = { ...prev };
-      if (nextQty === 0) {
-        delete next[productId];
-      } else {
-        next[productId] = nextQty;
-      }
+    const nextQty = Math.max(0, (orderNote[productId] || 0) + delta);
+    const next = { ...orderNote };
+    if (nextQty === 0) {
+      delete next[productId];
+    } else {
+      next[productId] = nextQty;
+    }
+    setOrderNote(next);
+
+    if (nextQty === 0 && orderCustomizations[productId]) {
+      const nextCustom = { ...orderCustomizations };
+      delete nextCustom[productId];
+      setOrderCustomizations(nextCustom);
       try {
-        localStorage.setItem('tunn_table_order_note_v1', JSON.stringify(next));
+        localStorage.setItem('tunn_table_order_custom_v1', JSON.stringify(nextCustom));
       } catch {
         // Ignore storage quota errors
       }
-      return next;
-    });
+    }
+
+    try {
+      localStorage.setItem('tunn_table_order_note_v1', JSON.stringify(next));
+    } catch {
+      // Ignore storage quota errors
+    }
+    window.dispatchEvent(new Event('tunn-order-note-updated'));
   };
 
   const clearOrderNote = () => {
@@ -199,6 +299,8 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
     setOrderCustomizations({});
     setTableGeneralNote('');
     setStaffViewMode(false);
+    setSplitOpen(false);
+    setSplitPeople(1);
     setOrderNoteOpen(false);
     try {
       localStorage.removeItem('tunn_table_order_note_v1');
@@ -251,17 +353,61 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
     };
   }, [isOrderModalOpen]);
 
+  const getEffectiveUnitPrice = (product: Product) => {
+    const base =
+      product.sale_price &&
+      Number(product.sale_price) > 0 &&
+      Number(product.sale_price) < Number(product.price)
+        ? Number(product.sale_price)
+        : Number(product.price);
+    const notes = orderCustomizations[product.id] || [];
+    const extra = notes.reduce((acc, opt) => acc + parseOptionExtraVnd(opt), 0);
+    return base + extra;
+  };
+
   const totalNotePrice = useMemo(
     () =>
       notedItems.reduce((sum, { product, qty }) => {
-        const unit =
-          product.sale_price && Number(product.sale_price) > 0 && Number(product.sale_price) < Number(product.price)
+        const base =
+          product.sale_price &&
+          Number(product.sale_price) > 0 &&
+          Number(product.sale_price) < Number(product.price)
             ? Number(product.sale_price)
             : Number(product.price);
-        return sum + unit * qty;
+        const notes = orderCustomizations[product.id] || [];
+        const extra = notes.reduce((acc, opt) => acc + parseOptionExtraVnd(opt), 0);
+        return sum + (base + extra) * qty;
       }, 0),
-    [notedItems]
+    [notedItems, orderCustomizations]
   );
+
+  const handleCopyOrderSlip = async () => {
+    if (notedItems.length === 0) return;
+    const lines: string[] = ['Đơn món tại bàn — TUNN Coffee House:'];
+    notedItems.forEach(({ product, qty }, idx) => {
+      const unit = getEffectiveUnitPrice(product);
+      const notes = orderCustomizations[product.id] || [];
+      const noteText = notes.length > 0 ? ` (${notes.join(', ')})` : '';
+      lines.push(`${idx + 1}. ${product.name} x${qty}${noteText} - ${formatVND(unit * qty)}`);
+    });
+    if (tableGeneralNote.trim()) {
+      lines.push(`Ghi chú: ${tableGeneralNote.trim()}`);
+    }
+    lines.push(`Tổng cộng (${totalNoteCount} ly): ${formatVND(totalNotePrice)}`);
+    if (splitPeople > 1) {
+      lines.push(
+        `Chia ${splitPeople} người: ~${formatVND(Math.round(totalNotePrice / splitPeople))} / người`
+      );
+    }
+
+    try {
+      await navigator.clipboard.writeText(lines.join('\n'));
+      setOrderCopied(true);
+      window.setTimeout(() => setOrderCopied(false), 2200);
+    } catch {
+      // Ignore clipboard errors
+    }
+  };
 
   const activeCategories = useMemo(
     () =>
@@ -369,7 +515,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
         {/* Editorial Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="text-center max-w-2xl mx-auto mb-10">
           <p className="text-sm text-coffee font-medium mb-2">
             {String(section?.content?.eyebrow || 'Thực đơn thủ công')}
           </p>
@@ -379,6 +525,12 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
           <p className="text-sm sm:text-base text-coffee-muted mt-3">
             {section?.subtitle || 'Khám phá trọn vẹn hương vị trà và cà phê thủ công'}
           </p>
+
+          {timeOfDayGreeting.text && (
+            <p className="mt-2 font-serif italic text-xs sm:text-sm text-coffee">
+              {timeOfDayGreeting.text}
+            </p>
+          )}
         </div>
 
         {showSkeleton ? (
@@ -629,18 +781,17 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
 
         {/* Recently Viewed Strip */}
         {recentlyViewedProducts.length > 0 && (
-          <div className="mb-8 p-3.5 sm:p-4 rounded-xl bg-ivory/45 dark:bg-white/[0.03] border border-coffee-beige/60 dark:border-white/[0.06]">
+          <div className="mb-8 pb-4 border-b border-coffee-beige/50 dark:border-white/[0.06]">
             <div className="flex items-center justify-between gap-2 mb-2.5">
-              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-coffee">
-                <Clock className="w-3.5 h-3.5" />
-                <span>Món bạn vừa xem</span>
-              </div>
+              <span className="text-xs font-medium text-coffee-muted">
+                Món vừa xem gần đây
+              </span>
               <button
                 type="button"
                 onClick={clearRecentlyViewed}
                 className="text-[11px] text-coffee-muted hover:text-coffee-dark transition-colors"
               >
-                Ẩn
+                Xóa
               </button>
             </div>
             <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar pb-0.5">
@@ -797,7 +948,8 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                             Bán chạy
                           </span>
                         )}
-                        <span className="inline-block px-2 py-0.5 text-[10px] font-medium bg-coffee/[0.07] dark:bg-white/[0.05] text-coffee-muted rounded-brand">
+                        <span className="text-[11px] text-coffee-muted">
+                          {(item.badge || item.is_best_seller) ? '· ' : ''}
                           {getDrinkFlavorProfile(item).label}
                         </span>
                       </div>
@@ -937,11 +1089,11 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
           {totalNoteCount > 0 && (
             <m.div
               key="floating-order-note-bar"
-              initial={{ opacity: 0, y: 20, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 16, scale: 0.96 }}
-              transition={{ type: 'spring', stiffness: 340, damping: 28 }}
-              className="fixed bottom-5 left-4 right-[68px] sm:right-auto sm:left-6 z-40 sm:w-auto max-w-sm"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed bottom-5 left-4 right-[68px] sm:right-auto sm:left-6 z-40 sm:w-auto max-w-sm will-change-transform"
             >
               <button
                 type="button"
@@ -985,18 +1137,18 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
                 onClick={() => setOrderNoteOpen(false)}
-                className="fixed inset-0 bg-black/60 backdrop-blur-[3px] touch-none"
+                className="fixed inset-0 bg-black/65 touch-none"
               />
               <m.div
-                initial={{ opacity: 0, y: 28, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 24, scale: 0.98 }}
-                transition={{ type: 'spring', stiffness: 340, damping: 30 }}
-                className={`relative z-10 w-full ${
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                className={`relative z-10 w-full will-change-transform ${
                   staffViewMode ? 'sm:max-w-[580px]' : 'sm:max-w-[500px]'
-                } bg-[#FAF8F3] dark:bg-[#18120E] text-coffee-dark border-t sm:border border-[#E6DFCE] dark:border-white/[0.08] rounded-t-[24px] sm:rounded-2xl shadow-[0_28px_70px_-16px_rgba(0,0,0,0.6)] overflow-hidden max-h-[88vh] sm:max-h-[85vh] flex flex-col overscroll-contain transition-all duration-200`}
+                } bg-[#FAF8F3] dark:bg-[#18120E] text-coffee-dark border-t sm:border border-[#E6DFCE] dark:border-white/[0.08] rounded-t-[24px] sm:rounded-2xl shadow-[0_24px_60px_-16px_rgba(0,0,0,0.55)] overflow-hidden max-h-[88vh] sm:max-h-[85vh] flex flex-col overscroll-contain`}
               >
                 {/* Mobile drag handle */}
                 <div className="pt-2.5 pb-0.5 sm:hidden flex justify-center">
@@ -1130,21 +1282,15 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                     <>
                       <AnimatePresence initial={false}>
                         {notedItems.map(({ product, qty }) => {
-                          const unitPrice =
-                            product.sale_price &&
-                            Number(product.sale_price) > 0 &&
-                            Number(product.sale_price) < Number(product.price)
-                              ? Number(product.sale_price)
-                              : Number(product.price);
+                          const unitPrice = getEffectiveUnitPrice(product);
                           const selectedNotes = orderCustomizations[product.id] || [];
                           return (
                             <m.div
-                              layout
                               key={product.id}
-                              initial={{ opacity: 0, y: 10 }}
+                              initial={{ opacity: 0, y: 8 }}
                               animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, scale: 0.96 }}
-                              transition={{ duration: 0.18 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.15, ease: 'easeOut' }}
                               className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-[#211914] border border-[#ECE6D6] dark:border-white/[0.05] shadow-[0_2px_8px_rgba(36,25,20,0.03)] dark:shadow-none"
                             >
                               <div className="flex items-start justify-between gap-3">
@@ -1194,25 +1340,66 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                                 </div>
                               </div>
 
-                              {/* Soft Borderless Taste Customization Pills */}
-                              <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                                {DRINK_NOTE_OPTIONS.map((opt) => {
-                                  const isSelected = selectedNotes.includes(opt);
-                                  return (
-                                    <button
-                                      key={opt}
-                                      type="button"
-                                      onClick={() => toggleOrderCustomization(product.id, opt)}
-                                      className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-150 active:scale-95 ${
-                                        isSelected
-                                          ? 'bg-coffee text-ivory-light shadow-2xs'
-                                          : 'bg-[#F4F0E6] dark:bg-white/[0.05] text-coffee-muted hover:text-coffee-dark hover:bg-[#EAE4D3] dark:hover:bg-white/[0.1]'
-                                      }`}
-                                    >
-                                      {opt}
-                                    </button>
-                                  );
-                                })}
+                              {/* Size & Sugar/Ice Customization Pills */}
+                              <div className="mt-3 space-y-1.5">
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  {sizeOptions.map((sz) => {
+                                    const isSelected = selectedNotes.includes(sz);
+                                    return (
+                                      <button
+                                        key={sz}
+                                        type="button"
+                                        onClick={() => toggleOrderCustomization(product.id, sz)}
+                                        className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all duration-150 active:scale-95 ${
+                                          isSelected
+                                            ? 'bg-coffee text-ivory-light shadow-2xs'
+                                            : 'bg-coffee/10 dark:bg-white/[0.08] text-coffee hover:bg-coffee/20'
+                                        }`}
+                                      >
+                                        {sz}
+                                      </button>
+                                    );
+                                  })}
+                                  {drinkNoteOptions.map((opt) => {
+                                    const isSelected = selectedNotes.includes(opt);
+                                    return (
+                                      <button
+                                        key={opt}
+                                        type="button"
+                                        onClick={() => toggleOrderCustomization(product.id, opt)}
+                                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-150 active:scale-95 ${
+                                          isSelected
+                                            ? 'bg-coffee text-ivory-light shadow-2xs'
+                                            : 'bg-[#F4F0E6] dark:bg-white/[0.05] text-coffee-muted hover:text-coffee-dark hover:bg-[#EAE4D3] dark:hover:bg-white/[0.1]'
+                                        }`}
+                                      >
+                                        {opt}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+
+                                {toppingOptions.length > 0 && (
+                                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                                    {toppingOptions.map((top) => {
+                                      const isSelected = selectedNotes.includes(top);
+                                      return (
+                                        <button
+                                          key={top}
+                                          type="button"
+                                          onClick={() => toggleOrderCustomization(product.id, top)}
+                                          className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-150 active:scale-95 ${
+                                            isSelected
+                                              ? 'bg-coffee text-ivory-light shadow-2xs'
+                                              : 'bg-[#FAF8F3] dark:bg-white/[0.03] border border-[#E6DFCE] dark:border-white/[0.07] text-coffee-muted hover:text-coffee-dark'
+                                          }`}
+                                        >
+                                          {top}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                )}
                               </div>
                             </m.div>
                           );
@@ -1224,10 +1411,9 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                         <div className="flex items-center justify-between gap-2">
                           <label
                             htmlFor="table-general-note-input"
-                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-coffee-dark"
+                            className="text-xs font-semibold text-coffee-dark"
                           >
-                            <MessageSquareText className="w-3.5 h-3.5 text-coffee" />
-                            <span>Ghi chú chung cho cả bàn</span>
+                            Ghi chú thêm cho bàn
                           </label>
                           {tableGeneralNote && (
                             <button
@@ -1235,7 +1421,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                               onClick={() => updateTableGeneralNote('')}
                               className="text-[11px] text-coffee-muted hover:text-coffee-dark"
                             >
-                              Xóa ghi chú
+                              Xóa
                             </button>
                           )}
                         </div>
@@ -1262,7 +1448,7 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                               }}
                               className="px-2.5 py-1 rounded-full text-[11px] bg-[#F4F0E6] dark:bg-white/[0.05] text-coffee-muted hover:text-coffee-dark transition-colors"
                             >
-                              + {sug}
+                              {sug}
                             </button>
                           ))}
                         </div>
@@ -1272,31 +1458,140 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
                 </div>
 
                 {/* Clean Summary Footer */}
-                <div className="px-5 py-4 bg-white dark:bg-[#1C1511] border-t border-[#EAE3D2] dark:border-white/[0.06] flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs text-coffee-muted">
-                      Tạm tính ({totalNoteCount} ly)
-                    </p>
-                    <p className="font-serif text-xl sm:text-2xl font-bold text-coffee tabular-nums leading-tight mt-0.5">
-                      {formatVND(totalNotePrice)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={clearOrderNote}
-                      className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-medium text-coffee-muted hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Làm mới</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setOrderNoteOpen(false)}
-                      className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-coffee text-ivory-light hover:opacity-95 active:scale-[0.98] transition-all"
-                    >
-                      Hoàn tất
-                    </button>
+                <div className="px-4 sm:px-5 py-3.5 sm:py-4 bg-white dark:bg-[#1C1511] border-t border-[#EAE3D2] dark:border-white/[0.06] space-y-3">
+                  {/* Expandable Split Bill Row (Hidden by default until user taps "Chia tiền") */}
+                  {splitOpen && (
+                    <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[#EFE9DA] dark:border-white/[0.05]">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-xs text-coffee-muted shrink-0">Chia</span>
+                        <div className="inline-flex items-center bg-[#F3EFE4] dark:bg-white/[0.07] rounded-full p-0.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSplitPeople((prev) => Math.max(2, prev - 1))
+                            }
+                            disabled={splitPeople <= 2}
+                            className="w-6 h-6 rounded-full inline-flex items-center justify-center text-coffee-dark hover:bg-white dark:hover:bg-white/[0.12] disabled:opacity-35 transition-colors"
+                            aria-label="Giảm số người"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <input
+                            type="number"
+                            inputMode="numeric"
+                            min={2}
+                            max={99}
+                            value={splitPeople}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value, 10);
+                              if (!isNaN(val)) {
+                                setSplitPeople(Math.max(1, Math.min(99, val)));
+                              } else if (e.target.value === '') {
+                                setSplitPeople(2);
+                              }
+                            }}
+                            aria-label="Số người chia tiền"
+                            className="w-8 text-center text-xs font-semibold text-coffee-dark bg-transparent focus:outline-none tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSplitPeople((prev) => Math.min(99, prev + 1))
+                            }
+                            className="w-6 h-6 rounded-full inline-flex items-center justify-center text-coffee-dark hover:bg-white dark:hover:bg-white/[0.12] transition-colors"
+                            aria-label="Tăng số người"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                        <span className="text-xs text-coffee-muted shrink-0">người</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        {splitPeople > 1 && (
+                          <span className="text-xs sm:text-sm font-semibold text-coffee tabular-nums">
+                            {formatVND(Math.round(totalNotePrice / splitPeople))}/người
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSplitOpen(false);
+                            setSplitPeople(1);
+                          }}
+                          className="w-6 h-6 rounded-full inline-flex items-center justify-center text-coffee-muted hover:text-coffee-dark hover:bg-[#F3EFE4] dark:hover:bg-white/[0.08] transition-colors"
+                          aria-label="Tắt chia tiền"
+                          title="Tắt chia tiền"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <p className="text-xs text-coffee-muted whitespace-nowrap">
+                          Tạm tính ({totalNoteCount} ly)
+                        </p>
+                        {!splitOpen && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSplitOpen(true);
+                              if (splitPeople <= 1) setSplitPeople(2);
+                            }}
+                            className="text-[11px] font-medium text-coffee hover:underline whitespace-nowrap"
+                          >
+                            · Chia tiền
+                          </button>
+                        )}
+                      </div>
+                      <p className="font-serif text-xl sm:text-2xl font-bold text-coffee tabular-nums leading-tight whitespace-nowrap shrink-0">
+                        {formatVND(totalNotePrice)}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={clearOrderNote}
+                        className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl text-xs font-medium text-coffee-muted hover:text-rose-500 hover:bg-rose-500/10 transition-colors whitespace-nowrap"
+                        title="Xóa toàn bộ sổ ghi món"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                        <span>Làm mới</span>
+                      </button>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={handleCopyOrderSlip}
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#F3EFE4] dark:bg-white/[0.08] text-coffee-dark hover:bg-[#E7E0CE] dark:hover:bg-white/[0.14] transition-colors whitespace-nowrap"
+                          title="Sao chép danh sách món để gửi qua Zalo hoặc Messenger"
+                        >
+                          {orderCopied ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span className="text-emerald-700 dark:text-emerald-400">
+                                Đã chép đơn
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5 text-coffee shrink-0" />
+                              <span>Chép đơn Zalo</span>
+                            </>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setOrderNoteOpen(false)}
+                          className="px-4 py-2 rounded-xl text-xs font-semibold bg-coffee text-ivory-light hover:opacity-95 active:scale-[0.98] transition-all whitespace-nowrap"
+                        >
+                          Hoàn tất
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </m.div>

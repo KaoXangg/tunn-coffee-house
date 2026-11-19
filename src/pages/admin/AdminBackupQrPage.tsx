@@ -98,6 +98,8 @@ export const AdminBackupQrPage: React.FC = () => {
   };
   const [tableNumber, setTableNumber] = useState('');
   const [downloadingQr, setDownloadingQr] = useState(false);
+  const [batchStartTable, setBatchStartTable] = useState<string>('1');
+  const [batchEndTable, setBatchEndTable] = useState<string>('8');
 
   // 1. Export full website JSON backup
   const handleDownloadBackup = () => {
@@ -264,6 +266,154 @@ export const AdminBackupQrPage: React.FC = () => {
     a.click();
     document.body.removeChild(a);
     toast.success('Đã tải hình mã QR thành công!');
+  };
+
+  const handlePrintBatchTableQrsA4 = () => {
+    const start = Math.max(1, Math.min(200, Math.floor(Number(batchStartTable) || 1)));
+    const end = Math.max(start, Math.min(start + 47, Math.floor(Number(batchEndTable) || start)));
+    const cleanTarget = qrTargetUrl.trim() || 'https://tunn-coffee-house.vercel.app/#menu';
+
+    const buildTableUrl = (tNum: string) => {
+      const encoded = encodeURIComponent(tNum);
+      if (cleanTarget.includes('#')) {
+        const [basePart, hashPart] = cleanTarget.split('#');
+        const sep = basePart.includes('?') ? '&' : '?';
+        return `${basePart}${sep}table=${encoded}#${hashPart}`;
+      }
+      const sep = cleanTarget.includes('?') ? '&' : '?';
+      return `${cleanTarget}${sep}table=${encoded}`;
+    };
+
+    const cardsHtml: string[] = [];
+    for (let num = start; num <= end; num++) {
+      const labelNum = String(num).padStart(2, '0');
+      const url = buildTableUrl(labelNum);
+      const dataUrl = renderQrToDataUrl(url, {
+        pixelSize: 320,
+        marginModules: 2,
+        darkColor: '#4B2E24',
+        lightColor: '#F7F5EF',
+      });
+      const wifiHtml =
+        showWifiOnQr && (wifiName.trim() || wifiPassword.trim())
+          ? `<div class="wifi-box">
+              ${wifiName.trim() ? `<div>Wi-Fi: <strong>${wifiName.trim()}</strong></div>` : ''}
+              ${wifiPassword.trim() ? `<div class="mono">Pass: <strong>${wifiPassword.trim()}</strong></div>` : ''}
+            </div>`
+          : '';
+      cardsHtml.push(`
+        <div class="qr-card">
+          <div class="qr-inner">
+            <div class="brand-name">${settings.brand_name || 'TUNN Coffee House'}</div>
+            <div class="table-badge">BÀN SỐ: ${labelNum}</div>
+            <img class="qr-img" src="${dataUrl}" alt="QR Bàn ${labelNum}" />
+            <div class="qr-title">${qrTitle || 'QUÉT MÃ XEM THỰC ĐƠN'}</div>
+            ${wifiHtml}
+          </div>
+        </div>
+      `);
+    }
+
+    const win = window.open('', '_blank', 'width=960,height=780');
+    if (!win) {
+      toast.error('Trình duyệt đang chặn cửa sổ bật lên', 'Vui lòng cho phép pop-up để in tem QR hàng loạt.');
+      return;
+    }
+
+    win.document.write(`
+      <!doctype html>
+      <html lang="vi">
+        <head>
+          <meta charset="utf-8" />
+          <title>In Tem QR Bàn ${String(start).padStart(2, '0')} - ${String(end).padStart(2, '0')} — ${settings.brand_name || 'TUNN Coffee House'}</title>
+          <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet" />
+          <style>
+            @page { size: A4 portrait; margin: 10mm; }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body {
+              font-family: 'Be Vietnam Pro', sans-serif;
+              color: #241914;
+              background: #fff;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .grid {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              gap: 6mm;
+            }
+            .qr-card {
+              border: 1px dashed #8C7565;
+              padding: 3.5mm;
+              background: #F7F5EF;
+              page-break-inside: avoid;
+              break-inside: avoid;
+            }
+            .qr-inner {
+              border: 1.5px solid #4B2E24;
+              padding: 3.5mm;
+              text-align: center;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 1.8mm;
+            }
+            .brand-name {
+              font-family: 'Lora', serif;
+              font-size: 13pt;
+              font-weight: 700;
+              color: #241914;
+            }
+            .table-badge {
+              display: inline-block;
+              background: #4B2E24;
+              color: #F7F5EF;
+              font-size: 8.5pt;
+              font-weight: 700;
+              letter-spacing: 0.08em;
+              padding: 1mm 3mm;
+              border-radius: 3px;
+            }
+            .qr-img {
+              width: 31mm;
+              height: 31mm;
+              object-fit: contain;
+              border: 1px solid #D5C6AD;
+              padding: 1mm;
+              background: #F7F5EF;
+            }
+            .qr-title {
+              font-family: 'Lora', serif;
+              font-size: 8.5pt;
+              font-weight: 700;
+              color: #4B2E24;
+            }
+            .wifi-box {
+              width: 100%;
+              background: #E9E6D8;
+              border: 1px solid #D5C6AD;
+              border-radius: 3px;
+              padding: 1.2mm 2mm;
+              font-size: 7.5pt;
+              line-height: 1.35;
+              color: #241914;
+            }
+            .mono { font-family: monospace; }
+          </style>
+        </head>
+        <body>
+          <div class="grid">${cardsHtml.join('')}</div>
+          <script>
+            window.onload = function() { setTimeout(function() { window.print(); }, 400); };
+          </script>
+        </body>
+      </html>
+    `);
+    win.document.close();
+    logAdminActivity(
+      `In bảng QR bàn hàng loạt (Bàn ${String(start).padStart(2, '0')} - ${String(end).padStart(2, '0')})`,
+      'qr'
+    );
   };
 
   // Download printable Table Standee Card as high-res PNG using HTML5 Canvas
@@ -664,6 +814,65 @@ export const AdminBackupQrPage: React.FC = () => {
                 <Download className="w-3.5 h-3.5" />
                 <span>Chỉ tải riêng hình QR</span>
               </button>
+            </div>
+
+            {/* Batch Table QR A4 Sheet Printer (8 Tables / A4 Page) */}
+            <div className="p-4 bg-ivory/70 border border-coffee-beige rounded-brand space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <p className="text-xs font-semibold text-coffee-dark">
+                    In Tem Bàn QR Hàng Loạt (8 bàn / trang A4)
+                  </p>
+                  <p className="text-[11px] text-coffee-muted">
+                    Tự động dàn trang A4 có đường cắt rời, đánh số từng bàn và kèm sẵn Wi-Fi để in 1 lần dán cho cả quán.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-end gap-3">
+                <div>
+                  <label className="block text-[11px] font-medium text-coffee-muted mb-1">
+                    Từ bàn số
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={200}
+                    value={batchStartTable}
+                    onChange={(e) => setBatchStartTable(e.target.value)}
+                    placeholder="1"
+                    className="w-24 px-3 py-1.5 text-sm bg-white border border-coffee-beige rounded-brand"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-coffee-muted mb-1">
+                    Đến bàn số
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={200}
+                    value={batchEndTable}
+                    onChange={(e) => setBatchEndTable(e.target.value)}
+                    placeholder="8"
+                    className="w-24 px-3 py-1.5 text-sm bg-white border border-coffee-beige rounded-brand"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handlePrintBatchTableQrsA4}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark rounded-brand transition-colors"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>
+                    In Bảng QR Hàng Loạt (Bàn{' '}
+                    {String(Math.max(1, Number(batchStartTable) || 1)).padStart(2, '0')} →{' '}
+                    {String(
+                      Math.max(Number(batchStartTable) || 1, Number(batchEndTable) || 1)
+                    ).padStart(2, '0')}
+                    )
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
 

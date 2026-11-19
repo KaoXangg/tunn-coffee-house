@@ -344,6 +344,7 @@ export const CustomerHomePage: React.FC = () => {
       <ProductDetailModal
         product={activeModalProduct}
         onClose={handleCloseProductModal}
+        onSelectProduct={(prod) => setSelectedProduct(prod)}
       />
 
       <TableFeedbackModal

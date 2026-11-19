@@ -11,11 +11,12 @@ import {
 } from 'lucide-react';
 import { m } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
-import { sanitizeUrl, sanitizeMapEmbedUrl } from '../../lib/utils';
+import { getStoreOpenStatus, sanitizeUrl, sanitizeMapEmbedUrl } from '../../lib/utils';
 import { FacebookIcon, InstagramIcon, TikTokIcon } from '../common/SocialIcons';
 
 export const ContactSection: React.FC = () => {
   const { settings, getSection } = useSiteData();
+  const storeStatus = getStoreOpenStatus(settings.opening_hours);
   const [copiedField, setCopiedField] = useState<'address' | 'hotline' | 'email' | null>(
     null
   );
@@ -84,8 +85,12 @@ export const ContactSection: React.FC = () => {
                     {settings.store_name || settings.brand_name}
                   </h3>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] uppercase tracking-wider font-semibold rounded-full bg-coffee/10 text-coffee shrink-0">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>Mở cửa mỗi ngày</span>
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        storeStatus.isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                      }`}
+                    />
+                    <span>{storeStatus.label}</span>
                   </span>
                 </div>
 

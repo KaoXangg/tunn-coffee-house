@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowUpRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { formatVND } from '../../lib/utils';
@@ -264,8 +264,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({ onSelectProduc
                     <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none">
                       <div className="flex flex-wrap gap-1.5">
                         {activeProduct.badge && (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 text-[10px] uppercase tracking-[0.16em] font-semibold bg-coffee text-ivory-light rounded-full shadow-sm">
-                            <Sparkles className="w-3 h-3" />
+                          <span className="inline-flex items-center px-3 py-1 text-[10px] uppercase tracking-[0.16em] font-semibold bg-coffee text-ivory-light rounded-full shadow-sm">
                             <span>{activeProduct.badge}</span>
                           </span>
                         )}

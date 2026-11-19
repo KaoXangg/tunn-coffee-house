@@ -22,24 +22,28 @@ export const AdminAppearancePage: React.FC = () => {
   );
   const [themeMode, setThemeMode] = useState<'light' | 'dark'>(settings.theme_mode);
   const [saving, setSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   const [prevSettings, setPrevSettings] = useState(settings);
   if (settings !== prevSettings) {
     setPrevSettings(settings);
-    setPrimaryColor(settings.primary_color);
-    setSecondaryBgColor(settings.secondary_bg_color);
-    setPrimaryBgColor(settings.primary_bg_color);
-    setTextPrimaryColor(settings.text_primary_color);
-    setTextMutedColor(settings.text_muted_color);
-    setAccentColor(settings.accent_color);
-    setHeadingFont(settings.heading_font);
-    setBodyFont(settings.body_font);
-    setBorderRadius(settings.border_radius);
-    setButtonStyle(settings.button_style);
-    setThemeMode(settings.theme_mode);
+    if (!isDirty) {
+      setPrimaryColor(settings.primary_color);
+      setSecondaryBgColor(settings.secondary_bg_color);
+      setPrimaryBgColor(settings.primary_bg_color);
+      setTextPrimaryColor(settings.text_primary_color);
+      setTextMutedColor(settings.text_muted_color);
+      setAccentColor(settings.accent_color);
+      setHeadingFont(settings.heading_font);
+      setBodyFont(settings.body_font);
+      setBorderRadius(settings.border_radius);
+      setButtonStyle(settings.button_style);
+      setThemeMode(settings.theme_mode);
+    }
   }
 
   const handleResetPalette = () => {
+    setIsDirty(true);
     setPrimaryColor(DEFAULT_SITE_SETTINGS.primary_color);
     setSecondaryBgColor(DEFAULT_SITE_SETTINGS.secondary_bg_color);
     setPrimaryBgColor(DEFAULT_SITE_SETTINGS.primary_bg_color);
@@ -74,6 +78,7 @@ export const AdminAppearancePage: React.FC = () => {
       if (error) {
         toast.info('Đã áp dụng bảng màu trên trình duyệt', error);
       } else {
+        setIsDirty(false);
         toast.success('Đã lưu Cấu hình Giao diện (Appearance Settings)!');
       }
     } finally {
@@ -82,7 +87,11 @@ export const AdminAppearancePage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div
+      className="space-y-6"
+      onInputCapture={() => setIsDirty(true)}
+      onChangeCapture={() => setIsDirty(true)}
+    >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl font-semibold text-coffee-dark">

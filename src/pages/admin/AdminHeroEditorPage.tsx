@@ -24,16 +24,19 @@ export const AdminHeroEditorPage: React.FC = () => {
   });
   const [isEnabled, setIsEnabled] = useState<boolean>(heroSection?.is_enabled ?? true);
   const [saving, setSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<'main' | 'secondary' | null>(null);
 
   const [prevHeroSection, setPrevHeroSection] = useState(heroSection);
   if (heroSection && heroSection !== prevHeroSection) {
     setPrevHeroSection(heroSection);
-    setFormState({
-      ...DEFAULT_HERO_CONTENT,
-      ...(heroSection.content || {}),
-    });
-    setIsEnabled(heroSection.is_enabled);
+    if (!isDirty) {
+      setFormState({
+        ...DEFAULT_HERO_CONTENT,
+        ...(heroSection.content || {}),
+      });
+      setIsEnabled(heroSection.is_enabled);
+    }
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -50,6 +53,7 @@ export const AdminHeroEditorPage: React.FC = () => {
       if (error) {
         toast.info('Đã cập nhật bản xem trước', error);
       } else {
+        setIsDirty(false);
         toast.success(
           'Đã xuất bản Hero Section!',
           'Trang khách hàng đã tự động nhận nội dung mới.'
@@ -61,7 +65,11 @@ export const AdminHeroEditorPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div
+      className="space-y-6"
+      onInputCapture={() => setIsDirty(true)}
+      onChangeCapture={() => setIsDirty(true)}
+    >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl font-semibold text-coffee-dark">

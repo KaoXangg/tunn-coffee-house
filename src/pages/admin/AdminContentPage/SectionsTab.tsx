@@ -207,19 +207,175 @@ export const SectionsTab: React.FC<SectionsTabProps> = ({
                       </div>
                     </div>
                     {sec.section_key === 'menu' && (
-                      <div>
-                        <label className="block text-[10px] uppercase tracking-widest font-semibold text-coffee-muted">
-                          Ghi chú cuối mục Thực đơn
-                        </label>
-                        <input
-                          type="text"
-                          value={String(sec.content?.note ?? '')}
-                          onChange={(e) =>
-                            updateSectionContentValue('menu', 'note', e.target.value)
-                          }
-                          placeholder="VD: Tất cả đồ uống có thể tùy chỉnh mức đường và đá..."
-                          className="mt-1 w-full px-3 py-1.5 text-xs bg-white border border-coffee-beige rounded-brand"
-                        />
+                      <div className="pt-2.5 mt-1 border-t border-coffee-beige/60 space-y-3">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[10px] uppercase tracking-widest font-semibold text-coffee-muted">
+                              Ghi chú cuối mục Thực đơn
+                            </label>
+                            <input
+                              type="text"
+                              value={String(sec.content?.note ?? '')}
+                              onChange={(e) =>
+                                updateSectionContentValue('menu', 'note', e.target.value)
+                              }
+                              placeholder="VD: Tất cả đồ uống có thể tùy chỉnh mức đường và đá..."
+                              className="mt-1 w-full px-3 py-1.5 text-xs bg-white border border-coffee-beige rounded-brand"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] uppercase tracking-widest font-semibold text-coffee-muted">
+                              Tiêu đề gợi ý món hợp vị (Trong Popup chi tiết món)
+                            </label>
+                            <input
+                              type="text"
+                              value={String(
+                                sec.content?.pairing_title ?? 'Gợi ý món hợp vị'
+                              )}
+                              onChange={(e) =>
+                                updateSectionContentValue('menu', 'pairing_title', e.target.value)
+                              }
+                              placeholder="VD: Gợi ý món hợp vị"
+                              className="mt-1 w-full px-3 py-1.5 text-xs bg-white border border-coffee-beige rounded-brand"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Time-of-Day Greetings Config */}
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] uppercase tracking-widest font-semibold text-coffee">
+                            Lời chào &amp; Gợi ý tự động theo thời điểm trong ngày
+                          </p>
+                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5">
+                            <div>
+                              <label className="block text-[10px] text-coffee-muted mb-0.5">
+                                Buổi sáng (05h – 11h)
+                              </label>
+                              <input
+                                type="text"
+                                value={String(
+                                  sec.content?.greeting_morning ??
+                                    'Khởi đầu ngày mới tỉnh táo với Cà phê thủ công & Matcha Uji'
+                                )}
+                                onChange={(e) =>
+                                  updateSectionContentValue(
+                                    'menu',
+                                    'greeting_morning',
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-3 py-1.5 text-xs bg-white border border-coffee-beige rounded-brand"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-coffee-muted mb-0.5">
+                                Buổi trưa / chiều (11h – 17h)
+                              </label>
+                              <input
+                                type="text"
+                                value={String(
+                                  sec.content?.greeting_afternoon ??
+                                    'Giải nhiệt buổi chiều với Trà trái cây tươi & Ô Long kem phô mai'
+                                )}
+                                onChange={(e) =>
+                                  updateSectionContentValue(
+                                    'menu',
+                                    'greeting_afternoon',
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-3 py-1.5 text-xs bg-white border border-coffee-beige rounded-brand"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-coffee-muted mb-0.5">
+                                Buổi tối (17h – 22h30)
+                              </label>
+                              <input
+                                type="text"
+                                value={String(
+                                  sec.content?.greeting_evening ??
+                                    'Thư giãn buổi tối với các dòng Trà thanh mát, ít cafein'
+                                )}
+                                onChange={(e) =>
+                                  updateSectionContentValue(
+                                    'menu',
+                                    'greeting_evening',
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-3 py-1.5 text-xs bg-white border border-coffee-beige rounded-brand"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Table Order Note Options (Size, Toppings, Sugar/Ice) */}
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] uppercase tracking-widest font-semibold text-coffee">
+                            Tùy chọn trong Sổ ghi món tại bàn (Ngăn cách bằng dấu phẩy)
+                          </p>
+                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-2.5">
+                            <div>
+                              <label className="block text-[10px] text-coffee-muted mb-0.5">
+                                Tùy chọn Size (M / L)
+                              </label>
+                              <input
+                                type="text"
+                                value={String(
+                                  sec.content?.size_options ?? 'Size M, Size L (+10k)'
+                                )}
+                                onChange={(e) =>
+                                  updateSectionContentValue('menu', 'size_options', e.target.value)
+                                }
+                                placeholder="Size M, Size L (+10k)"
+                                className="w-full px-3 py-1.5 text-xs bg-white border border-coffee-beige rounded-brand"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-coffee-muted mb-0.5">
+                                Tùy chọn Topping thêm
+                              </label>
+                              <input
+                                type="text"
+                                value={String(
+                                  sec.content?.topping_options ??
+                                    'Kem Phô Mai, Trân châu trắng, Hạt sen tươi, Dừa nướng giòn'
+                                )}
+                                onChange={(e) =>
+                                  updateSectionContentValue(
+                                    'menu',
+                                    'topping_options',
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Kem Phô Mai, Trân châu trắng..."
+                                className="w-full px-3 py-1.5 text-xs bg-white border border-coffee-beige rounded-brand"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] text-coffee-muted mb-0.5">
+                                Tùy chọn Đường / Đá
+                              </label>
+                              <input
+                                type="text"
+                                value={String(
+                                  sec.content?.drink_note_options ??
+                                    'Bình thường, Ít ngọt, Không đường, Ít đá, Riêng đá, Nóng'
+                                )}
+                                onChange={(e) =>
+                                  updateSectionContentValue(
+                                    'menu',
+                                    'drink_note_options',
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Bình thường, Ít ngọt, Không đường..."
+                                className="w-full px-3 py-1.5 text-xs bg-white border border-coffee-beige rounded-brand"
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     )}
                     {sec.section_key === 'contact' && (

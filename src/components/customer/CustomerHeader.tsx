@@ -250,7 +250,20 @@ export const CustomerHeader: React.FC = () => {
         </div>
 
         {/* Mobile Actions & Menu Trigger */}
-        <div className="lg:hidden flex items-center gap-2">
+        <div className="lg:hidden flex items-center gap-1.5">
+          <a
+            href="#contact"
+            onClick={() => handleNavClick('#contact')}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-coffee/[0.06] dark:bg-white/[0.08] text-[11px] font-medium text-coffee-dark whitespace-nowrap"
+            title={`${storeStatus.label} · ${storeStatus.detail}`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                storeStatus.isOpen ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+              }`}
+            />
+            <span>{storeStatus.isOpen ? 'Đang mở' : 'Đóng cửa'}</span>
+          </a>
           <button
             type="button"
             onClick={toggleTheme}

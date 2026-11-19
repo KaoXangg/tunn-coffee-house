@@ -371,7 +371,7 @@ export const AdminPromotionsPage: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
-                    Ngày kết thúc
+                    Ngày kết thúc (Hiện đếm ngược)
                   </label>
                   <input
                     type="date"

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, CheckCircle2, Plus, Minus, ClipboardList, Share2, Check } from 'lucide-react';
+import { X, Plus, Minus, ClipboardList, Share2, Check } from 'lucide-react';
 import { AnimatePresence, m } from 'framer-motion';
 import { formatVND } from '../../lib/utils';
 import { trackProductView } from '../../lib/analytics';
@@ -9,13 +9,17 @@ import type { Product } from '../../types/database';
 interface ProductDetailModalProps {
   product: Product | null;
   onClose: () => void;
+  onSelectProduct?: (product: Product) => void;
 }
 
 export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   product,
   onClose,
+  onSelectProduct,
 }) => {
-  const { categories, settings } = useSiteData();
+  const { categories, products, settings, getSection } = useSiteData();
+  const menuSection = getSection('menu');
+  const pairingTitle = String(menuSection?.content?.pairing_title ?? 'Gợi ý món hợp vị').trim();
   const [noteQty, setNoteQty] = useState<number>(0);
   const [copiedProductId, setCopiedProductId] = useState<string | null>(null);
 
@@ -43,6 +47,18 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
       const nextQty = Math.max(0, (map[product.id] || 0) + delta);
       if (nextQty === 0) {
         delete map[product.id];
+        try {
+          const rawCustom = localStorage.getItem('tunn_table_order_custom_v1');
+          if (rawCustom) {
+            const customMap = JSON.parse(rawCustom) as Record<string, string[]>;
+            if (customMap[product.id]) {
+              delete customMap[product.id];
+              localStorage.setItem('tunn_table_order_custom_v1', JSON.stringify(customMap));
+            }
+          }
+        } catch {
+          // Ignore storage errors
+        }
       } else {
         map[product.id] = nextQty;
       }
@@ -89,6 +105,19 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
   const categoryName =
     categories.find((c) => c.id === product.category_id)?.name || 'TUNN Signature';
+
+  const pairedProducts = products
+    .filter((p) => p.is_visible && p.is_available && p.id !== product.id)
+    .sort((a, b) => {
+      const aSameCat = a.category_id === product.category_id ? 1 : 0;
+      const bSameCat = b.category_id === product.category_id ? 1 : 0;
+      if (aSameCat !== bSameCat) return bSameCat - aSameCat;
+      const aBest = a.is_best_seller || a.is_featured ? 1 : 0;
+      const bBest = b.is_best_seller || b.is_featured ? 1 : 0;
+      if (aBest !== bBest) return bBest - aBest;
+      return a.sort_order - b.sort_order;
+    })
+    .slice(0, 2);
 
   const hasDiscount =
     product.sale_price !== null &&
@@ -200,21 +229,51 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   {product.description}
                 </p>
 
-                <div className="mt-3.5 sm:mt-5 pt-3 sm:pt-4 border-t border-coffee-beige/60 space-y-1.5 sm:space-y-2 text-xs text-coffee-dark/80">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-coffee shrink-0" />
-                    <span>
-                      Trạng thái:{' '}
-                      <strong>
-                        {product.is_available ? 'Đang phục vụ tại quán' : 'Tạm hết hôm nay'}
-                      </strong>
-                    </span>
+                <p className="mt-3 pt-3 border-t border-coffee-beige/60 text-xs text-coffee-muted">
+                  <strong className="text-coffee-dark font-semibold">
+                    {product.is_available ? 'Đang phục vụ tại quán' : 'Tạm hết hôm nay'}
+                  </strong>{' '}
+                  · Tùy chỉnh đường &amp; đá theo khẩu vị
+                </p>
+
+                {pairedProducts.length > 0 && pairingTitle && (
+                  <div className="mt-3.5 pt-3 border-t border-coffee-beige/60">
+                    <p className="text-[11px] font-semibold text-coffee mb-2">
+                      {pairingTitle}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {pairedProducts.map((pair) => {
+                        const pairSale =
+                          pair.sale_price !== null &&
+                          pair.sale_price !== undefined &&
+                          Number(pair.sale_price) > 0 &&
+                          Number(pair.sale_price) < Number(pair.price);
+                        return (
+                          <button
+                            key={pair.id}
+                            type="button"
+                            onClick={() => onSelectProduct?.(pair)}
+                            className="flex items-center gap-2 p-1.5 rounded-xl bg-ivory/60 dark:bg-white/[0.04] border border-coffee-beige/60 dark:border-white/[0.08] hover:border-coffee text-left transition-colors min-w-0"
+                          >
+                            <img
+                              src={pair.image_url}
+                              alt={pair.name}
+                              className="w-9 h-9 rounded-lg object-cover shrink-0"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className="font-serif text-xs font-semibold text-coffee-dark truncate">
+                                {pair.name}
+                              </p>
+                              <p className="text-[10px] font-medium text-coffee tabular-nums">
+                                {formatVND(pairSale ? pair.sale_price : pair.price)}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-coffee shrink-0" />
-                    <span>Tùy chỉnh mức đường &amp; đá theo sở thích riêng</span>
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className="mt-4 sm:mt-7 pt-3.5 sm:pt-4 border-t border-coffee-beige/60 space-y-2">

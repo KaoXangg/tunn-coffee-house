@@ -238,43 +238,67 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       ]);
 
       if (!settingsRes.error && settingsRes.data) {
-        setSettings({
+        const nextSettings = {
           ...DEFAULT_SITE_SETTINGS,
           ...settingsRes.data,
           nav_items: Array.isArray(settingsRes.data.nav_items)
             ? settingsRes.data.nav_items
             : DEFAULT_SITE_SETTINGS.nav_items,
-        });
+        };
+        setSettings((prev) =>
+          JSON.stringify(prev) === JSON.stringify(nextSettings) ? prev : nextSettings
+        );
         setIsLiveDatabase(true);
       }
 
       if (!catsRes.error && catsRes.data) {
-        setCategories(catsRes.data as Category[]);
+        const nextCats = catsRes.data as Category[];
+        setCategories((prev) =>
+          JSON.stringify(prev) === JSON.stringify(nextCats) ? prev : nextCats
+        );
         setIsLiveDatabase(true);
       }
 
       if (!prodsRes.error && prodsRes.data) {
-        setProducts(prodsRes.data as Product[]);
+        const nextProds = prodsRes.data as Product[];
+        setProducts((prev) =>
+          JSON.stringify(prev) === JSON.stringify(nextProds) ? prev : nextProds
+        );
       }
 
       if (!promosRes.error && promosRes.data) {
-        setPromotions(promosRes.data as Promotion[]);
+        const nextPromos = promosRes.data as Promotion[];
+        setPromotions((prev) =>
+          JSON.stringify(prev) === JSON.stringify(nextPromos) ? prev : nextPromos
+        );
       }
 
       if (!galleryRes.error && galleryRes.data) {
-        setGallery(galleryRes.data as GalleryItem[]);
+        const nextGallery = galleryRes.data as GalleryItem[];
+        setGallery((prev) =>
+          JSON.stringify(prev) === JSON.stringify(nextGallery) ? prev : nextGallery
+        );
       }
 
       if (!sectionsRes.error && sectionsRes.data && sectionsRes.data.length > 0) {
-        setSections(sectionsRes.data as PageSection[]);
+        const nextSections = sectionsRes.data as PageSection[];
+        setSections((prev) =>
+          JSON.stringify(prev) === JSON.stringify(nextSections) ? prev : nextSections
+        );
       }
 
       if (!mediaRes.error && mediaRes.data) {
-        setMediaAssets(mediaRes.data as MediaAsset[]);
+        const nextMedia = mediaRes.data as MediaAsset[];
+        setMediaAssets((prev) =>
+          JSON.stringify(prev) === JSON.stringify(nextMedia) ? prev : nextMedia
+        );
       }
 
       if (!logsRes.error && logsRes.data) {
-        setActivityLogs(logsRes.data as AdminActivityLog[]);
+        const nextLogs = logsRes.data as AdminActivityLog[];
+        setActivityLogs((prev) =>
+          JSON.stringify(prev) === JSON.stringify(nextLogs) ? prev : nextLogs
+        );
       }
 
       // Persist latest storefront snapshot for offline / weak-signal PWA access
@@ -329,11 +353,28 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Realtime + Cross-Tab + Visibility + Fallback Polling sync so website updates without F5
   useEffect(() => {
+    const isUserTypingInAdmin = () => {
+      if (typeof window === 'undefined' || typeof document === 'undefined') return false;
+      if (!window.location.pathname.startsWith('/admin')) return false;
+      const el = document.activeElement as HTMLElement | null;
+      if (!el) return false;
+      const tag = el.tagName;
+      return (
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
+        el.isContentEditable
+      );
+    };
+
     let debounceTimer: number | null = null;
     const scheduleRefresh = () => {
+      if (isUserTypingInAdmin()) return;
       if (debounceTimer) window.clearTimeout(debounceTimer);
       debounceTimer = window.setTimeout(() => {
-        refreshAll();
+        if (!isUserTypingInAdmin()) {
+          refreshAll();
+        }
       }, 50);
     };
 
@@ -355,7 +396,7 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const pollInterval = isSupabaseConfigured
       ? window.setInterval(() => {
-          if (document.visibilityState === 'visible') {
+          if (document.visibilityState === 'visible' && !isUserTypingInAdmin()) {
             refreshAll();
           }
         }, 8_000)

@@ -1,14 +1,48 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, ArrowUpRight } from 'lucide-react';
 import { m } from 'framer-motion';
 import { useSiteData } from '../../contexts/SiteDataContext';
 import { formatDateVi, getPromotionScheduleStatus, sanitizeUrl } from '../../lib/utils';
 import { Skeleton } from '../common/Skeleton';
 
+function getPromoCountdownBadge(endDateRaw: string | null | undefined, now: Date): string | null {
+  if (!endDateRaw) return null;
+  const end = new Date(endDateRaw);
+  if (isNaN(end.getTime())) return null;
+  const endOfDay = new Date(
+    end.getFullYear(),
+    end.getMonth(),
+    end.getDate(),
+    23,
+    59,
+    59,
+    999
+  );
+  const diffMs = endOfDay.getTime() - now.getTime();
+  if (diffMs <= 0) return null;
+
+  const totalMinutes = Math.floor(diffMs / 60000);
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+
+  if (days > 30) return null;
+  if (days >= 1) {
+    return `Còn ${days} ngày ${hours} giờ`;
+  }
+  return `Còn ${hours} giờ ${minutes} phút`;
+}
+
 export const PromotionsSection: React.FC = () => {
   const { promotions, settings, getSection, loading, isLiveDatabase } = useSiteData();
   const section = getSection('promotions');
   const showSkeleton = loading && !isLiveDatabase;
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 30000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   if (section && !section.is_enabled) return null;
 
@@ -48,7 +82,6 @@ export const PromotionsSection: React.FC = () => {
     );
   }
 
-  const now = new Date();
   const activePromos = promotions
     .filter((p) => getPromotionScheduleStatus(p, now).isCurrentlyVisible)
     .sort((a, b) => a.sort_order - b.sort_order);
@@ -87,6 +120,7 @@ export const PromotionsSection: React.FC = () => {
         <div className="space-y-10">
           {activePromos.map((promo, index) => {
             const isEven = index % 2 === 0;
+            const countdownLabel = getPromoCountdownBadge(promo.end_date, now);
             return (
               <m.div
                 key={promo.id}
@@ -135,13 +169,18 @@ export const PromotionsSection: React.FC = () => {
                   </p>
 
                   {(promo.start_date || promo.end_date) && (
-                    <div className="mt-5 inline-flex items-center gap-2 text-xs text-coffee-muted">
-                      <Calendar className="w-3.5 h-3.5 text-coffee" />
+                    <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-coffee-muted">
+                      <Calendar className="w-3.5 h-3.5 text-coffee shrink-0" />
                       <span>
                         Thời gian áp dụng:{' '}
                         {promo.start_date ? formatDateVi(promo.start_date) : 'Hôm nay'} -{' '}
                         {promo.end_date ? formatDateVi(promo.end_date) : 'Khi có thông báo mới'}
                       </span>
+                      {countdownLabel && (
+                        <span className="font-semibold text-coffee">
+                          · {countdownLabel}
+                        </span>
+                      )}
                     </div>
                   )}
 

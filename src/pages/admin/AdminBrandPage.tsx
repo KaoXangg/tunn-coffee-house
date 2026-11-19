@@ -18,18 +18,21 @@ export const AdminBrandPage: React.FC = () => {
   const [copyrightText, setCopyrightText] = useState(settings.copyright_text);
 
   const [saving, setSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<'logo' | 'favicon' | null>(null);
 
   const [prevSettings, setPrevSettings] = useState(settings);
   if (settings !== prevSettings) {
     setPrevSettings(settings);
-    setBrandName(settings.brand_name);
-    setSiteTitle(settings.site_title);
-    setSlogan(settings.slogan);
-    setLogoUrl(settings.logo_url);
-    setFaviconUrl(settings.favicon_url);
-    setFooterDescription(settings.footer_description);
-    setCopyrightText(settings.copyright_text);
+    if (!isDirty) {
+      setBrandName(settings.brand_name);
+      setSiteTitle(settings.site_title);
+      setSlogan(settings.slogan);
+      setLogoUrl(settings.logo_url);
+      setFaviconUrl(settings.favicon_url);
+      setFooterDescription(settings.footer_description);
+      setCopyrightText(settings.copyright_text);
+    }
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -49,6 +52,7 @@ export const AdminBrandPage: React.FC = () => {
       if (error) {
         toast.info('Đã áp dụng tạm thời trên giao diện', error);
       } else {
+        setIsDirty(false);
         toast.success(
           'Đã cập nhật Nhận diện Thương hiệu!',
           'Logo và tên thương hiệu đã được đồng bộ trên toàn bộ Website & Admin.'
@@ -60,7 +64,11 @@ export const AdminBrandPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div
+      className="space-y-6"
+      onInputCapture={() => setIsDirty(true)}
+      onChangeCapture={() => setIsDirty(true)}
+    >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl font-semibold text-coffee-dark">

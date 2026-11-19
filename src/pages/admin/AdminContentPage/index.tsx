@@ -22,8 +22,11 @@ export const AdminContentPage: React.FC = () => {
   const toast = useToast();
 
   const [activeTab, setActiveTab] = useState<'sections' | 'about' | 'navigation'>('sections');
-  const [orderedSections, setOrderedSections] = useState<PageSection[]>([]);
+  const [orderedSections, setOrderedSections] = useState<PageSection[]>(() =>
+    [...sections].sort((a, b) => a.sort_order - b.sort_order)
+  );
   const [savingOrder, setSavingOrder] = useState(false);
+  const [sectionsDirty, setSectionsDirty] = useState(false);
 
   // About Section Editor State
   const aboutSec = getSection('about');
@@ -34,6 +37,7 @@ export const AdminContentPage: React.FC = () => {
     ...(aboutSec?.content || {}),
   });
   const [savingAbout, setSavingAbout] = useState(false);
+  const [aboutDirty, setAboutDirty] = useState(false);
   const [aboutMediaTarget, setAboutMediaTarget] = useState<'main' | 'secondary' | null>(null);
 
   // Navigation & Footer State
@@ -51,21 +55,25 @@ export const AdminContentPage: React.FC = () => {
   const [prevSections, setPrevSections] = useState(sections);
   if (sections !== prevSections) {
     setPrevSections(sections);
-    setOrderedSections([...sections].sort((a, b) => a.sort_order - b.sort_order));
+    if (!sectionsDirty) {
+      setOrderedSections([...sections].sort((a, b) => a.sort_order - b.sort_order));
+    }
   }
 
   const [prevAboutSec, setPrevAboutSec] = useState(aboutSec);
   if (aboutSec && aboutSec !== prevAboutSec) {
     setPrevAboutSec(aboutSec);
-    setAboutTitle(aboutSec.title);
-    setAboutSubtitle(aboutSec.subtitle);
-    setAboutContent({
-      ...DEFAULT_ABOUT_CONTENT,
-      ...(aboutSec.content || {}),
-      pillars: Array.isArray(aboutSec.content?.pillars)
-        ? (aboutSec.content.pillars as AboutSectionContent['pillars'])
-        : DEFAULT_ABOUT_CONTENT.pillars,
-    });
+    if (!aboutDirty) {
+      setAboutTitle(aboutSec.title);
+      setAboutSubtitle(aboutSec.subtitle);
+      setAboutContent({
+        ...DEFAULT_ABOUT_CONTENT,
+        ...(aboutSec.content || {}),
+        pillars: Array.isArray(aboutSec.content?.pillars)
+          ? (aboutSec.content.pillars as AboutSectionContent['pillars'])
+          : DEFAULT_ABOUT_CONTENT.pillars,
+      });
+    }
   }
 
   const [prevSettings, setPrevSettings] = useState(settings);
@@ -87,6 +95,7 @@ export const AdminContentPage: React.FC = () => {
     const temp = clone[index];
     clone[index] = clone[targetIndex];
     clone[targetIndex] = temp;
+    setSectionsDirty(true);
     setOrderedSections(
       clone.map((item, idx) => ({ ...item, sort_order: idx + 1 }))
     );
@@ -169,6 +178,7 @@ export const AdminContentPage: React.FC = () => {
   };
 
   const toggleSectionVisibility = (key: PageSection['section_key']) => {
+    setSectionsDirty(true);
     setOrderedSections((prev) =>
       prev.map((sec) =>
         sec.section_key === key ? { ...sec, is_enabled: !sec.is_enabled } : sec
@@ -181,6 +191,7 @@ export const AdminContentPage: React.FC = () => {
     field: 'title' | 'subtitle',
     value: string
   ) => {
+    setSectionsDirty(true);
     setOrderedSections((prev) =>
       prev.map((sec) => {
         if (sec.section_key !== key) return sec;
@@ -210,6 +221,7 @@ export const AdminContentPage: React.FC = () => {
     field: string,
     value: string
   ) => {
+    setSectionsDirty(true);
     setOrderedSections((prev) =>
       prev.map((sec) =>
         sec.section_key === key
@@ -223,6 +235,7 @@ export const AdminContentPage: React.FC = () => {
     key: PageSection['section_key'],
     value: string
   ) => {
+    setSectionsDirty(true);
     setOrderedSections((prev) =>
       prev.map((sec) =>
         sec.section_key === key
@@ -268,6 +281,7 @@ export const AdminContentPage: React.FC = () => {
           )
         );
       }
+      setSectionsDirty(false);
       broadcastLiveSync('cms');
       await refreshAll();
       toast.success(
@@ -293,6 +307,7 @@ export const AdminContentPage: React.FC = () => {
       if (error) {
         toast.info('Đã cập nhật bản xem trước', error);
       } else {
+        setAboutDirty(false);
         toast.success('Đã lưu Câu chuyện Thương hiệu (About Section)!');
       }
     } finally {
@@ -397,7 +412,10 @@ export const AdminContentPage: React.FC = () => {
         <AboutTab
           aboutContent={aboutContent}
           savingAbout={savingAbout}
-          onChangeContent={setAboutContent}
+          onChangeContent={(action) => {
+            setAboutDirty(true);
+            setAboutContent(action);
+          }}
           onOpenMediaPicker={setAboutMediaTarget}
           onSubmit={handleSaveAbout}
         />
@@ -412,17 +430,32 @@ export const AdminContentPage: React.FC = () => {
           footerDesc={footerDesc}
           copyright={copyright}
           savingNav={savingNav}
-          onChangeNavItems={setNavItems}
+          onChangeNavItems={(action) => {
+            setNavDirty(true);
+            setNavItems(action);
+          }}
           onMarkDirty={() => setNavDirty(true)}
           onMoveNavItem={moveNavItem}
           onAddNavItem={handleAddNavItem}
           onDeleteNavItem={handleDeleteNavItem}
           onRestoreSingleNavItem={handleRestoreSingleNavItem}
           onRestoreDefaultNav={handleRestoreDefaultNav}
-          onChangeHeaderCtaLabel={setHeaderCtaLabel}
-          onChangeHeaderCtaHref={setHeaderCtaHref}
-          onChangeFooterDesc={setFooterDesc}
-          onChangeCopyright={setCopyright}
+          onChangeHeaderCtaLabel={(val) => {
+            setNavDirty(true);
+            setHeaderCtaLabel(val);
+          }}
+          onChangeHeaderCtaHref={(val) => {
+            setNavDirty(true);
+            setHeaderCtaHref(val);
+          }}
+          onChangeFooterDesc={(val) => {
+            setNavDirty(true);
+            setFooterDesc(val);
+          }}
+          onChangeCopyright={(val) => {
+            setNavDirty(true);
+            setCopyright(val);
+          }}
           onSubmit={handleSaveNavigationAndFooter}
         />
       )}
@@ -432,6 +465,7 @@ export const AdminContentPage: React.FC = () => {
         open={Boolean(aboutMediaTarget)}
         onClose={() => setAboutMediaTarget(null)}
         onSelect={(url) => {
+          setAboutDirty(true);
           if (aboutMediaTarget === 'main') {
             setAboutContent((prev) => ({ ...prev, main_image_url: url }));
           } else if (aboutMediaTarget === 'secondary') {
