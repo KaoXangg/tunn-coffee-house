@@ -737,190 +737,232 @@ export const MenuSection: React.FC<MenuSectionProps> = ({ onSelectProduct }) => 
         )}
 
         {/* Floating Table Order Note Pill (Left-aligned on mobile to clear Back-to-Top button on right) */}
-        {totalNoteCount > 0 && (
-          <div className="fixed bottom-5 left-4 right-[68px] sm:right-auto sm:left-6 z-40 sm:w-auto max-w-sm">
-            <button
-              type="button"
-              onClick={() => setOrderNoteOpen(true)}
-              className="w-full sm:w-auto flex items-center justify-between gap-3 pl-3 pr-3.5 py-2.5 rounded-2xl bg-coffee-dark text-ivory-light border border-coffee-beige/30 shadow-editorial-lg hover:bg-coffee active:scale-[0.98] transition-all"
+        <AnimatePresence>
+          {totalNoteCount > 0 && (
+            <m.div
+              key="floating-order-note-bar"
+              initial={{ opacity: 0, y: 20, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.96 }}
+              transition={{ type: 'spring', stiffness: 340, damping: 28 }}
+              className="fixed bottom-5 left-4 right-[68px] sm:right-auto sm:left-6 z-40 sm:w-auto max-w-sm"
             >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span className="w-8 h-8 rounded-xl bg-coffee text-ivory-light inline-flex items-center justify-center shrink-0 relative">
-                  <ClipboardList className="w-4 h-4" />
-                  <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-400 text-coffee-dark text-[10px] font-bold inline-flex items-center justify-center tabular-nums">
-                    {totalNoteCount}
+              <button
+                type="button"
+                onClick={() => setOrderNoteOpen(true)}
+                className="group w-full sm:w-auto flex items-center justify-between gap-3.5 pl-2.5 pr-3 py-2 rounded-2xl bg-[#241914]/95 dark:bg-[#221914]/95 backdrop-blur-md text-[#F7F5EF] border border-[#4B2E24]/80 dark:border-[#D4A574]/30 shadow-[0_14px_34px_-10px_rgba(20,14,10,0.5)] dark:shadow-[0_16px_40px_-10px_rgba(0,0,0,0.8)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="h-9 px-2.5 rounded-xl bg-[#3A2820] dark:bg-[#D4A574]/15 border border-[#D4A574]/30 text-[#E8C69E] dark:text-[#D4A574] inline-flex items-center justify-center gap-1.5 shrink-0">
+                    <ClipboardList className="w-3.5 h-3.5" />
+                    <span className="font-serif text-sm font-bold tabular-nums">
+                      {totalNoteCount}
+                    </span>
                   </span>
-                </span>
-                <div className="text-left min-w-0">
-                  <p className="text-xs font-semibold leading-tight truncate">
-                    Sổ ghi món tại bàn
-                  </p>
-                  <p className="text-xs font-serif font-bold text-amber-300 mt-0.5 tabular-nums">
-                    {formatVND(totalNotePrice)}
-                  </p>
-                </div>
-              </div>
-              <span className="px-3 py-1.5 rounded-xl bg-ivory-light text-coffee-dark text-xs font-semibold shrink-0">
-                Xem sổ
-              </span>
-            </button>
-          </div>
-        )}
-
-        {/* Table Order Note Modal */}
-        {orderNoteOpen && notedItems.length > 0 && (
-          <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4">
-            <div
-              onClick={() => setOrderNoteOpen(false)}
-              className="fixed inset-0 bg-black/55 backdrop-blur-[2px]"
-            />
-            <div className="relative z-10 w-full sm:max-w-lg bg-white dark:bg-[#1D1511] text-coffee-dark border-t sm:border border-coffee-beige rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
-              {/* Mobile drag handle */}
-              <div className="pt-2.5 pb-1 sm:hidden flex justify-center bg-white dark:bg-[#1D1511]">
-                <span className="w-10 h-1 rounded-full bg-coffee-beige/80" />
-              </div>
-
-              <div className="px-5 py-3.5 sm:py-4 border-b border-coffee-beige/70 flex items-center justify-between gap-3 bg-white dark:bg-[#1D1511]">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="w-9 h-9 rounded-xl bg-coffee text-ivory-light inline-flex items-center justify-center shrink-0">
-                    <ClipboardList className="w-4 h-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-serif text-lg font-semibold text-coffee-dark">
-                        Sổ ghi món tại bàn
-                      </h3>
-                      <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-ivory text-coffee border border-coffee-beige">
-                        {totalNoteCount} ly
-                      </span>
-                    </div>
-                    <p className="text-xs text-coffee-muted truncate">
-                      Đưa màn hình này hoặc đọc cho nhân viên khi gọi món
+                  <div className="text-left min-w-0 pr-1">
+                    <p className="text-xs font-semibold text-[#F7F5EF] leading-tight truncate">
+                      Sổ ghi món tại bàn
+                    </p>
+                    <p className="text-xs font-serif font-semibold text-[#E8C69E] dark:text-[#D4A574] mt-0.5 tabular-nums">
+                      {formatVND(totalNotePrice)}
                     </p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setOrderNoteOpen(false)}
-                  className="w-8 h-8 rounded-xl inline-flex items-center justify-center text-coffee-muted hover:text-coffee-dark hover:bg-ivory transition-colors shrink-0"
-                  aria-label="Đóng sổ ghi món"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+                <span className="px-3 py-1.5 rounded-xl bg-[#F7F5EF] dark:bg-[#D4A574] text-[#241914] dark:text-[#140F0C] text-xs font-semibold shrink-0 group-hover:bg-[#E9E6D8] dark:group-hover:bg-[#E2B887] transition-colors">
+                  Mở sổ
+                </span>
+              </button>
+            </m.div>
+          )}
+        </AnimatePresence>
 
-              <div className="p-4 sm:p-5 overflow-y-auto space-y-3 bg-ivory-light/75 dark:bg-[#140F0C]">
-                {notedItems.map(({ product, qty }) => {
-                  const unitPrice =
-                    product.sale_price &&
-                    Number(product.sale_price) > 0 &&
-                    Number(product.sale_price) < Number(product.price)
-                      ? Number(product.sale_price)
-                      : Number(product.price);
-                  const selectedNotes = orderCustomizations[product.id] || [];
-                  return (
-                    <div
-                      key={product.id}
-                      className="p-3.5 rounded-2xl bg-white dark:bg-[#1D1511] border border-coffee-beige/80 shadow-2xs space-y-3"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3 min-w-0">
-                          <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="w-14 h-14 rounded-xl object-cover border border-coffee-beige/70 shrink-0"
-                          />
-                          <div className="min-w-0">
-                            <p className="font-serif text-[15px] font-semibold text-coffee-dark leading-snug line-clamp-2">
-                              {product.name}
-                            </p>
-                            <p className="text-xs text-coffee-muted mt-1 tabular-nums">
-                              {formatVND(unitPrice)} × {qty} ={' '}
-                              <strong className="text-coffee font-semibold">
-                                {formatVND(unitPrice * qty)}
-                              </strong>
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="inline-flex items-center gap-1 bg-ivory-light border border-coffee-beige rounded-xl p-0.5 text-xs font-semibold shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => updateOrderNoteQty(product.id, -1)}
-                            className="w-7 h-7 rounded-lg inline-flex items-center justify-center text-coffee-dark hover:bg-ivory transition-colors"
-                            aria-label="Giảm"
-                          >
-                            <Minus className="w-3.5 h-3.5" />
-                          </button>
-                          <span className="min-w-[22px] text-center tabular-nums text-coffee-dark">
-                            {qty}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => updateOrderNoteQty(product.id, 1)}
-                            className="w-7 h-7 rounded-lg inline-flex items-center justify-center text-coffee-dark hover:bg-ivory transition-colors"
-                            aria-label="Tăng"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="pt-2.5 border-t border-coffee-beige/50 flex flex-wrap items-center gap-1.5">
-                        <span className="text-[11px] text-coffee-muted mr-0.5">Tùy chọn:</span>
-                        {DRINK_NOTE_OPTIONS.map((opt) => {
-                          const isSelected = selectedNotes.includes(opt);
-                          return (
-                            <button
-                              key={opt}
-                              type="button"
-                              onClick={() => toggleOrderCustomization(product.id, opt)}
-                              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
-                                isSelected
-                                  ? 'bg-coffee text-ivory-light shadow-2xs'
-                                  : 'bg-ivory-light text-coffee-dark/80 border border-coffee-beige/70 hover:border-coffee'
-                              }`}
-                            >
-                              {opt}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="px-5 py-4 bg-white dark:bg-[#1D1511] border-t border-coffee-beige/80 flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[11px] text-coffee-muted">
-                    Tổng tạm tính ({totalNoteCount} ly)
-                  </p>
-                  <p className="font-serif text-2xl font-bold text-coffee tabular-nums leading-tight">
-                    {formatVND(totalNotePrice)}
-                  </p>
+        {/* Table Order Note Modal */}
+        <AnimatePresence>
+          {orderNoteOpen && notedItems.length > 0 && (
+            <div
+              className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="table-order-note-title"
+            >
+              <m.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setOrderNoteOpen(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-[3px]"
+              />
+              <m.div
+                initial={{ opacity: 0, y: 28, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 24, scale: 0.98 }}
+                transition={{ type: 'spring', stiffness: 340, damping: 30 }}
+                className="relative z-10 w-full sm:max-w-[500px] bg-[#FAF8F3] dark:bg-[#18120E] text-coffee-dark border-t sm:border border-[#E6DFCE] dark:border-white/[0.08] rounded-t-[24px] sm:rounded-2xl shadow-[0_28px_70px_-16px_rgba(0,0,0,0.6)] overflow-hidden max-h-[86vh] sm:max-h-[82vh] flex flex-col"
+              >
+                {/* Mobile drag handle */}
+                <div className="pt-2.5 pb-0.5 sm:hidden flex justify-center">
+                  <span className="w-10 h-1 rounded-full bg-coffee-beige dark:bg-white/15" />
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={clearOrderNote}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-red-700 hover:bg-red-50 border border-red-200 transition-colors"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Xóa hết</span>
-                  </button>
+
+                {/* Editorial Header */}
+                <div className="px-5 pt-3.5 pb-4 sm:py-4 border-b border-[#EAE3D2] dark:border-white/[0.06] flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-medium text-coffee">
+                        Phiếu gọi món tại bàn
+                      </span>
+                      <span className="text-coffee-muted/50">·</span>
+                      <span className="text-[11px] font-semibold text-coffee">
+                        {totalNoteCount} ly
+                      </span>
+                    </div>
+                    <h3
+                      id="table-order-note-title"
+                      className="font-serif text-xl sm:text-[22px] font-semibold text-coffee-dark leading-snug mt-0.5"
+                    >
+                      Sổ ghi món của bàn
+                    </h3>
+                    <p className="text-xs text-coffee-muted mt-0.5">
+                      Đưa màn hình này hoặc đọc danh sách cho nhân viên khi gọi món
+                    </p>
+                  </div>
                   <button
                     type="button"
                     onClick={() => setOrderNoteOpen(false)}
-                    className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-coffee text-ivory-light hover:bg-coffee-dark transition-colors"
+                    className="w-8 h-8 rounded-full bg-[#EFECE2] dark:bg-white/[0.06] text-coffee-muted hover:text-coffee-dark hover:bg-[#E5E0D0] dark:hover:bg-white/[0.12] inline-flex items-center justify-center transition-colors shrink-0 mt-0.5"
+                    aria-label="Đóng sổ ghi món"
                   >
-                    Đóng
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
+
+                {/* Drink Cards List */}
+                <div className="px-4 sm:px-5 py-3.5 overflow-y-auto space-y-2.5 flex-1">
+                  <AnimatePresence initial={false}>
+                    {notedItems.map(({ product, qty }) => {
+                      const unitPrice =
+                        product.sale_price &&
+                        Number(product.sale_price) > 0 &&
+                        Number(product.sale_price) < Number(product.price)
+                          ? Number(product.sale_price)
+                          : Number(product.price);
+                      const selectedNotes = orderCustomizations[product.id] || [];
+                      return (
+                        <m.div
+                          layout
+                          key={product.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.96 }}
+                          transition={{ duration: 0.18 }}
+                          className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-[#211914] border border-[#ECE6D6] dark:border-white/[0.05] shadow-[0_2px_8px_rgba(36,25,20,0.03)] dark:shadow-none"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-3 min-w-0">
+                              <img
+                                src={product.image_url}
+                                alt={product.name}
+                                className="w-14 h-14 rounded-xl object-cover bg-ivory shrink-0"
+                              />
+                              <div className="min-w-0 pt-0.5">
+                                <p className="font-serif text-[15px] sm:text-base font-semibold text-coffee-dark leading-snug line-clamp-2">
+                                  {product.name}
+                                </p>
+                                <div className="flex items-baseline gap-1.5 mt-1">
+                                  <span className="font-serif text-sm font-bold text-coffee tabular-nums">
+                                    {formatVND(unitPrice * qty)}
+                                  </span>
+                                  {qty > 1 && (
+                                    <span className="text-[11px] text-coffee-muted tabular-nums">
+                                      ({formatVND(unitPrice)} / ly)
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="inline-flex items-center gap-1 bg-[#F3EFE4] dark:bg-white/[0.06] rounded-full p-1 text-xs font-semibold shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => updateOrderNoteQty(product.id, -1)}
+                                className="w-7 h-7 rounded-full inline-flex items-center justify-center text-coffee-dark hover:bg-white dark:hover:bg-white/[0.12] active:scale-90 transition-all"
+                                aria-label="Giảm số lượng"
+                              >
+                                <Minus className="w-3.5 h-3.5" />
+                              </button>
+                              <span className="min-w-[20px] text-center tabular-nums text-coffee-dark">
+                                {qty}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => updateOrderNoteQty(product.id, 1)}
+                                className="w-7 h-7 rounded-full inline-flex items-center justify-center text-coffee-dark hover:bg-white dark:hover:bg-white/[0.12] active:scale-90 transition-all"
+                                aria-label="Tăng số lượng"
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Soft Borderless Taste Customization Pills */}
+                          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                            {DRINK_NOTE_OPTIONS.map((opt) => {
+                              const isSelected = selectedNotes.includes(opt);
+                              return (
+                                <button
+                                  key={opt}
+                                  type="button"
+                                  onClick={() => toggleOrderCustomization(product.id, opt)}
+                                  className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-150 active:scale-95 ${
+                                    isSelected
+                                      ? 'bg-coffee text-ivory-light shadow-2xs'
+                                      : 'bg-[#F4F0E6] dark:bg-white/[0.05] text-coffee-muted hover:text-coffee-dark hover:bg-[#EAE4D3] dark:hover:bg-white/[0.1]'
+                                  }`}
+                                >
+                                  {opt}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </m.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+
+                {/* Clean Summary Footer */}
+                <div className="px-5 py-4 bg-white dark:bg-[#1C1511] border-t border-[#EAE3D2] dark:border-white/[0.06] flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs text-coffee-muted">
+                      Tạm tính ({totalNoteCount} ly)
+                    </p>
+                    <p className="font-serif text-xl sm:text-2xl font-bold text-coffee tabular-nums leading-tight mt-0.5">
+                      {formatVND(totalNotePrice)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={clearOrderNote}
+                      className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-medium text-coffee-muted hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Làm mới</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOrderNoteOpen(false)}
+                      className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-coffee text-ivory-light hover:opacity-95 active:scale-[0.98] transition-all"
+                    >
+                      Hoàn tất
+                    </button>
+                  </div>
+                </div>
+              </m.div>
             </div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

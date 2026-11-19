@@ -1,3 +1,10 @@
+const withAlpha = (variable, fallback) => ({ opacityValue }) => {
+  if (opacityValue === undefined || opacityValue === '1') {
+    return `var(${variable}, ${fallback})`;
+  }
+  return `color-mix(in srgb, var(${variable}, ${fallback}) calc(${opacityValue} * 100%), transparent)`;
+};
+
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: 'class',
@@ -9,15 +16,18 @@ export default {
     extend: {
       colors: {
         ivory: {
-          DEFAULT: 'var(--color-bg-secondary, #E9E6D8)',
-          light: 'var(--color-bg-primary, #F7F5EF)',
+          DEFAULT: withAlpha('--color-bg-secondary', '#E9E6D8'),
+          light: withAlpha('--color-bg-primary', '#F7F5EF'),
         },
         coffee: {
-          DEFAULT: 'var(--color-primary, #4B2E24)',
-          dark: 'var(--color-text-primary, #241914)',
-          muted: 'var(--color-text-muted, #8C7565)',
-          beige: 'var(--color-accent, #D5C6AD)',
+          DEFAULT: withAlpha('--color-primary', '#4B2E24'),
+          dark: withAlpha('--color-text-primary', '#241914'),
+          muted: withAlpha('--color-text-muted', '#8C7565'),
+          beige: withAlpha('--color-accent', '#D5C6AD'),
         },
+      },
+      borderColor: {
+        DEFAULT: 'var(--color-accent, #D5C6AD)',
       },
       fontFamily: {
         serif: ['var(--font-heading, "Lora")', '"Playfair Display"', 'serif'],

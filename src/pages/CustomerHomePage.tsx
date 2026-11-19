@@ -56,8 +56,36 @@ export const CustomerHomePage: React.FC = () => {
   const { effectiveTheme } = useSeasonalTheme();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [hasOrderNote, setHasOrderNote] = useState<boolean>(() => {
+    try {
+      const raw = localStorage.getItem('tunn_table_order_note_v1');
+      if (!raw) return false;
+      const map = JSON.parse(raw) as Record<string, number>;
+      return Object.values(map).some((q) => Number(q) > 0);
+    } catch {
+      return false;
+    }
+  });
   const [searchParams] = useSearchParams();
   const tableNumber = searchParams.get('table');
+
+  useEffect(() => {
+    const syncOrderNoteStatus = () => {
+      try {
+        const raw = localStorage.getItem('tunn_table_order_note_v1');
+        if (!raw) {
+          setHasOrderNote(false);
+          return;
+        }
+        const map = JSON.parse(raw) as Record<string, number>;
+        setHasOrderNote(Object.values(map).some((q) => Number(q) > 0));
+      } catch {
+        setHasOrderNote(false);
+      }
+    };
+    window.addEventListener('tunn-order-note-updated', syncOrderNoteStatus);
+    return () => window.removeEventListener('tunn-order-note-updated', syncOrderNoteStatus);
+  }, []);
 
   // Synchronize active or previewed seasonal theme tokens onto CSS custom properties
   useEffect(() => {
@@ -259,7 +287,11 @@ export const CustomerHomePage: React.FC = () => {
       <CustomerHeader />
       <SeasonalBanner />
       <main className="flex-1 relative">
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 max-w-[calc(100vw-2rem)]">
+        <div
+          className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-30 items-center gap-2 max-w-[calc(100vw-2rem)] ${
+            hasOrderNote ? 'hidden sm:flex' : 'flex'
+          }`}
+        >
           {tableNumber && (
             <div className="px-3.5 py-2 bg-[#241914]/95 backdrop-blur-sm text-[#F7F5EF] border border-[#4B2E24] rounded-full shadow-lg text-xs font-medium whitespace-nowrap">
               Đang xem tại <strong className="text-[#D5C6AD]">Bàn {tableNumber}</strong>
