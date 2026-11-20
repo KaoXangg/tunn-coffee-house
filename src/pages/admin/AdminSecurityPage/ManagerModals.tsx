@@ -95,16 +95,19 @@ export const ManagerModals: React.FC<ManagerModalsProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
-                  Email đăng nhập *
+                  Tên đăng nhập hoặc Email *
                 </label>
                 <input
-                  type="email"
+                  type="text"
                   required
                   value={newMgrEmail}
                   onChange={(e) => setNewMgrEmail(e.target.value)}
-                  placeholder="quanly@tunncoffee.com"
+                  placeholder="quanly1 hoặc quanly@tunncoffee.com"
                   className="w-full px-3.5 py-2 text-sm bg-white border border-coffee-beige rounded-brand"
                 />
+                <p className="text-[11px] text-coffee-muted mt-1">
+                  Có thể nhập tên đăng nhập ngắn (vd: <code className="font-mono">quanly1</code>, <code className="font-mono">ca_sang</code>) — không cần tạo Gmail mới.
+                </p>
               </div>
 
               <div>

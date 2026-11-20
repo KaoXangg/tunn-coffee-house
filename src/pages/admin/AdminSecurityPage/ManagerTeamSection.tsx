@@ -1,6 +1,7 @@
 import React from 'react';
 import { Crown, KeyRound, Trash2, Users } from 'lucide-react';
 import { formatDateVi } from '../../../lib/utils';
+import { formatAccountIdentifier } from '../../../lib/managerAuth';
 import type { Profile } from '../../../types/database';
 
 interface ManagerTeamSectionProps {
@@ -87,7 +88,14 @@ export const ManagerTeamSection: React.FC<ManagerTeamSectionProps> = ({
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-coffee-muted">{p.email}</p>
+                        <p className="text-xs text-coffee-muted">
+                          {(() => {
+                            const account = formatAccountIdentifier(p.email);
+                            return account.isUsername
+                              ? `Tên đăng nhập: ${account.label}`
+                              : account.label;
+                          })()}
+                        </p>
                       </td>
 
                       <td className="py-3.5 px-4 whitespace-nowrap">

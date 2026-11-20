@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { UserPlus } from 'lucide-react';
 import {
   supabase,
   isSupabaseConfigured,
-  supabaseUrl,
-  supabaseAnonKey,
 } from '../../../lib/supabase';
+import {
+  isValidIdentifierOrEmail,
+  normalizeLoginIdentifier,
+} from '../../../lib/managerAuth';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useSiteData } from '../../../contexts/SiteDataContext';
 import { useToast } from '../../../contexts/ToastContext';
@@ -403,7 +404,15 @@ export const AdminSecurityPage: React.FC = () => {
     if (!newMgrName.trim() || !newMgrEmail.trim()) {
       toast.error(
         'Thông tin chưa hợp lệ',
-        'Vui lòng nhập đầy đủ Họ tên và Email.'
+        'Vui lòng nhập đầy đủ Họ tên và Tên đăng nhập hoặc Email.'
+      );
+      return;
+    }
+
+    if (!isValidIdentifierOrEmail(newMgrEmail)) {
+      toast.error(
+        'Tên đăng nhập / Email chưa hợp lệ',
+        'Tên đăng nhập gồm 3-32 ký tự (chữ, số, ., _, -) hoặc nhập Email hợp lệ.'
       );
       return;
     }
@@ -416,49 +425,48 @@ export const AdminSecurityPage: React.FC = () => {
 
     setCreatingMgr(true);
     try {
-      // Use an isolated, non-persisting Supabase client so current Admin session is NOT overwritten
-      const tempClient = createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-          detectSessionInUrl: false,
+      const displayIdentifier = newMgrEmail.trim().toLowerCase();
+      const { data, error } = await supabase.functions.invoke<{
+        ok?: boolean;
+        displayIdentifier?: string;
+        error?: string;
+      }>('create-manager', {
+        body: {
+          fullName: newMgrName.trim(),
+          identifier: displayIdentifier,
+          password: newMgrPassword,
         },
       });
 
-      const { data, error } = await tempClient.auth.signUp({
-        email: newMgrEmail.trim().toLowerCase(),
-        password: newMgrPassword,
-        options: {
-          data: {
-            full_name: newMgrName.trim(),
-            created_by_owner: 'true',
-            assigned_role: 'admin',
-          },
-        },
-      });
-
-      if (error) throw error;
-
-      if (data.user) {
-        // Explicitly promote the newly created profile to 'admin' (Sub-Manager) using current Admin's RLS permission
-        await supabase.from('profiles').upsert({
-          id: data.user.id,
-          email: newMgrEmail.trim().toLowerCase(),
-          full_name: newMgrName.trim(),
-          role: 'admin',
-        });
+      if (error || data?.error || !data?.ok) {
+        let serverError = data?.error;
+        if (!serverError && error && typeof error === 'object' && 'context' in error) {
+          const ctx = (error as { context?: unknown }).context;
+          if (ctx instanceof Response) {
+            try {
+              const json = (await ctx.clone().json()) as { error?: string };
+              serverError = json?.error;
+            } catch {
+              // ignore non-JSON body
+            }
+          }
+        }
+        throw new Error(
+          serverError ||
+            'Không thể tạo tài khoản Quản lý. Hãy kiểm tra Edge Function create-manager đã được triển khai.'
+        );
       }
 
       await logAdminActivity(
         'Tạo tài khoản Quản lý mới',
         'profiles',
-        newMgrEmail.trim().toLowerCase()
+        normalizeLoginIdentifier(displayIdentifier)
       );
       await fetchAllProfiles();
 
       toast.success(
         'Đã thêm Quản lý mới thành công!',
-        `Tài khoản ${newMgrEmail.trim()} đã có thể đăng nhập vào trang Admin.`
+        `Tài khoản ${data.displayIdentifier || displayIdentifier} đã có thể đăng nhập ngay vào trang Admin.`
       );
       setNewMgrName('');
       setNewMgrEmail('');

@@ -22,9 +22,19 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { BrandLogo } from '../../components/common/BrandLogo';
 import { renderQrToDataUrl } from '../../lib/qrGenerator';
+import {
+  isValidIdentifierOrEmail,
+  normalizeLoginIdentifier,
+} from '../../lib/managerAuth';
 
 const loginSchema = z.object({
-  email: z.string().email('Vui lòng nhập địa chỉ email hợp lệ'),
+  email: z
+    .string()
+    .trim()
+    .refine(
+      (val) => isValidIdentifierOrEmail(val),
+      'Vui lòng nhập Email hoặc Tên đăng nhập hợp lệ'
+    ),
   password: z.string().min(6, 'Mật khẩu cần ít nhất 6 ký tự'),
 });
 
@@ -279,7 +289,8 @@ export const AdminLoginPage: React.FC = () => {
     setSubmitting(true);
     setAccountLockedMessage(null);
     try {
-      const { error } = await signInWithEmail(values.email, values.password);
+      const loginEmail = normalizeLoginIdentifier(values.email);
+      const { error } = await signInWithEmail(loginEmail, values.password);
       if (error) {
         if (error === 'ACCOUNT_LOCKED') {
           setAccountLockedMessage(
@@ -597,17 +608,17 @@ export const AdminLoginPage: React.FC = () => {
                     htmlFor="admin-login-email"
                     className="block text-[13px] font-medium text-coffee-dark mb-1.5"
                   >
-                    Email
+                    Email hoặc tên đăng nhập
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-coffee-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <input
                       id="admin-login-email"
-                      type="email"
-                      autoComplete="email"
+                      type="text"
+                      autoComplete="username"
                       disabled={lockoutRemainingSec > 0}
                       {...loginForm.register('email')}
-                      placeholder="admin@tunncoffee.com"
+                      placeholder="quanly1 hoặc admin@tunncoffee.com"
                       className="w-full min-h-[44px] pl-10 pr-3.5 py-2.5 text-sm bg-white text-coffee-dark placeholder:text-coffee-muted/70 border border-coffee-beige rounded-xl focus:outline-none focus:ring-2 focus:ring-coffee/25 focus:border-coffee transition-all disabled:opacity-50"
                     />
                   </div>
