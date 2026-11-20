@@ -35,6 +35,38 @@ function randomTwoDigitCode(): string {
   return String(10 + (arr[0] % 90));
 }
 
+async function buildCodeChoices(
+  sessionId: string,
+  secretHash: string,
+  realCode: string
+): Promise<string[]> {
+  const digestHex = await sha256Hex(`${sessionId}:${secretHash}:choices`);
+  const choices = new Set<string>([realCode]);
+  let cursor = 0;
+  while (choices.size < 3 && cursor + 2 <= digestHex.length) {
+    const num = parseInt(digestHex.slice(cursor, cursor + 2), 16);
+    cursor += 2;
+    const candidate = String(10 + (num % 90));
+    choices.add(candidate);
+  }
+  // Fallback if hash bytes collided
+  let fallback = 10;
+  while (choices.size < 3 && fallback < 100) {
+    choices.add(String(fallback));
+    fallback += 1;
+  }
+  const arr = Array.from(choices);
+  // Deterministic Fisher-Yates shuffle from trailing hash bytes
+  for (let i = arr.length - 1; i > 0; i--) {
+    const byteHex = digestHex.slice(digestHex.length - 2 - i * 2, digestHex.length - i * 2);
+    const j = parseInt(byteHex || '0', 16) % (i + 1);
+    const tmp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = tmp;
+  }
+  return arr;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -176,7 +208,7 @@ Deno.serve(async (req) => {
       .eq('id', user.id)
       .maybeSingle();
 
-    if (profileErr || !profile || profile.role !== 'admin') {
+    if (profileErr || !profile || (profile.role !== 'admin' && profile.role !== 'editor')) {
       return jsonResponse({ error: 'Tài khoản này không có quyền duyệt đăng nhập.' }, 403);
     }
 
@@ -187,7 +219,7 @@ Deno.serve(async (req) => {
 
     const { data: row } = await adminClient
       .from('admin_qr_sessions')
-      .select('id, verification_code, device_label, status, expires_at')
+      .select('id, session_secret, verification_code, device_label, status, expires_at')
       .eq('id', sessionId)
       .maybeSingle();
 
@@ -200,9 +232,14 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'inspect') {
+      const codeChoices = await buildCodeChoices(
+        row.id,
+        row.session_secret,
+        row.verification_code
+      );
       return jsonResponse({
         sessionId: row.id,
-        verificationCode: row.verification_code,
+        codeChoices,
         deviceLabel: row.device_label,
         expiresAt: row.expires_at,
         approverEmail: user.email,
@@ -216,6 +253,22 @@ Deno.serve(async (req) => {
         .eq('id', sessionId)
         .eq('status', 'pending');
       return jsonResponse({ ok: true, status: 'rejected' });
+    }
+
+    const selectedCode = String(payload.selectedCode || '').trim();
+    if (!selectedCode || selectedCode !== row.verification_code) {
+      await adminClient
+        .from('admin_qr_sessions')
+        .update({ status: 'rejected', approved_by: user.id })
+        .eq('id', sessionId)
+        .eq('status', 'pending');
+      return jsonResponse(
+        {
+          error:
+            'Số xác nhận chưa khớp với màn hình máy tính. Mã QR đã bị hủy để bảo mật.',
+        },
+        403
+      );
     }
 
     // Generate single-use email OTP via Supabase Admin Auth API
