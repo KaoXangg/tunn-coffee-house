@@ -29,8 +29,11 @@ export const AdminSecurityPage: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
-  // 2. Update Profile Name State
+  // 2. Update Profile Name & Username State
   const [fullName, setFullName] = useState(profile?.full_name || '');
+  const [username, setUsername] = useState(
+    String(user?.user_metadata?.username || '')
+  );
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
   // 3. Auto Session Timeout State
@@ -359,10 +362,18 @@ export const AdminSecurityPage: React.FC = () => {
     }
   };
 
-  // Update own display name
+  // Update own display name & optional login username
   const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSupabaseConfigured || !user) return;
+    const cleanUsername = username.trim().toLowerCase();
+    if (cleanUsername && !/^[a-zA-Z0-9._-]{3,32}$/.test(cleanUsername)) {
+      toast.error(
+        'Tên đăng nhập chưa hợp lệ',
+        'Chỉ gồm 3-32 ký tự chữ, số, dấu chấm, gạch dưới hoặc gạch ngang.'
+      );
+      return;
+    }
     setUpdatingProfile(true);
     try {
       const { error } = await supabase
@@ -370,9 +381,15 @@ export const AdminSecurityPage: React.FC = () => {
         .update({ full_name: fullName.trim() })
         .eq('id', user.id);
       if (error) throw error;
+
+      const { error: authErr } = await supabase.auth.updateUser({
+        data: { username: cleanUsername || null },
+      });
+      if (authErr) throw authErr;
+
       await refreshProfile();
       await fetchAllProfiles();
-      toast.success('Đã cập nhật tên hiển thị');
+      toast.success('Đã cập nhật hồ sơ & tên đăng nhập');
     } catch (err: unknown) {
       toast.error('Lỗi cập nhật hồ sơ', err instanceof Error ? err.message : undefined);
     } finally {
@@ -693,12 +710,14 @@ export const AdminSecurityPage: React.FC = () => {
         updatingPassword={updatingPassword}
         idleMinutes={idleMinutes}
         fullName={fullName}
+        username={username}
         updatingProfile={updatingProfile}
         onChangeNewPassword={setNewPassword}
         onChangeConfirmPassword={setConfirmPassword}
         onPasswordChange={handlePasswordChange}
         onSaveIdleTimeout={handleSaveIdleTimeout}
         onChangeFullName={setFullName}
+        onChangeUsername={setUsername}
         onProfileSave={handleProfileSave}
       />
 

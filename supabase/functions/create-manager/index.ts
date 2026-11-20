@@ -34,6 +34,46 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Thiếu cấu hình máy chủ Supabase.' }, 500);
   }
 
+  let payload: Record<string, unknown>;
+  try {
+    payload = (await req.json()) as Record<string, unknown>;
+  } catch {
+    return jsonResponse({ error: 'Dữ liệu yêu cầu không hợp lệ.' }, 400);
+  }
+
+  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  // Public action: resolve a username (no @) into its Supabase auth email for login
+  if (payload.action === 'resolve') {
+    const rawIdentifier = String(payload.identifier || '').trim().toLowerCase();
+    if (!rawIdentifier || rawIdentifier.includes('@') || !USERNAME_REGEX.test(rawIdentifier)) {
+      return jsonResponse({ email: '' });
+    }
+
+    const fallbackEmail = `${rawIdentifier}@${MANAGER_USERNAME_DOMAIN}`;
+    let page = 1;
+    while (page <= 10) {
+      const { data: listed, error: listErr } = await adminClient.auth.admin.listUsers({
+        page,
+        perPage: 100,
+      });
+      if (listErr || !listed?.users?.length) break;
+      const matched = listed.users.find((u) => {
+        const metaUsername = String(u.user_metadata?.username || '').trim().toLowerCase();
+        return metaUsername === rawIdentifier || (u.email || '').toLowerCase() === fallbackEmail;
+      });
+      if (matched?.email) {
+        return jsonResponse({ email: matched.email });
+      }
+      if (listed.users.length < 100) break;
+      page += 1;
+    }
+
+    return jsonResponse({ email: fallbackEmail });
+  }
+
   const authHeader = req.headers.get('Authorization') || '';
   if (!authHeader.startsWith('Bearer ')) {
     return jsonResponse({ error: 'Chưa xác thực phiên đăng nhập.' }, 401);
@@ -53,10 +93,6 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Phiên đăng nhập đã hết hạn.' }, 401);
   }
 
-  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-
   const { data: callerProfile, error: profileErr } = await adminClient
     .from('profiles')
     .select('role, is_owner')
@@ -68,13 +104,6 @@ Deno.serve(async (req) => {
       { error: 'Chỉ tài khoản Chủ sở hữu mới có quyền tạo Quản lý mới.' },
       403
     );
-  }
-
-  let payload: Record<string, unknown>;
-  try {
-    payload = (await req.json()) as Record<string, unknown>;
-  } catch {
-    return jsonResponse({ error: 'Dữ liệu yêu cầu không hợp lệ.' }, 400);
   }
 
   const fullName = String(payload.fullName || '').trim();

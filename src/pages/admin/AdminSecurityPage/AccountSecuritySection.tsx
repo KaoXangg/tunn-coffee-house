@@ -10,12 +10,14 @@ interface AccountSecuritySectionProps {
   updatingPassword: boolean;
   idleMinutes: number;
   fullName: string;
+  username: string;
   updatingProfile: boolean;
   onChangeNewPassword: (v: string) => void;
   onChangeConfirmPassword: (v: string) => void;
   onPasswordChange: (e: React.FormEvent) => void;
   onSaveIdleTimeout: (minutes: number) => void;
   onChangeFullName: (v: string) => void;
+  onChangeUsername: (v: string) => void;
   onProfileSave: (e: React.FormEvent) => void;
 }
 
@@ -26,12 +28,14 @@ export const AccountSecuritySection: React.FC<AccountSecuritySectionProps> = ({
   updatingPassword,
   idleMinutes,
   fullName,
+  username,
   updatingProfile,
   onChangeNewPassword: setNewPassword,
   onChangeConfirmPassword: setConfirmPassword,
   onPasswordChange: handlePasswordChange,
   onSaveIdleTimeout: handleSaveIdleTimeout,
   onChangeFullName: setFullName,
+  onChangeUsername: setUsername,
   onProfileSave: handleProfileSave,
 }) => {
   const user = userEmail ? { email: userEmail } : null;
@@ -160,26 +164,45 @@ export const AccountSecuritySection: React.FC<AccountSecuritySectionProps> = ({
 
             <form
               onSubmit={handleProfileSave}
-              className="pt-4 border-t border-coffee-beige flex flex-col sm:flex-row items-end gap-3"
+              className="pt-4 border-t border-coffee-beige space-y-3"
             >
-              <div className="flex-1 w-full">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
-                  Tên hiển thị của bạn
-                </label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
+                    Tên hiển thị của bạn
+                  </label>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-coffee-dark mb-1.5">
+                    Tên đăng nhập (tùy chọn)
+                  </label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="vd: admin hoặc caosang"
+                    className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
+                  />
+                </div>
               </div>
-              <button
-                type="submit"
-                disabled={updatingProfile}
-                className="px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-ivory text-coffee-dark hover:bg-coffee-beige rounded-brand shrink-0"
-              >
-                {updatingProfile ? 'Đang lưu...' : 'Lưu Tên'}
-              </button>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] text-coffee-muted">
+                  Đặt tên đăng nhập (3-32 ký tự) để đăng nhập nhanh thay cho Email.
+                </p>
+                <button
+                  type="submit"
+                  disabled={updatingProfile}
+                  className="px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-ivory text-coffee-dark hover:bg-coffee-beige rounded-brand shrink-0"
+                >
+                  {updatingProfile ? 'Đang lưu...' : 'Lưu Hồ Sơ'}
+                </button>
+              </div>
             </form>
           </div>
         </div>

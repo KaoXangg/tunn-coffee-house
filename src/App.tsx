@@ -45,9 +45,6 @@ function lazyWithRetry<T extends ComponentType<Record<string, unknown>>>(
 const AdminLoginPage = lazyWithRetry(() =>
   import('./pages/admin/AdminLoginPage').then((m) => ({ default: m.AdminLoginPage }))
 );
-const AdminQrApprovePage = lazyWithRetry(() =>
-  import('./pages/admin/AdminQrApprovePage').then((m) => ({ default: m.AdminQrApprovePage }))
-);
 const AdminDashboardPage = lazyWithRetry(() =>
   import('./pages/admin/AdminDashboardPage').then((m) => ({
     default: m.AdminDashboardPage,
@@ -112,11 +109,6 @@ const AdminSecurityPage = lazyWithRetry(() =>
     default: m.AdminSecurityPage,
   }))
 );
-const AdminResetPasswordPage = lazyWithRetry(() =>
-  import('./pages/admin/AdminResetPasswordPage').then((m) => ({
-    default: m.AdminResetPasswordPage,
-  }))
-);
 const AdminSeasonalThemesPage = lazyWithRetry(() =>
   import('./pages/admin/AdminSeasonalThemesPage').then((m) => ({
     default: m.AdminSeasonalThemesPage,
@@ -151,8 +143,6 @@ export function App() {
 
                 {/* Admin Authentication */}
                 <Route path="/admin/login" element={<AdminLoginPage />} />
-                <Route path="/admin/qr-approve" element={<AdminQrApprovePage />} />
-                <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
 
                 {/* Protected Admin CMS */}
                 <Route

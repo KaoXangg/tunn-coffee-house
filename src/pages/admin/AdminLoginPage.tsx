@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Lock,
-  Mail,
+  User,
   ArrowLeft,
   Loader2,
   Database,
@@ -14,14 +14,11 @@ import {
   Smartphone,
   Eye,
   EyeOff,
-  QrCode,
-  RefreshCw,
 } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { BrandLogo } from '../../components/common/BrandLogo';
-import { renderQrToDataUrl } from '../../lib/qrGenerator';
 import {
   isValidIdentifierOrEmail,
   normalizeLoginIdentifier,
@@ -64,22 +61,6 @@ export const AdminLoginPage: React.FC = () => {
   const [mfaCode, setMfaCode] = useState('');
   const [verifyingMfa, setVerifyingMfa] = useState(false);
 
-  // QR Login & Recovery State
-  const [qrMode, setQrMode] = useState(false);
-  const [recoveryTab, setRecoveryTab] = useState<'qr' | 'email'>('qr');
-  const [resetEmail, setResetEmail] = useState('');
-  const [sendingReset, setSendingReset] = useState(false);
-  const [resetSent, setResetSent] = useState(false);
-  const [qrLoading, setQrLoading] = useState(false);
-  const [qrError, setQrError] = useState<string | null>(null);
-  const [qrSession, setQrSession] = useState<{
-    sessionId: string;
-    sessionSecret: string;
-    verificationCode: string;
-    expiresAt: string;
-  } | null>(null);
-  const [qrSecondsLeft, setQrSecondsLeft] = useState<number>(0);
-
   // Brute-force Rate-limit Lockout State
   const [lockoutRemainingSec, setLockoutRemainingSec] = useState<number>(0);
 
@@ -108,7 +89,6 @@ export const AdminLoginPage: React.FC = () => {
         if (verifiedTotp) {
           setMfaFactorId(verifiedTotp.id);
           setMfaCode('');
-          setQrMode(false);
           toast.info(
             'Yêu cầu Xác thực 2 lớp (2FA)',
             'Vui lòng nhập mã 6 chữ số từ ứng dụng Authenticator.'
@@ -121,160 +101,6 @@ export const AdminLoginPage: React.FC = () => {
     toast.success('Chào mừng trở lại!', 'Đã đăng nhập vào TUNN Admin CMS');
     navigate(postLoginPath);
   }, [navigate, postLoginPath, toast]);
-
-  const startQrSession = useCallback(async () => {
-    if (!isConfigured) {
-      setQrError('Chưa kết nối Supabase để sử dụng đăng nhập bằng mã QR.');
-      return;
-    }
-    setQrLoading(true);
-    setQrError(null);
-    setQrSession(null);
-    try {
-      const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
-      const browserLabel = ua.includes('Edg')
-        ? 'Edge'
-        : ua.includes('Chrome')
-        ? 'Chrome'
-        : ua.includes('Safari')
-        ? 'Safari'
-        : ua.includes('Firefox')
-        ? 'Firefox'
-        : 'Trình duyệt';
-      const osLabel = /iPhone|iPad/i.test(ua)
-        ? 'iOS'
-        : /Android/i.test(ua)
-        ? 'Android'
-        : /Windows/i.test(ua)
-        ? 'Windows'
-        : /Mac/i.test(ua)
-        ? 'macOS'
-        : 'Web';
-
-      const { data, error } = await supabase.functions.invoke<{
-        sessionId?: string;
-        sessionSecret?: string;
-        verificationCode?: string;
-        expiresAt?: string;
-        error?: string;
-      }>('qr-login', {
-        body: {
-          action: 'create',
-          deviceLabel: `${browserLabel} · ${osLabel}`,
-        },
-      });
-
-      if (error || data?.error || !data?.sessionId || !data?.sessionSecret || !data?.verificationCode || !data?.expiresAt) {
-        setQrError(
-          data?.error ||
-            'Không thể khởi tạo mã QR. Hãy kiểm tra Edge Function qr-login đã được triển khai.'
-        );
-        return;
-      }
-
-      setQrSession({
-        sessionId: data.sessionId,
-        sessionSecret: data.sessionSecret,
-        verificationCode: data.verificationCode,
-        expiresAt: data.expiresAt,
-      });
-      setQrSecondsLeft(
-        Math.max(0, Math.ceil((new Date(data.expiresAt).getTime() - Date.now()) / 1000))
-      );
-    } catch {
-      setQrError('Mất kết nối máy chủ khi tạo mã QR.');
-    } finally {
-      setQrLoading(false);
-    }
-  }, [isConfigured]);
-
-  const qrDataUrl = useMemo(() => {
-    if (!qrSession || typeof window === 'undefined') return '';
-    const approveUrl = `${window.location.origin}/admin/qr-approve?sid=${encodeURIComponent(
-      qrSession.sessionId
-    )}`;
-    return renderQrToDataUrl(approveUrl, {
-      pixelSize: 320,
-      marginModules: 2,
-      darkColor: '#241914',
-      lightColor: '#FFFFFF',
-    });
-  }, [qrSession]);
-
-  useEffect(() => {
-    if (!qrMode || !qrSession) {
-      return;
-    }
-
-    const updateRemaining = () => {
-      const diff = Math.max(
-        0,
-        Math.ceil((new Date(qrSession.expiresAt).getTime() - Date.now()) / 1000)
-      );
-      setQrSecondsLeft(diff);
-    };
-    const initialTimer = window.setTimeout(updateRemaining, 0);
-    const countdownTimer = window.setInterval(updateRemaining, 1000);
-
-    let stopped = false;
-    const pollTimer = window.setInterval(async () => {
-      if (stopped) return;
-      try {
-        const { data } = await supabase.functions.invoke<{
-          status?: string;
-          email?: string;
-          otpToken?: string;
-        }>('qr-login', {
-          body: {
-            action: 'poll',
-            sessionId: qrSession.sessionId,
-            sessionSecret: qrSession.sessionSecret,
-          },
-        });
-
-        if (stopped || !data) return;
-
-        if (data.status === 'expired') {
-          stopped = true;
-          setQrSecondsLeft(0);
-          setQrError('Mã QR đã hết hạn. Vui lòng tạo mã mới.');
-          return;
-        }
-
-        if (data.status === 'rejected') {
-          stopped = true;
-          setQrSession(null);
-          setQrError('Yêu cầu đăng nhập đã bị từ chối trên thiết bị kia.');
-          return;
-        }
-
-        if (data.status === 'approved' && data.email && data.otpToken) {
-          stopped = true;
-          const { error: otpErr } = await supabase.auth.verifyOtp({
-            email: data.email,
-            token: data.otpToken,
-            type: 'email',
-          });
-          if (otpErr) {
-            setQrError('Không thể xác thực phiên đăng nhập từ mã QR.');
-            return;
-          }
-          localStorage.removeItem(ATTEMPTS_KEY);
-          localStorage.removeItem(LOCKOUT_KEY);
-          await completeLoginNavigation();
-        }
-      } catch {
-        // Silent retry on next poll tick
-      }
-    }, 2500);
-
-    return () => {
-      stopped = true;
-      window.clearTimeout(initialTimer);
-      window.clearInterval(countdownTimer);
-      window.clearInterval(pollTimer);
-    };
-  }, [qrMode, qrSession, completeLoginNavigation]);
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -293,7 +119,23 @@ export const AdminLoginPage: React.FC = () => {
     setSubmitting(true);
     setAccountLockedMessage(null);
     try {
-      const loginEmail = normalizeLoginIdentifier(values.email);
+      const rawIdentifier = values.email.trim().toLowerCase();
+      let loginEmail = normalizeLoginIdentifier(rawIdentifier);
+      if (isConfigured && !rawIdentifier.includes('@')) {
+        try {
+          const { data: resolved } = await supabase.functions.invoke<{ email?: string }>(
+            'create-manager',
+            {
+              body: { action: 'resolve', identifier: rawIdentifier },
+            }
+          );
+          if (resolved?.email) {
+            loginEmail = resolved.email;
+          }
+        } catch {
+          // Fallback to normalized manager domain email
+        }
+      }
       const { error } = await signInWithEmail(loginEmail, values.password);
       if (error) {
         if (error === 'ACCOUNT_LOCKED') {
@@ -444,16 +286,12 @@ export const AdminLoginPage: React.FC = () => {
               <h2 className="font-serif text-2xl font-medium text-coffee-dark">
                 {mfaFactorId
                   ? 'Xác thực 2 lớp (2FA)'
-                  : qrMode
-                  ? 'Đăng nhập bằng mã QR'
                   : lockoutRemainingSec > 0 || accountLockedMessage
                   ? 'Tạm khóa truy cập'
                   : 'Đăng nhập quản trị'}
               </h2>
               {mfaFactorId ? (
                 <Smartphone className="w-5 h-5 text-coffee shrink-0" />
-              ) : qrMode ? (
-                <QrCode className="w-5 h-5 text-coffee shrink-0" />
               ) : lockoutRemainingSec > 0 || accountLockedMessage ? (
                 <ShieldAlert className="w-5 h-5 text-red-700 shrink-0" />
               ) : null}
@@ -530,175 +368,6 @@ export const AdminLoginPage: React.FC = () => {
                   Hủy và đăng nhập tài khoản khác
                 </button>
               </form>
-            ) : qrMode ? (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-1.5 p-1 bg-ivory rounded-xl border border-coffee-beige">
-                  <button
-                    type="button"
-                    onClick={() => setRecoveryTab('qr')}
-                    className={`py-2 px-2.5 rounded-lg text-xs font-medium transition-colors ${
-                      recoveryTab === 'qr'
-                        ? 'bg-coffee text-ivory-light shadow-xs'
-                        : 'text-coffee-muted hover:text-coffee-dark'
-                    }`}
-                  >
-                    Quét mã QR
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRecoveryTab('email')}
-                    className={`py-2 px-2.5 rounded-lg text-xs font-medium transition-colors ${
-                      recoveryTab === 'email'
-                        ? 'bg-coffee text-ivory-light shadow-xs'
-                        : 'text-coffee-muted hover:text-coffee-dark'
-                    }`}
-                  >
-                    Khôi phục Email
-                  </button>
-                </div>
-
-                {recoveryTab === 'qr' ? (
-                  <>
-                    <p className="text-xs text-coffee-muted leading-relaxed">
-                      Trên điện thoại đang đăng nhập sẵn, mở mục <strong className="text-coffee-dark">Quét QR Đăng nhập</strong> trong menu Admin (hoặc quét bằng Camera), rồi <strong className="text-coffee-dark">chọn đúng số khớp với màn hình này</strong>.
-                    </p>
-
-                    <div className="p-4 sm:p-5 bg-white border border-coffee-beige rounded-2xl flex flex-col items-center text-center gap-3">
-                      {qrLoading ? (
-                        <div className="w-44 h-44 flex flex-col items-center justify-center gap-2 text-coffee-muted">
-                          <Loader2 className="w-6 h-6 animate-spin text-coffee" />
-                          <span className="text-xs">Đang tạo mã QR...</span>
-                        </div>
-                      ) : qrError ? (
-                        <div className="py-6 px-3 space-y-3">
-                          <p className="text-xs text-red-700 font-medium leading-relaxed">
-                            {qrError}
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => void startQrSession()}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-coffee text-ivory-light text-xs font-medium hover:bg-coffee-dark transition-colors"
-                          >
-                            <RefreshCw className="w-3.5 h-3.5" />
-                            <span>Tạo mã QR mới</span>
-                          </button>
-                        </div>
-                      ) : qrSession && qrDataUrl ? (
-                        <>
-                          <div className="p-2 bg-white border border-coffee-beige/80 rounded-xl">
-                            <img
-                              src={qrDataUrl}
-                              alt="Mã QR đăng nhập Admin"
-                              className="w-40 h-40 sm:w-44 sm:h-44 object-contain"
-                            />
-                          </div>
-
-                          <div className="w-full pt-2 border-t border-coffee-beige/60 flex items-center justify-between gap-2 text-xs">
-                            <span className="text-coffee-muted">
-                              Số xác nhận:{' '}
-                              <strong className="font-serif text-lg text-coffee font-bold tabular-nums">
-                                {qrSession.verificationCode}
-                              </strong>
-                            </span>
-                            {qrSecondsLeft > 0 ? (
-                              <span className="text-coffee-muted tabular-nums">
-                                Hết hạn sau{' '}
-                                <strong className="text-coffee-dark">{qrSecondsLeft}s</strong>
-                              </span>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => void startQrSession()}
-                                className="inline-flex items-center gap-1 font-semibold text-coffee hover:underline"
-                              >
-                                <RefreshCw className="w-3 h-3" />
-                                <span>Làm mới mã</span>
-                              </button>
-                            )}
-                          </div>
-                        </>
-                      ) : null}
-                    </div>
-                  </>
-                ) : (
-                  <div className="space-y-4">
-                    {resetSent ? (
-                      <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 space-y-2 leading-relaxed">
-                        <strong className="block text-sm">Đã gửi liên kết đặt lại mật khẩu</strong>
-                        <p>
-                          Vui lòng kiểm tra hộp thư <strong>{resetEmail}</strong> (kể cả mục Thư rác) và bấm vào liên kết để đặt mật khẩu mới.
-                        </p>
-                      </div>
-                    ) : (
-                      <form
-                        onSubmit={async (e) => {
-                          e.preventDefault();
-                          const trimmed = resetEmail.trim().toLowerCase();
-                          if (!trimmed || !trimmed.includes('@')) {
-                            toast.error('Vui lòng nhập địa chỉ Gmail / Email hợp lệ');
-                            return;
-                          }
-                          setSendingReset(true);
-                          try {
-                            const { error } = await supabase.auth.resetPasswordForEmail(trimmed, {
-                              redirectTo: `${window.location.origin}/admin/reset-password`,
-                            });
-                            if (error) {
-                              toast.error('Không thể gửi email khôi phục', error.message);
-                              return;
-                            }
-                            setResetSent(true);
-                          } finally {
-                            setSendingReset(false);
-                          }
-                        }}
-                        className="space-y-3"
-                      >
-                        <p className="text-xs text-coffee-muted leading-relaxed">
-                          Nếu bạn là <strong className="text-coffee-dark">Chủ quán / Quản lý dùng Gmail</strong> và không có thiết bị nào đăng nhập sẵn, nhập Gmail để nhận liên kết đặt lại mật khẩu:
-                        </p>
-                        <input
-                          type="email"
-                          required
-                          value={resetEmail}
-                          onChange={(e) => setResetEmail(e.target.value)}
-                          placeholder="admin@gmail.com"
-                          className="w-full min-h-[44px] px-3.5 py-2.5 text-sm bg-white border border-coffee-beige rounded-xl focus:outline-none focus:ring-2 focus:ring-coffee/25 focus:border-coffee"
-                        />
-                        <button
-                          type="submit"
-                          disabled={sendingReset}
-                          className="w-full min-h-[42px] bg-coffee hover:bg-coffee-dark text-ivory-light text-xs font-medium rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                        >
-                          {sendingReset && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                          <span>Gửi liên kết đặt lại mật khẩu</span>
-                        </button>
-                      </form>
-                    )}
-
-                    <div className="p-3.5 rounded-xl bg-ivory border border-coffee-beige text-[11px] text-coffee-muted leading-relaxed">
-                      <strong className="text-coffee-dark block mb-0.5">
-                        Quản lý dùng Tên đăng nhập (như quanly1)?
-                      </strong>
-                      Nếu quên mật khẩu và không có máy nào đang đăng nhập sẵn, hãy báo Chủ quán vào mục{' '}
-                      <strong className="text-coffee-dark">Bảo mật &amp; Tài khoản → Cấp lại mật khẩu</strong>.
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQrMode(false);
-                    setQrSession(null);
-                    setQrError(null);
-                    setResetSent(false);
-                  }}
-                  className="w-full min-h-[42px] py-2 text-xs font-medium text-coffee-muted hover:text-coffee-dark transition-colors"
-                >
-                  Quay lại đăng nhập bằng mật khẩu
-                </button>
-              </div>
             ) : (
               <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                 <div>
@@ -709,14 +378,14 @@ export const AdminLoginPage: React.FC = () => {
                     Email hoặc tên đăng nhập
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-coffee-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <User className="w-4 h-4 text-coffee-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                     <input
                       id="admin-login-email"
                       type="text"
                       autoComplete="username"
                       disabled={lockoutRemainingSec > 0}
                       {...loginForm.register('email')}
-                      placeholder="quanly1 hoặc admin@tunncoffee.com"
+                      placeholder="Nhập email hoặc tên đăng nhập"
                       className="w-full min-h-[44px] pl-10 pr-3.5 py-2.5 text-sm bg-white text-coffee-dark placeholder:text-coffee-muted/70 border border-coffee-beige rounded-xl focus:outline-none focus:ring-2 focus:ring-coffee/25 focus:border-coffee transition-all disabled:opacity-50"
                     />
                   </div>
@@ -777,21 +446,6 @@ export const AdminLoginPage: React.FC = () => {
                       : 'Đăng nhập'}
                   </span>
                 </button>
-
-                {isConfigured && (
-                  <button
-                    type="button"
-                    disabled={lockoutRemainingSec > 0}
-                    onClick={() => {
-                      setQrMode(true);
-                      void startQrSession();
-                    }}
-                    className="w-full min-h-[42px] px-4 border border-coffee-beige bg-white hover:bg-ivory text-coffee-dark text-xs font-medium rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    <QrCode className="w-4 h-4 text-coffee" />
-                    <span>Quên mật khẩu? Đăng nhập bằng mã QR</span>
-                  </button>
-                )}
               </form>
             )}
 

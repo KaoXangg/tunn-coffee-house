@@ -57,7 +57,6 @@ const CMS_NAV_ITEMS: NavGroupItem[] = [
   { label: 'Thư viện Không gian', to: '/admin/gallery', icon: GalleryHorizontalEnd, ownerOnly: false },
   { label: 'Kho Hình ảnh (Media)', to: '/admin/media', icon: ImageIcon, ownerOnly: false },
   { label: 'Đánh giá Khách hàng', to: '/admin/feedback', icon: Star, ownerOnly: false },
-  { label: 'Quét QR Đăng nhập', to: '/admin/qr-approve', icon: QrCode, ownerOnly: false },
 
   // System, Brand & Security Pages (Accessible ONLY by Root Owner Admin)
   { label: 'Banner Đầu trang', to: '/admin/sections/hero', icon: Sparkles, ownerOnly: true },
