@@ -1,6 +1,7 @@
 import React from 'react';
-import { Activity, Clock, Eye, Filter, RefreshCw, Trash2 } from 'lucide-react';
+import { Activity, Calendar, Clock, Eye, Filter, Loader2, RefreshCw, Trash2, X } from 'lucide-react';
 import { formatDateTimeVi, formatDurationVi } from '../../../lib/utils';
+import { formatAccountIdentifier } from '../../../lib/managerAuth';
 import type { AdminActivityLog, Profile } from '../../../types/database';
 
 export interface ManagerActivitySummaryRow {
@@ -28,10 +29,13 @@ interface ActivityAuditSectionProps {
   filteredActivityLogs: AdminActivityLog[];
   selectedManagerEmail: string;
   selectedActionCategory: 'all' | 'data' | 'navigation' | 'session';
+  selectedDate: string;
+  loadingDateLogs: boolean;
   getLogBadge: (log: AdminActivityLog) => { label: string; cls: string };
   onRefreshLogs: () => void;
   onChangeSelectedManager: (email: string) => void;
   onChangeActionCategory: (cat: 'all' | 'data' | 'navigation' | 'session') => void;
+  onChangeSelectedDate: (date: string) => void;
   onClearLogs: () => void;
 }
 
@@ -45,12 +49,23 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
   filteredActivityLogs,
   selectedManagerEmail,
   selectedActionCategory,
+  selectedDate,
+  loadingDateLogs,
   getLogBadge,
   onRefreshLogs: handleRefreshLogs,
   onChangeSelectedManager: setSelectedManagerEmail,
   onChangeActionCategory: setSelectedActionCategory,
+  onChangeSelectedDate: setSelectedDate,
   onClearLogs: handleClearLogs,
 }) => {
+  const now = new Date();
+  const formatKey = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+      d.getDate()
+    ).padStart(2, '0')}`;
+  const todayKey = formatKey(now);
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  const yesterdayKey = formatKey(yesterday);
   return (
       <div className="bg-white border border-coffee-beige rounded-brand p-6 space-y-6 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-coffee-beige">
@@ -129,7 +144,14 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
                         <p className="font-semibold text-coffee-dark">
                           {String(mgr.fullName)}
                         </p>
-                        <p className="text-[11px] text-coffee-muted">{mgr.email}</p>
+                        <p className="text-[11px] text-coffee-muted">
+                          {(() => {
+                            const account = formatAccountIdentifier(mgr.email);
+                            return account.isUsername
+                              ? `Tên đăng nhập: ${account.label}`
+                              : account.label;
+                          })()}
+                        </p>
                       </td>
 
                       <td className="py-3 px-3.5">
@@ -221,43 +243,103 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
         </div>
 
         {/* SUB-SECTION 2B: DETAILED ACTION LOGS & FILTERS */}
-        <div className="space-y-3 pt-2 border-t border-ivory">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-coffee flex items-center gap-1.5">
-              <Filter className="w-3.5 h-3.5" />
-              <span>
-                2. Nhật Ký Chi Tiết Từng Hành Động ({filteredActivityLogs.length} bản ghi)
-              </span>
-            </h3>
+        <div className="space-y-3 pt-3 border-t border-ivory">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-coffee flex items-center gap-1.5">
+                <Filter className="w-3.5 h-3.5" />
+                <span>
+                  2. Nhật Ký Chi Tiết Từng Hành Động ({filteredActivityLogs.length} bản ghi)
+                </span>
+              </h3>
+              {loadingDateLogs && (
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-coffee-muted">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-coffee" />
+                  <span>Đang tải nhật ký ngày đã chọn...</span>
+                </span>
+              )}
+            </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <select
-                value={selectedManagerEmail}
-                onChange={(e) => setSelectedManagerEmail(e.target.value)}
-                className="px-3 py-1.5 text-xs font-medium bg-ivory-light border border-coffee-beige rounded-brand text-coffee-dark"
-              >
-                <option value="all">Tất cả Quản lý ({managerActivitySummary.length})</option>
-                {managerActivitySummary.map((m) => (
-                  <option key={m.email} value={m.email}>
-                    {String(m.fullName)} ({m.email})
-                  </option>
-                ))}
-              </select>
+            <div className="p-2.5 bg-ivory/70 border border-coffee-beige/80 rounded-xl flex flex-col lg:flex-row lg:items-center gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+                <select
+                  value={selectedManagerEmail}
+                  onChange={(e) => setSelectedManagerEmail(e.target.value)}
+                  className="w-full min-h-[36px] px-3 py-1.5 text-xs font-medium bg-white border border-coffee-beige rounded-lg text-coffee-dark focus:outline-none focus:ring-2 focus:ring-coffee/20"
+                >
+                  <option value="all">Tất cả Quản lý ({managerActivitySummary.length})</option>
+                  {managerActivitySummary.map((m) => (
+                    <option key={m.email} value={m.email}>
+                      {String(m.fullName)} ({formatAccountIdentifier(m.email).label})
+                    </option>
+                  ))}
+                </select>
 
-              <select
-                value={selectedActionCategory}
-                onChange={(e) =>
-                  setSelectedActionCategory(
-                    e.target.value as 'all' | 'data' | 'navigation' | 'session'
-                  )
-                }
-                className="px-3 py-1.5 text-xs font-medium bg-ivory-light border border-coffee-beige rounded-brand text-coffee-dark"
-              >
-                <option value="all">Mọi hoạt động (Chỉnh sửa + Xem trang + Đăng nhập)</option>
-                <option value="data">Chỉ xem: Chỉnh sửa dữ liệu (Món, Giá, Cài đặt...)</option>
-                <option value="navigation">Chỉ xem: Di chuyển & Xem các trang</option>
-                <option value="session">Chỉ xem: Đăng nhập, Đăng xuất & Bảo mật</option>
-              </select>
+                <select
+                  value={selectedActionCategory}
+                  onChange={(e) =>
+                    setSelectedActionCategory(
+                      e.target.value as 'all' | 'data' | 'navigation' | 'session'
+                    )
+                  }
+                  className="w-full min-h-[36px] px-3 py-1.5 text-xs font-medium bg-white border border-coffee-beige rounded-lg text-coffee-dark focus:outline-none focus:ring-2 focus:ring-coffee/20"
+                >
+                  <option value="all">Mọi hoạt động (Chỉnh sửa + Xem trang + Đăng nhập)</option>
+                  <option value="data">Chỉ xem: Chỉnh sửa dữ liệu (Món, Giá, Cài đặt...)</option>
+                  <option value="navigation">Chỉ xem: Di chuyển & Xem các trang</option>
+                  <option value="session">Chỉ xem: Đăng nhập, Đăng xuất & Bảo mật</option>
+                </select>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                <label className="inline-flex items-center gap-1.5 min-h-[36px] px-2.5 bg-white border border-coffee-beige rounded-lg text-xs font-medium text-coffee-dark focus-within:ring-2 focus-within:ring-coffee/20">
+                  <Calendar className="w-3.5 h-3.5 text-coffee shrink-0" />
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    max={todayKey}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    aria-label="Lọc nhật ký theo ngày"
+                    className="bg-transparent text-xs font-medium text-coffee-dark focus:outline-none"
+                  />
+                </label>
+
+                <div className="inline-flex items-center bg-white border border-coffee-beige rounded-lg p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDate(todayKey)}
+                    className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors ${
+                      selectedDate === todayKey
+                        ? 'bg-coffee text-ivory-light'
+                        : 'text-coffee-muted hover:text-coffee-dark'
+                    }`}
+                  >
+                    Hôm nay
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDate(yesterdayKey)}
+                    className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors ${
+                      selectedDate === yesterdayKey
+                        ? 'bg-coffee text-ivory-light'
+                        : 'text-coffee-muted hover:text-coffee-dark'
+                    }`}
+                  >
+                    Hôm qua
+                  </button>
+                  {selectedDate && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDate('')}
+                      title="Xem tất cả ngày"
+                      className="px-2 py-1 text-[11px] font-medium text-coffee-muted hover:text-red-700 inline-flex items-center gap-0.5 rounded-md transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                      <span>Tất cả</span>
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 

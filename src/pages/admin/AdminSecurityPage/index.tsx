@@ -68,6 +68,9 @@ export const AdminSecurityPage: React.FC = () => {
   const [selectedActionCategory, setSelectedActionCategory] = useState<
     'all' | 'data' | 'navigation' | 'session'
   >('all');
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [dateLogs, setDateLogs] = useState<AdminActivityLog[] | null>(null);
+  const [loadingDateLogs, setLoadingDateLogs] = useState(false);
   const [refreshingLogs, setRefreshingLogs] = useState(false);
 
   const fetchAllProfiles = useCallback(async () => {
@@ -114,13 +117,11 @@ export const AdminSecurityPage: React.FC = () => {
   };
 
   // Compute per-manager active duration, online status, current page, and action counts
+  // Only include active profiles (deleted managers should not remain in active monitoring summary)
   const managerActivitySummary = useMemo(() => {
     const emailSet = new Set<string>();
     allProfiles.forEach((p) => {
       if (p.email) emailSet.add(p.email.toLowerCase());
-    });
-    activityLogs.forEach((l) => {
-      if (l.actor_email) emailSet.add(l.actor_email.toLowerCase());
     });
 
     return Array.from(emailSet).map((email) => {
@@ -244,10 +245,60 @@ export const AdminSecurityPage: React.FC = () => {
     });
   }, [allProfiles, activityLogs, nowMs]);
 
+  // Fetch all logs for a specific calendar date directly from Supabase (so older days beyond the latest 200 logs are always viewable)
+  useEffect(() => {
+    if (!selectedDate || !isSupabaseConfigured) {
+      return;
+    }
+
+    let cancelled = false;
+    const fetchForDate = async () => {
+      setLoadingDateLogs(true);
+      try {
+        const [y, m, d] = selectedDate.split('-').map(Number);
+        const start = new Date(y, (m || 1) - 1, d || 1, 0, 0, 0, 0);
+        const end = new Date(y, (m || 1) - 1, (d || 1) + 1, 0, 0, 0, 0);
+
+        const { data, error } = await supabase
+          .from('admin_activity_logs')
+          .select('*')
+          .gte('created_at', start.toISOString())
+          .lt('created_at', end.toISOString())
+          .order('created_at', { ascending: false })
+          .limit(500);
+
+        if (!cancelled && !error && data) {
+          setDateLogs(data as AdminActivityLog[]);
+        }
+      } finally {
+        if (!cancelled) setLoadingDateLogs(false);
+      }
+    };
+
+    const timer = window.setTimeout(() => {
+      void fetchForDate();
+    }, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [selectedDate]);
+
   // Filter detailed activity logs (hide silent heartbeats unless needed, show page views, logins, data edits)
   const filteredActivityLogs = useMemo(() => {
-    return activityLogs.filter((log) => {
+    const sourceLogs = selectedDate ? dateLogs || [] : activityLogs;
+    return sourceLogs.filter((log) => {
       if (log.entity_type === 'session_heartbeat') return false;
+
+      if (selectedDate) {
+        const d = new Date(log.created_at);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        if (`${y}-${m}-${day}` !== selectedDate) {
+          return false;
+        }
+      }
 
       if (
         selectedManagerEmail !== 'all' &&
@@ -271,7 +322,7 @@ export const AdminSecurityPage: React.FC = () => {
       }
       return true;
     });
-  }, [activityLogs, selectedManagerEmail, selectedActionCategory]);
+  }, [activityLogs, dateLogs, selectedDate, selectedManagerEmail, selectedActionCategory]);
 
   const handleRefreshLogs = async () => {
     setRefreshingLogs(true);
@@ -696,10 +747,16 @@ export const AdminSecurityPage: React.FC = () => {
         filteredActivityLogs={filteredActivityLogs}
         selectedManagerEmail={selectedManagerEmail}
         selectedActionCategory={selectedActionCategory}
+        selectedDate={selectedDate}
+        loadingDateLogs={loadingDateLogs}
         getLogBadge={getLogBadge}
         onRefreshLogs={handleRefreshLogs}
         onChangeSelectedManager={setSelectedManagerEmail}
         onChangeActionCategory={setSelectedActionCategory}
+        onChangeSelectedDate={(d) => {
+          if (!d) setDateLogs(null);
+          setSelectedDate(d);
+        }}
         onClearLogs={handleClearLogs}
       />
 

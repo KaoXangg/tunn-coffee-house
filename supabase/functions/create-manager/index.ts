@@ -71,6 +71,19 @@ Deno.serve(async (req) => {
       page += 1;
     }
 
+    // Default alias: allow Root Owner Admin to log in with "admin" even before setting a custom username
+    if (rawIdentifier === 'admin') {
+      const { data: ownerProfile } = await adminClient
+        .from('profiles')
+        .select('email')
+        .eq('role', 'admin')
+        .eq('is_owner', true)
+        .maybeSingle();
+      if (ownerProfile?.email) {
+        return jsonResponse({ email: ownerProfile.email });
+      }
+    }
+
     return jsonResponse({ email: fallbackEmail });
   }
 

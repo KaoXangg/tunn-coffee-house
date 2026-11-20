@@ -186,14 +186,14 @@ export const AccountSecuritySection: React.FC<AccountSecuritySectionProps> = ({
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="vd: admin hoặc caosang"
+                    placeholder="admin (mặc định) hoặc tên riêng"
                     className="w-full px-3.5 py-2 text-sm bg-ivory-light border border-coffee-beige rounded-brand"
                   />
                 </div>
               </div>
               <div className="flex items-center justify-between gap-3">
                 <p className="text-[11px] text-coffee-muted">
-                  Đặt tên đăng nhập (3-32 ký tự) để đăng nhập nhanh thay cho Email.
+                  Mặc định Chủ quán đăng nhập được bằng <code className="font-mono">admin</code>, hoặc đặt tên riêng (3-32 ký tự) ở đây.
                 </p>
                 <button
                   type="submit"
