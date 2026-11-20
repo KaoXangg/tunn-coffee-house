@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Calendar, Clock, Eye, Filter, Loader2, RefreshCw, Trash2, X } from 'lucide-react';
+import { Activity, Calendar, Clock, Download, Eye, Filter, Loader2, RefreshCw, Trash2, X } from 'lucide-react';
 import { formatDateTimeVi, formatDurationVi } from '../../../lib/utils';
 import { formatAccountIdentifier } from '../../../lib/managerAuth';
 import type { AdminActivityLog, Profile } from '../../../types/database';
@@ -22,6 +22,7 @@ export interface ManagerActivitySummaryRow {
 interface ActivityAuditSectionProps {
   isOwnerAdmin: boolean;
   clearingLogs: boolean;
+  pruningLogs: boolean;
   refreshingLogs: boolean;
   managerActivitySummary: ManagerActivitySummaryRow[];
   allProfiles: Profile[];
@@ -36,12 +37,15 @@ interface ActivityAuditSectionProps {
   onChangeSelectedManager: (email: string) => void;
   onChangeActionCategory: (cat: 'all' | 'data' | 'navigation' | 'session') => void;
   onChangeSelectedDate: (date: string) => void;
+  onExportLogs: () => void;
+  onPruneOldLogs: () => void;
   onClearLogs: () => void;
 }
 
 export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
   isOwnerAdmin,
   clearingLogs,
+  pruningLogs,
   refreshingLogs,
   managerActivitySummary,
   allProfiles,
@@ -56,6 +60,8 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
   onChangeSelectedManager: setSelectedManagerEmail,
   onChangeActionCategory: setSelectedActionCategory,
   onChangeSelectedDate: setSelectedDate,
+  onExportLogs: handleExportLogs,
+  onPruneOldLogs: handlePruneOldLogs,
   onClearLogs: handleClearLogs,
 }) => {
   const now = new Date();
@@ -81,7 +87,7 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             <button
               type="button"
               disabled={refreshingLogs}
@@ -94,16 +100,37 @@ export const ActivityAuditSection: React.FC<ActivityAuditSectionProps> = ({
               <span>Làm mới nhật ký</span>
             </button>
 
+            <button
+              type="button"
+              onClick={handleExportLogs}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-ivory-light text-coffee-dark border border-coffee-beige hover:bg-ivory rounded-brand transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Xuất Excel</span>
+            </button>
+
             {isOwnerAdmin && activityLogs.length > 0 && (
-              <button
-                type="button"
-                disabled={clearingLogs}
-                onClick={handleClearLogs}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 border border-red-200 rounded-brand transition-colors"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Xóa nhật ký</span>
-              </button>
+              <>
+                <button
+                  type="button"
+                  disabled={pruningLogs}
+                  onClick={handlePruneOldLogs}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-coffee-dark bg-ivory-light hover:bg-ivory border border-coffee-beige rounded-brand transition-colors disabled:opacity-50"
+                >
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>{pruningLogs ? 'Đang dọn...' : 'Dọn log > 30 ngày'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={clearingLogs}
+                  onClick={handleClearLogs}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 border border-red-200 rounded-brand transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Xóa nhật ký</span>
+                </button>
+              </>
             )}
           </div>
         </div>

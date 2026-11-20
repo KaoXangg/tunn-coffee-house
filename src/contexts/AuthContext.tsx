@@ -150,8 +150,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
     }
 
+    const identifier = email.trim();
+
+    // Username login: authenticate strictly on the server via Edge Function so internal emails are never exposed
+    if (!identifier.includes('@')) {
+      const { data: fnData, error: fnErr } = await supabase.functions.invoke<{
+        session?: { access_token: string; refresh_token: string };
+        error?: string;
+      }>('username-login', {
+        body: {
+          username: identifier.toLowerCase(),
+          password,
+        },
+      });
+
+      let fnErrorMessage = fnData?.error;
+      if (!fnErrorMessage && fnErr && typeof fnErr === 'object' && 'context' in fnErr) {
+        const ctx = (fnErr as { context?: unknown }).context;
+        if (ctx instanceof Response) {
+          try {
+            const json = (await ctx.clone().json()) as { error?: string };
+            fnErrorMessage = json?.error;
+          } catch {
+            // ignore non-JSON body
+          }
+        }
+      }
+
+      if (fnErr || fnErrorMessage || !fnData?.session) {
+        return { error: fnErrorMessage || 'Invalid login credentials' };
+      }
+
+      const { data: sessionData, error: setSessionErr } = await supabase.auth.setSession({
+        access_token: fnData.session.access_token,
+        refresh_token: fnData.session.refresh_token,
+      });
+
+      if (setSessionErr) {
+        return { error: setSessionErr.message };
+      }
+
+      if (sessionData.user) {
+        await fetchProfile(sessionData.user);
+      }
+
+      return { error: null };
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
+      email: identifier,
       password,
     });
 

@@ -436,11 +436,7 @@ export async function fetchPublicPositiveReviews(): Promise<PublicReviewRecord[]
   }
 
   try {
-    const { data, error } = await supabase
-      .from('public_positive_reviews')
-      .select('id, customer_name, table_number, rating, tags, comment, created_at')
-      .order('created_at', { ascending: false })
-      .limit(24);
+    const { data, error } = await supabase.rpc('get_public_positive_reviews');
 
     if (error || !data) {
       return localPositive;

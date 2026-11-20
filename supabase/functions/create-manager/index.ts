@@ -45,48 +45,6 @@ Deno.serve(async (req) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // Public action: resolve a username (no @) into its Supabase auth email for login
-  if (payload.action === 'resolve') {
-    const rawIdentifier = String(payload.identifier || '').trim().toLowerCase();
-    if (!rawIdentifier || rawIdentifier.includes('@') || !USERNAME_REGEX.test(rawIdentifier)) {
-      return jsonResponse({ email: '' });
-    }
-
-    const fallbackEmail = `${rawIdentifier}@${MANAGER_USERNAME_DOMAIN}`;
-    let page = 1;
-    while (page <= 10) {
-      const { data: listed, error: listErr } = await adminClient.auth.admin.listUsers({
-        page,
-        perPage: 100,
-      });
-      if (listErr || !listed?.users?.length) break;
-      const matched = listed.users.find((u) => {
-        const metaUsername = String(u.user_metadata?.username || '').trim().toLowerCase();
-        return metaUsername === rawIdentifier || (u.email || '').toLowerCase() === fallbackEmail;
-      });
-      if (matched?.email) {
-        return jsonResponse({ email: matched.email });
-      }
-      if (listed.users.length < 100) break;
-      page += 1;
-    }
-
-    // Default alias: allow Root Owner Admin to log in with "admin" even before setting a custom username
-    if (rawIdentifier === 'admin') {
-      const { data: ownerProfile } = await adminClient
-        .from('profiles')
-        .select('email')
-        .eq('role', 'admin')
-        .eq('is_owner', true)
-        .maybeSingle();
-      if (ownerProfile?.email) {
-        return jsonResponse({ email: ownerProfile.email });
-      }
-    }
-
-    return jsonResponse({ email: fallbackEmail });
-  }
-
   const authHeader = req.headers.get('Authorization') || '';
   if (!authHeader.startsWith('Bearer ')) {
     return jsonResponse({ error: 'Chưa xác thực phiên đăng nhập.' }, 401);
@@ -145,6 +103,21 @@ Deno.serve(async (req) => {
   const emailForAuth = isEmail
     ? rawIdentifier
     : `${rawIdentifier}@${MANAGER_USERNAME_DOMAIN}`;
+  const usernameValue = isEmail ? null : rawIdentifier;
+
+  if (usernameValue) {
+    const { data: existingUsername } = await adminClient
+      .from('profiles')
+      .select('id')
+      .ilike('username', usernameValue)
+      .maybeSingle();
+    if (existingUsername) {
+      return jsonResponse(
+        { error: 'Tên đăng nhập này đã được sử dụng.' },
+        409
+      );
+    }
+  }
 
   const { data: created, error: createErr } = await adminClient.auth.admin.createUser({
     email: emailForAuth,
@@ -154,7 +127,7 @@ Deno.serve(async (req) => {
       full_name: fullName,
       created_by_owner: 'true',
       assigned_role: 'admin',
-      username: isEmail ? undefined : rawIdentifier,
+      username: usernameValue || undefined,
     },
   });
 
@@ -175,6 +148,7 @@ Deno.serve(async (req) => {
   const { error: upsertErr } = await adminClient.from('profiles').upsert({
     id: created.user.id,
     email: emailForAuth,
+    username: usernameValue,
     full_name: fullName,
     role: 'admin',
     is_owner: false,

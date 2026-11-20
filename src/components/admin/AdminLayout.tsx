@@ -36,6 +36,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { fetchTableFeedback } from '../../lib/feedback';
 import { subscribeLiveSync } from '../../lib/liveSync';
 import { BrandLogo } from '../common/BrandLogo';
+import { ErrorBoundary } from '../common/ErrorBoundary';
 import {
   formatDurationVi,
   IDLE_TIMEOUT_STORAGE_KEY,
@@ -725,7 +726,9 @@ export const AdminLayout: React.FC = () => {
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  <Outlet />
+                  <ErrorBoundary fallbackTitle="Mục quản trị này gặp sự cố hiển thị">
+                    <Outlet />
+                  </ErrorBoundary>
                 </motion.div>
               </AnimatePresence>
             </Suspense>

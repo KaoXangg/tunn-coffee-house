@@ -6,6 +6,7 @@ export interface NavItem {
 export interface Profile {
   id: string;
   email: string;
+  username?: string | null;
   full_name: string | null;
   role: 'admin' | 'editor' | 'staff';
   is_owner?: boolean;

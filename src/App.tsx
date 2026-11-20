@@ -7,6 +7,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { SiteDataProvider } from './contexts/SiteDataContext';
 import { SeasonalThemeProvider } from './contexts/SeasonalThemeContext';
 import { CustomerHomePage } from './pages/CustomerHomePage';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 const ProtectedRoute = lazy(() =>
   import('./components/admin/ProtectedRoute').then((m) => ({ default: m.ProtectedRoute }))
 );
@@ -136,6 +137,7 @@ export function App() {
           <SiteDataProvider>
             <SeasonalThemeProvider>
               <BrowserRouter>
+            <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 {/* Customer Website */}
@@ -176,6 +178,7 @@ export function App() {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
+            </ErrorBoundary>
             </BrowserRouter>
             </SeasonalThemeProvider>
           </SiteDataProvider>

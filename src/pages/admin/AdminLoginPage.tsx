@@ -19,10 +19,7 @@ import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { BrandLogo } from '../../components/common/BrandLogo';
-import {
-  isValidIdentifierOrEmail,
-  normalizeLoginIdentifier,
-} from '../../lib/managerAuth';
+import { isValidIdentifierOrEmail } from '../../lib/managerAuth';
 
 const loginSchema = z.object({
   email: z
@@ -119,24 +116,7 @@ export const AdminLoginPage: React.FC = () => {
     setSubmitting(true);
     setAccountLockedMessage(null);
     try {
-      const rawIdentifier = values.email.trim().toLowerCase();
-      let loginEmail = normalizeLoginIdentifier(rawIdentifier);
-      if (isConfigured && !rawIdentifier.includes('@')) {
-        try {
-          const { data: resolved } = await supabase.functions.invoke<{ email?: string }>(
-            'create-manager',
-            {
-              body: { action: 'resolve', identifier: rawIdentifier },
-            }
-          );
-          if (resolved?.email) {
-            loginEmail = resolved.email;
-          }
-        } catch {
-          // Fallback to normalized manager domain email
-        }
-      }
-      const { error } = await signInWithEmail(loginEmail, values.password);
+      const { error } = await signInWithEmail(values.email.trim(), values.password);
       if (error) {
         if (error === 'ACCOUNT_LOCKED') {
           setAccountLockedMessage(

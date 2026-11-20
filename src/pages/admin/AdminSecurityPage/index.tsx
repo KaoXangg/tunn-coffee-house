@@ -11,8 +11,10 @@ import {
 import { useAuth } from '../../../contexts/AuthContext';
 import { useSiteData } from '../../../contexts/SiteDataContext';
 import { useToast } from '../../../contexts/ToastContext';
-import { IDLE_TIMEOUT_STORAGE_KEY } from '../../../lib/utils';
+import { IDLE_TIMEOUT_STORAGE_KEY, formatDateTimeVi } from '../../../lib/utils';
+import { downloadStyledXlsx } from '../../../lib/exportXlsx';
 import { evaluatePasswordStrength } from '../../../lib/passwordPolicy';
+import { formatAccountIdentifier } from '../../../lib/managerAuth';
 import { ManagerTeamSection } from './ManagerTeamSection';
 import { ActivityAuditSection } from './ActivityAuditSection';
 import { AccountSecuritySection } from './AccountSecuritySection';
@@ -32,7 +34,7 @@ export const AdminSecurityPage: React.FC = () => {
   // 2. Update Profile Name & Username State
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [username, setUsername] = useState(
-    String(user?.user_metadata?.username || '')
+    String(profile?.username || user?.user_metadata?.username || '')
   );
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
@@ -46,6 +48,7 @@ export const AdminSecurityPage: React.FC = () => {
   const [allProfiles, setAllProfiles] = useState<Profile[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(false);
   const [clearingLogs, setClearingLogs] = useState(false);
+  const [pruningLogs, setPruningLogs] = useState(false);
 
   // 5. Create New Sub-Manager Modal State
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -429,9 +432,17 @@ export const AdminSecurityPage: React.FC = () => {
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ full_name: fullName.trim() })
+        .update({
+          full_name: fullName.trim(),
+          username: cleanUsername || null,
+        })
         .eq('id', user.id);
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error('Tên đăng nhập này đã có người sử dụng.');
+        }
+        throw error;
+      }
 
       const { error: authErr } = await supabase.auth.updateUser({
         data: { username: cleanUsername || null },
@@ -701,6 +712,59 @@ export const AdminSecurityPage: React.FC = () => {
     }
   };
 
+  const handlePruneOldLogs = async () => {
+    if (!isSupabaseConfigured) return;
+    setPruningLogs(true);
+    try {
+      const cutoffIso = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { error } = await supabase
+        .from('admin_activity_logs')
+        .delete()
+        .lt('created_at', cutoffIso);
+      if (error) throw error;
+      setDateLogs(null);
+      await refreshAll();
+      toast.success('Đã dọn nhật ký cũ hơn 30 ngày');
+    } catch (err: unknown) {
+      toast.error('Không thể dọn nhật ký cũ', err instanceof Error ? err.message : undefined);
+    } finally {
+      setPruningLogs(false);
+    }
+  };
+
+  const handleExportLogsXlsx = () => {
+    if (filteredActivityLogs.length === 0) {
+      toast.info('Không có bản ghi nào để xuất Excel');
+      return;
+    }
+    const todayStr = new Date().toISOString().slice(0, 10);
+    downloadStyledXlsx({
+      filename: `nhat-ky-tunn-${selectedDate || todayStr}.xlsx`,
+      sheetName: 'Nhat ky quan tri',
+      title: 'TUNN Coffee House — Nhật Ký Hoạt Động Quản Trị',
+      subtitle: `Xuất ngày ${new Date().toLocaleDateString('vi-VN')} · ${filteredActivityLogs.length} bản ghi`,
+      columns: [
+        { header: 'Thời gian', width: 22 },
+        { header: 'Người thực hiện', width: 24 },
+        { header: 'Loại', width: 22 },
+        { header: 'Hành động', width: 42 },
+        { header: 'Chi tiết', width: 32 },
+      ],
+      rows: filteredActivityLogs.map((log) => {
+        const badge = getLogBadge(log);
+        const actor = formatAccountIdentifier(log.actor_email || '').label || 'Quản lý';
+        return [
+          formatDateTimeVi(log.created_at),
+          actor,
+          badge.label,
+          log.action,
+          log.entity_name || String(log.details?.page_label || ''),
+        ];
+      }),
+    });
+    toast.success('Đã tải xuống file Excel nhật ký');
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -740,6 +804,7 @@ export const AdminSecurityPage: React.FC = () => {
       <ActivityAuditSection
         isOwnerAdmin={isOwnerAdmin}
         clearingLogs={clearingLogs}
+        pruningLogs={pruningLogs}
         refreshingLogs={refreshingLogs}
         managerActivitySummary={managerActivitySummary}
         allProfiles={allProfiles}
@@ -757,6 +822,8 @@ export const AdminSecurityPage: React.FC = () => {
           if (!d) setDateLogs(null);
           setSelectedDate(d);
         }}
+        onExportLogs={handleExportLogsXlsx}
+        onPruneOldLogs={handlePruneOldLogs}
         onClearLogs={handleClearLogs}
       />
 
