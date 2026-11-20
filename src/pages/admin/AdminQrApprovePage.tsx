@@ -167,11 +167,22 @@ export const AdminQrApprovePage: React.FC = () => {
           rafRef.current = window.requestAnimationFrame(scanFrame);
         };
         rafRef.current = window.requestAnimationFrame(scanFrame);
-      } catch {
+      } catch (err) {
         if (!cancelled) {
-          setCameraError(
-            'Không thể mở camera. Bạn có thể cấp quyền camera hoặc dán đường dẫn QR vào ô bên dưới.'
-          );
+          const errName = err instanceof Error ? err.name : '';
+          if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError') {
+            setCameraError(
+              'Thiết bị này không có camera. Hãy mở trang này trên điện thoại hoặc dán đường dẫn QR vào ô bên dưới.'
+            );
+          } else if (errName === 'NotAllowedError' || errName === 'SecurityError') {
+            setCameraError(
+              'Trình duyệt đang chặn quyền camera. Vui lòng cho phép quyền Camera cho trang web này hoặc dán đường dẫn QR vào ô bên dưới.'
+            );
+          } else {
+            setCameraError(
+              'Không thể mở camera. Bạn có thể cấp quyền camera hoặc dán đường dẫn QR vào ô bên dưới.'
+            );
+          }
         }
       }
     };
