@@ -22,6 +22,24 @@ interface QrInspectInfo {
   approverEmail: string;
 }
 
+async function extractFunctionErrorMessage(
+  error: unknown,
+  fallback: string
+): Promise<string> {
+  if (error && typeof error === 'object' && 'context' in error) {
+    const ctx = (error as { context?: unknown }).context;
+    if (ctx instanceof Response) {
+      try {
+        const json = (await ctx.clone().json()) as { error?: string };
+        if (json?.error) return json.error;
+      } catch {
+        // Ignore JSON parse failure on non-JSON error responses
+      }
+    }
+  }
+  return fallback;
+}
+
 export const AdminQrApprovePage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -59,9 +77,15 @@ export const AdminQrApprovePage: React.FC = () => {
         });
         if (cancelled) return;
         if (error || data?.error || !data?.verificationCode) {
-          setInspectError(
-            data?.error || 'Mã QR đã hết hạn hoặc không còn hiệu lực.'
-          );
+          const msg =
+            data?.error ||
+            (await extractFunctionErrorMessage(
+              error,
+              'Mã QR đã hết hạn hoặc không còn hiệu lực.'
+            ));
+          if (!cancelled) {
+            setInspectError(msg);
+          }
           return;
         }
         setInspectInfo(data);
@@ -101,10 +125,13 @@ export const AdminQrApprovePage: React.FC = () => {
       });
 
       if (error || data?.error || !data?.ok) {
-        toast.error(
-          'Không thể xử lý yêu cầu',
-          data?.error || 'Mã QR có thể đã hết hạn.'
-        );
+        const msg =
+          data?.error ||
+          (await extractFunctionErrorMessage(
+            error,
+            'Mã QR có thể đã hết hạn.'
+          ));
+        toast.error('Không thể xử lý yêu cầu', msg);
         return;
       }
 

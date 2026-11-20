@@ -170,13 +170,13 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Phiên đăng nhập trên thiết bị này đã hết hạn.' }, 401);
     }
 
-    const { data: profile } = await adminClient
+    const { data: profile, error: profileErr } = await adminClient
       .from('profiles')
-      .select('role, is_locked')
+      .select('role')
       .eq('id', user.id)
       .maybeSingle();
 
-    if (!profile || (profile.role !== 'admin' && profile.role !== 'manager') || profile.is_locked) {
+    if (profileErr || !profile || profile.role !== 'admin') {
       return jsonResponse({ error: 'Tài khoản này không có quyền duyệt đăng nhập.' }, 403);
     }
 
